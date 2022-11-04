@@ -28,93 +28,95 @@
 
 
 
-_RINvCscZxOOuatxMc_8fvm_fuzz15stack_mutationsNCNvNvCsgHnJkPfMuli_22instrument_with_mutate1__3run0EBM_:
-   45|    101|pub fn stack_mutations<'a>(
-   46|    101|    bin: Vec<u8>,
-   47|    101|    raw: &mut Unstructured<'a>,
-   48|    101|    action: impl Fn(Vec<u8>, u64, u32, u32),
-   49|    101|) -> Vec<u8> {
-   50|    101|    let preseed: u64 = raw.arbitrary().unwrap();
-   51|    101|    let mut rng = SmallRng::seed_from_u64(preseed);
-   52|    101|    let mut cp = bin;
-   53|    101|
-   54|    101|    log::debug!("Preseed {:?}", preseed);
-   55|    101|    let stacked_mutations: u32 = rng.gen_range(1..10);
-   56|    101|    log::debug!("stacked_mutations: {}", stacked_mutations);
-   57|       |
-   58|    641|    for i in 0..=stacked_mutations {
-   59|    641|        let seed = rng.gen();
-   60|    641|        let mut wasm_mutate = Box::<wasm_mutate::WasmMutate<'_>>::default();
-   61|    641|        wasm_mutate.seed(seed);
-   62|    641|        log::debug!("Seed: {}", seed);
-   63|    641|        wasm_mutate.preserve_semantics(true);
-   64|    641|
-   65|    641|        // TODO, set fuel as a parameter of the fuzzer, lets the fuzzer to determine if more fuel is needed
-   66|    641|        wasm_mutate.fuel(500);
-   67|    641|        let tomutate = cp.clone();
-   68|    641|        let mut_iterator = wasm_mutate.run(&tomutate);
-   69|    641|
-   70|    641|        match mut_iterator {
-   71|      0|            Ok(mut it) => {
-   72|      0|                // lateral traversing
-   73|      0|                let check_siblings: u32 = rng.gen_range(1..100);
-   74|      0|                log::debug!("check_siblings: {}", check_siblings);
-   75|      0|                for j in 0..=check_siblings {
-   76|      0|                    let mutated_bin = it.next();
-   77|       |
-   78|      0|                    if let Some(mutated_bin) = mutated_bin {
-   79|      0|                        match mutated_bin {
-   80|      0|                            Ok(mutated_bin) => {
-   81|      0|                                action(mutated_bin.clone(), seed, i, j);
-   82|      0|                                swap(&mut cp, mutated_bin);
-   83|      0|                            }
-   84|      0|                            Err(e) => {
-   85|      0|                                // Do nothing
-   86|      0|                                log::debug!("Error: {:?}", e);
-   87|       |                            }
-   88|       |                        }
-   89|      0|                    }
-   90|       |                }
-   91|       |            }
-   92|    641|            Err(e) => {
-   93|    641|                // do nothing continue
-   94|    641|                log::debug!("Error: {:?}", e);
-   95|       |            }
-   96|       |        }
-   97|       |    }
-   98|    101|    cp
-   99|    101|}
-_RNvCscZxOOuatxMc_8fvm_fuzz12get_wasm_dir:
-  101|    101|fn get_wasm_dir() -> PathBuf {
-  102|    101|    match env::var("OUT") {
-  103|    101|        Ok(out) => {
-  104|    101|            let mut path: PathBuf = out.into();
-  105|    101|            path
-  106|       |        }
-  107|      0|        Err(e) => {
-  108|      0|            log::debug!("Error {:?}", e);
-  109|       |            // gracefully exit
-  110|      0|            std::process::exit(0)
-  111|       |        }
-  112|       |    }
-  113|    101|}
-_RNvCscZxOOuatxMc_8fvm_fuzz18get_random_fixture:
-  163|    101|pub fn get_random_fixture<'a>(raw: &mut Unstructured<'a>) -> AResult<(Vec<u8>, PathBuf)> {
-  164|    101|    let files = get_wasm_dir()
-  165|    101|        .read_dir()
-  166|    101|        .unwrap()
-  167|    101|        .into_iter()
-  168|    101|        .map(|r| r.unwrap())
-  169|    101|        .collect::<Vec<_>>();
-  170|       |
-  171|    101|    let idx = raw.choose_index(files.len())?;
-  172|    101|    let random_file = files[idx].path();
-  173|    101|    log::debug!("Random fixture: {:?}", random_file);
-  174|       |
-  175|    101|    let bytes = std::fs::read(&random_file)?;
-  176|       |
-  177|    101|    Ok((bytes, random_file))
-  178|    101|}
-_RNCNvCscZxOOuatxMc_8fvm_fuzz18get_random_fixture0B3_:
-  168|  5.95k|        .map(|r| r.unwrap())
+_RINvCs3q57DI4qwxw_8fvm_fuzz15stack_mutationsNCNvNvCs89TkfWtZHUx_22instrument_with_mutate1__3run0EBM_:
+   54|     12|pub fn stack_mutations<'a>(
+   55|     12|    bin: Vec<u8>,
+   56|     12|    raw: &mut Unstructured<'a>,
+   57|     12|    mut action: impl FnMut(Vec<u8>, u64, u32, u32),
+   58|     12|    max_stacked_mutations: u32,
+   59|     12|    max_siblings_exploration: u32,
+   60|     12|) -> Vec<u8> {
+   61|     12|    let preseed: u64 = raw.arbitrary().unwrap();
+   62|     12|    let mut rng = SmallRng::seed_from_u64(preseed);
+   63|     12|    let mut cp = bin;
+   64|     12|
+   65|     12|    log::debug!("Preseed {:?}", preseed);
+   66|     12|    let stacked_mutations: u32 = rng.gen_range(1..max_stacked_mutations);
+   67|     12|    log::debug!("stacked_mutations: {}", stacked_mutations);
+   68|       |
+   69|     76|    for i in 0..=stacked_mutations {
+   70|     76|        let seed = rng.gen();
+   71|     76|        let mut wasm_mutate = Box::<wasm_mutate::WasmMutate<'_>>::default();
+   72|     76|        wasm_mutate.seed(seed);
+   73|     76|        log::debug!("Seed: {}", seed);
+   74|     76|        wasm_mutate.preserve_semantics(true);
+   75|     76|
+   76|     76|        // TODO, set fuel as a parameter of the fuzzer, lets the fuzzer to determine if more fuel is needed
+   77|     76|        wasm_mutate.fuel(500);
+   78|     76|        let tomutate = cp.clone();
+   79|     76|        let mut_iterator = wasm_mutate.run(&tomutate);
+   80|     76|
+   81|     76|        match mut_iterator {
+   82|      0|            Ok(mut it) => {
+   83|      0|                // lateral traversing
+   84|      0|                let check_siblings: u32 = rng.gen_range(1..max_siblings_exploration);
+   85|      0|                log::debug!("check_siblings: {}", check_siblings);
+   86|      0|                for j in 0..=check_siblings {
+   87|      0|                    let mutated_bin = it.next();
+   88|       |
+   89|      0|                    if let Some(mutated_bin) = mutated_bin {
+   90|      0|                        match mutated_bin {
+   91|      0|                            Ok(mutated_bin) => {
+   92|      0|                                action(mutated_bin.clone(), seed, i, j);
+   93|      0|                                swap(&mut cp, mutated_bin);
+   94|      0|                            }
+   95|      0|                            Err(e) => {
+   96|      0|                                // Do nothing
+   97|      0|                                log::debug!("Error: {:?}", e);
+   98|       |                            }
+   99|       |                        }
+  100|      0|                    }
+  101|       |                }
+  102|       |            }
+  103|     76|            Err(e) => {
+  104|     76|                // do nothing continue
+  105|     76|                log::debug!("Error: {:?}", e);
+  106|       |            }
+  107|       |        }
+  108|       |    }
+  109|     12|    cp
+  110|     12|}
+_RNvCs3q57DI4qwxw_8fvm_fuzz18get_random_fixture:
+  127|     12|pub fn get_random_fixture<'a>(raw: &mut Unstructured<'a>) -> AResult<(Vec<u8>, PathBuf)> {
+  128|     12|    let files = get_wasm_dir()
+  129|     12|        .read_dir()
+  130|     12|        .unwrap()
+  131|     12|        .into_iter()
+  132|     12|        .map(|r| r.unwrap())
+  133|     12|        .collect::<Vec<_>>();
+  134|       |
+  135|     12|    let idx = raw.choose_index(files.len())?;
+  136|     12|    let random_file = files[idx].path();
+  137|     12|    log::debug!("Random fixture: {:?}", random_file);
+  138|       |
+  139|     12|    let bytes = std::fs::read(&random_file)?;
+  140|       |
+  141|     12|    Ok((bytes, random_file))
+  142|     12|}
+_RNvCs3q57DI4qwxw_8fvm_fuzz12get_wasm_dir:
+  112|     12|fn get_wasm_dir() -> PathBuf {
+  113|     12|    match env::var("OUT") {
+  114|     12|        Ok(out) => {
+  115|     12|            let mut path: PathBuf = out.into();
+  116|     12|            path
+  117|       |        }
+  118|      0|        Err(e) => {
+  119|      0|            log::debug!("Error {:?}", e);
+  120|       |            // gracefully exit
+  121|      0|            std::process::exit(0)
+  122|       |        }
+  123|       |    }
+  124|     12|}
+_RNCNvCs3q57DI4qwxw_8fvm_fuzz18get_random_fixture0B3_:
+  132|     96|        .map(|r| r.unwrap())
 
