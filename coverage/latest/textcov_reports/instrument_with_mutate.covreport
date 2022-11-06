@@ -23,6 +23,97 @@
 
 
 
+_RINvCsjDHMN5t9uWA_8fvm_fuzz15stack_mutationsNCNvNvCskMNflvnc71j_22instrument_with_mutate1__3run0EBM_:
+   56|    320|pub fn stack_mutations<'a>(
+   57|    320|    bin: Vec<u8>,
+   58|    320|    raw: &mut Unstructured<'a>,
+   59|    320|    mut action: impl FnMut(Vec<u8>, u64, u32, u32),
+   60|    320|    max_stacked_mutations: u32,
+   61|    320|    max_siblings_exploration: u32,
+   62|    320|) -> Vec<u8> {
+   63|    320|    let preseed: u64 = raw.arbitrary().unwrap();
+   64|    320|    let mut rng = SmallRng::seed_from_u64(preseed);
+   65|    320|    let mut cp = bin;
+   66|    320|
+   67|    320|    log::debug!("Preseed {:?}", preseed);
+   68|    320|    let stacked_mutations: u32 = rng.gen_range(1..max_stacked_mutations);
+   69|    320|    log::debug!("stacked_mutations: {}", stacked_mutations);
+   70|       |
+   71|    640|    for i in 0..=stacked_mutations {
+   72|    640|        let seed = rng.gen();
+   73|    640|        let mut wasm_mutate = Box::<wasm_mutate::WasmMutate<'_>>::default();
+   74|    640|        wasm_mutate.seed(seed);
+   75|    640|        log::debug!("Seed: {}", seed);
+   76|    640|        wasm_mutate.preserve_semantics(true);
+   77|    640|
+   78|    640|        // TODO, set fuel as a parameter of the fuzzer, lets the fuzzer to determine if more fuel is needed
+   79|    640|        wasm_mutate.fuel(500);
+   80|    640|        let tomutate = cp.clone();
+   81|    640|        let mut_iterator = wasm_mutate.run(&tomutate);
+   82|    640|
+   83|    640|        match mut_iterator {
+   84|      0|            Ok(mut it) => {
+   85|      0|                // lateral traversing
+   86|      0|                let check_siblings: u32 = rng.gen_range(1..max_siblings_exploration);
+   87|      0|                log::debug!("check_siblings: {}", check_siblings);
+   88|      0|                for j in 0..=check_siblings {
+   89|      0|                    let mutated_bin = it.next();
+   90|       |
+   91|      0|                    if let Some(mutated_bin) = mutated_bin {
+   92|      0|                        match mutated_bin {
+   93|      0|                            Ok(mutated_bin) => {
+   94|      0|                                action(mutated_bin.clone(), seed, i, j);
+   95|      0|                                swap(&mut cp, mutated_bin);
+   96|      0|                            }
+   97|      0|                            Err(e) => {
+   98|      0|                                // Do nothing
+   99|      0|                                log::debug!("Error: {:?}", e);
+  100|       |                            }
+  101|       |                        }
+  102|      0|                    }
+  103|       |                }
+  104|       |            }
+  105|    640|            Err(e) => {
+  106|    640|                // do nothing continue
+  107|    640|                log::debug!("Error: {:?}", e);
+  108|       |            }
+  109|       |        }
+  110|       |    }
+  111|    320|    cp
+  112|    320|}
+_RNvCsjDHMN5t9uWA_8fvm_fuzz12get_wasm_dir:
+  114|    320|fn get_wasm_dir() -> PathBuf {
+  115|    320|    match env::var("OUT") {
+  116|    320|        Ok(out) => {
+  117|    320|            let path: PathBuf = out.into();
+  118|    320|            path
+  119|       |        }
+  120|      0|        Err(e) => {
+  121|      0|            log::debug!("Error {:?}", e);
+  122|       |            // gracefully exit
+  123|      0|            std::process::exit(0)
+  124|       |        }
+  125|       |    }
+  126|    320|}
+_RNvCsjDHMN5t9uWA_8fvm_fuzz18get_random_fixture:
+  129|    320|pub fn get_random_fixture<'a>(raw: &mut Unstructured<'a>) -> AResult<(Vec<u8>, PathBuf)> {
+  130|    320|    let files = get_wasm_dir()
+  131|    320|        .read_dir()
+  132|    320|        .unwrap()
+  133|    320|        .into_iter()
+  134|    320|        .map(|r| r.unwrap())
+  135|    320|        .collect::<Vec<_>>();
+  136|       |
+  137|    320|    let idx = raw.choose_index(files.len())?;
+  138|    320|    let random_file = files[idx].path();
+  139|    320|    log::debug!("Random fixture: {:?}", random_file);
+  140|       |
+  141|    320|    let bytes = std::fs::read(&random_file)?;
+  142|       |
+  143|    320|    Ok((bytes, random_file))
+  144|    320|}
+_RNCNvCsjDHMN5t9uWA_8fvm_fuzz18get_random_fixture0B3_:
+  134|  34.2k|        .map(|r| r.unwrap())
 
 
 
