@@ -23,35 +23,35 @@
 
 
 
-_RINvCs8sgUAq8DBFE_8fvm_fuzz15stack_mutationsNCNvNvCsarpePEPofPt_22instrument_with_mutate1__3run0EBM_:
-   92|    162|pub fn stack_mutations<'a>(
-   93|    162|    bin: Vec<u8>,
-   94|    162|    raw: &mut Unstructured<'a>,
-   95|    162|    mut action: impl FnMut(Vec<u8>, u64, u32, u32),
-   96|    162|    max_stacked_mutations: u32,
-   97|    162|    max_siblings_exploration: u32,
-   98|    162|) -> Vec<u8> {
-   99|    162|    let preseed: u64 = raw.arbitrary().unwrap();
-  100|    162|    let mut rng = SmallRng::seed_from_u64(preseed);
-  101|    162|    let mut cp = bin;
-  102|    162|
-  103|    162|    log::debug!("Preseed {:?}", preseed);
-  104|    162|    let stacked_mutations: u32 = rng.gen_range(1..max_stacked_mutations);
-  105|    162|    log::debug!("stacked_mutations: {}", stacked_mutations);
+_RINvCs2zAUJC1jATr_8fvm_fuzz15stack_mutationsNCNvNvCsbRCQLiUYhjC_22instrument_with_mutate1__3run0EBM_:
+   92|  1.34k|pub fn stack_mutations<'a>(
+   93|  1.34k|    bin: Vec<u8>,
+   94|  1.34k|    raw: &mut Unstructured<'a>,
+   95|  1.34k|    mut action: impl FnMut(Vec<u8>, u64, u32, u32),
+   96|  1.34k|    max_stacked_mutations: u32,
+   97|  1.34k|    max_siblings_exploration: u32,
+   98|  1.34k|) -> Vec<u8> {
+   99|  1.34k|    let preseed: u64 = raw.arbitrary().unwrap();
+  100|  1.34k|    let mut rng = SmallRng::seed_from_u64(preseed);
+  101|  1.34k|    let mut cp = bin;
+  102|  1.34k|
+  103|  1.34k|    log::debug!("Preseed {:?}", preseed);
+  104|  1.34k|    let stacked_mutations: u32 = rng.gen_range(1..max_stacked_mutations);
+  105|  1.34k|    log::debug!("stacked_mutations: {}", stacked_mutations);
   106|       |
-  107|    324|    for i in 0..=stacked_mutations {
-  108|    324|        let seed = rng.gen();
-  109|    324|        let mut wasm_mutate = Box::<wasm_mutate::WasmMutate<'_>>::default();
-  110|    324|        wasm_mutate.seed(seed);
-  111|    324|        log::debug!("Seed: {}", seed);
-  112|    324|        wasm_mutate.preserve_semantics(true);
-  113|    324|
-  114|    324|        // TODO, set fuel as a parameter of the fuzzer, lets the fuzzer to determine if more fuel is needed
-  115|    324|        wasm_mutate.fuel(500);
-  116|    324|        let tomutate = cp.clone();
-  117|    324|        let mut_iterator = wasm_mutate.run(&tomutate);
-  118|    324|
-  119|    324|        match mut_iterator {
+  107|  2.69k|    for i in 0..=stacked_mutations {
+  108|  2.69k|        let seed = rng.gen();
+  109|  2.69k|        let mut wasm_mutate = Box::<wasm_mutate::WasmMutate<'_>>::default();
+  110|  2.69k|        wasm_mutate.seed(seed);
+  111|  2.69k|        log::debug!("Seed: {}", seed);
+  112|  2.69k|        wasm_mutate.preserve_semantics(true);
+  113|  2.69k|
+  114|  2.69k|        // TODO, set fuel as a parameter of the fuzzer, lets the fuzzer to determine if more fuel is needed
+  115|  2.69k|        wasm_mutate.fuel(500);
+  116|  2.69k|        let tomutate = cp.clone();
+  117|  2.69k|        let mut_iterator = wasm_mutate.run(&tomutate);
+  118|  2.69k|
+  119|  2.69k|        match mut_iterator {
   120|      0|            Ok(mut it) => {
   121|      0|                // lateral traversing
   122|      0|                let check_siblings: u32 = rng.gen_range(1..max_siblings_exploration);
@@ -73,39 +73,39 @@ _RINvCs8sgUAq8DBFE_8fvm_fuzz15stack_mutationsNCNvNvCsarpePEPofPt_22instrument_wi
   138|      0|                    }
   139|       |                }
   140|       |            }
-  141|    324|            Err(e) => {
-  142|    324|                // do nothing continue
-  143|    324|                log::debug!("Error: {:?}", e);
+  141|  2.69k|            Err(e) => {
+  142|  2.69k|                // do nothing continue
+  143|  2.69k|                log::debug!("Error: {:?}", e);
   144|       |            }
   145|       |        }
   146|       |    }
-  147|    162|    cp
-  148|    162|}
-_RNCNvCs8sgUAq8DBFE_8fvm_fuzz18get_random_fixture0B3_:
-  170|  18.1k|        .map(|r| r.unwrap())
-_RNvCs8sgUAq8DBFE_8fvm_fuzz18get_random_fixture:
-  165|    162|pub fn get_random_fixture<'a>(raw: &mut Unstructured<'a>) -> AResult<(Vec<u8>, PathBuf)> {
-  166|    162|    let files = get_wasm_dir()
-  167|    162|        .read_dir()
-  168|    162|        .unwrap()
-  169|    162|        .into_iter()
-  170|    162|        .map(|r| r.unwrap())
-  171|    162|        .collect::<Vec<_>>();
+  147|  1.34k|    cp
+  148|  1.34k|}
+_RNCNvCs2zAUJC1jATr_8fvm_fuzz18get_random_fixture0B3_:
+  170|   131k|        .map(|r| r.unwrap())
+_RNvCs2zAUJC1jATr_8fvm_fuzz18get_random_fixture:
+  165|  1.34k|pub fn get_random_fixture<'a>(raw: &mut Unstructured<'a>) -> AResult<(Vec<u8>, PathBuf)> {
+  166|  1.34k|    let files = get_wasm_dir()
+  167|  1.34k|        .read_dir()
+  168|  1.34k|        .unwrap()
+  169|  1.34k|        .into_iter()
+  170|  1.34k|        .map(|r| r.unwrap())
+  171|  1.34k|        .collect::<Vec<_>>();
   172|       |
-  173|    162|    let idx = raw.choose_index(files.len())?;
-  174|    162|    let random_file = files[idx].path();
-  175|    162|    log::debug!("Random fixture: {:?}", random_file);
+  173|  1.34k|    let idx = raw.choose_index(files.len())?;
+  174|  1.34k|    let random_file = files[idx].path();
+  175|  1.34k|    log::debug!("Random fixture: {:?}", random_file);
   176|       |
-  177|    162|    let bytes = std::fs::read(&random_file)?;
+  177|  1.34k|    let bytes = std::fs::read(&random_file)?;
   178|       |
-  179|    162|    Ok((bytes, random_file))
-  180|    162|}
-_RNvCs8sgUAq8DBFE_8fvm_fuzz12get_wasm_dir:
-  150|    162|fn get_wasm_dir() -> PathBuf {
-  151|    162|    match env::var("OUT") {
-  152|    162|        Ok(out) => {
-  153|    162|            let path: PathBuf = out.into();
-  154|    162|            path
+  179|  1.34k|    Ok((bytes, random_file))
+  180|  1.34k|}
+_RNvCs2zAUJC1jATr_8fvm_fuzz12get_wasm_dir:
+  150|  1.34k|fn get_wasm_dir() -> PathBuf {
+  151|  1.34k|    match env::var("OUT") {
+  152|  1.34k|        Ok(out) => {
+  153|  1.34k|            let path: PathBuf = out.into();
+  154|  1.34k|            path
   155|       |        }
   156|      0|        Err(e) => {
   157|      0|            log::debug!("Error {:?}", e);
@@ -113,7 +113,7 @@ _RNvCs8sgUAq8DBFE_8fvm_fuzz12get_wasm_dir:
   159|      0|            std::process::exit(0)
   160|       |        }
   161|       |    }
-  162|    162|}
+  162|  1.34k|}
 
 
 
