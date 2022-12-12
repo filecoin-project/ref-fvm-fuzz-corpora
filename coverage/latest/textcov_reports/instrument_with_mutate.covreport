@@ -1,3 +1,1333 @@
+_RNvXsI_CsgESxx8uoPVI_9arbitraryyNtB5_9Arbitrary9arbitrary:
+  309|    154|                fn arbitrary(u: &mut Unstructured<'a>) -> Result<Self> {
+  310|    154|                    let mut buf = [0; mem::size_of::<$ty>()];
+  311|    154|                    u.fill_buffer(&mut buf)?;
+  312|    154|                    let mut x: $unsigned = 0;
+  313|  1.23k|                    for i in 0..mem::size_of::<$ty>() {
+  314|  1.23k|                        x |= buf[i] as $unsigned << (i * 8);
+  315|  1.23k|                    }
+  316|    154|                    Ok(x as $ty)
+  317|    154|                }
+
+_RINvMNtCsgESxx8uoPVI_9arbitrary12unstructuredNtB3_12Unstructured9arbitraryyECs8G9iWBnlMIE_22instrument_with_mutate:
+  167|    154|    pub fn arbitrary<A>(&mut self) -> Result<A>
+  168|    154|    where
+  169|    154|        A: Arbitrary<'a>,
+  170|    154|    {
+  171|    154|        <A as Arbitrary<'a>>::arbitrary(self)
+  172|    154|    }
+_RNvXs6_NtCsgESxx8uoPVI_9arbitrary12unstructuredjNtB5_3Int11to_unsigned:
+  856|    308|                fn to_unsigned(self) -> Self::Unsigned {
+  857|    308|                    self as $unsigned_ty
+  858|    308|                }
+_RNvXs6_NtCsgESxx8uoPVI_9arbitrary12unstructuredjNtB5_3Int7from_u8:
+  836|    308|                fn from_u8(b: u8) -> Self {
+  837|    308|                    b as Self
+  838|    308|                }
+_RNvXs6_NtCsgESxx8uoPVI_9arbitrary12unstructuredjNtB5_3Int12wrapping_sub:
+  852|    154|                fn wrapping_sub(self, rhs: Self) -> Self {
+  853|    154|                    <$ty>::wrapping_sub(self, rhs)
+  854|    154|                }
+_RNvXs6_NtCsgESxx8uoPVI_9arbitrary12unstructuredjNtB5_3Int12wrapping_add:
+  848|    154|                fn wrapping_add(self, rhs: Self) -> Self {
+  849|    154|                    <$ty>::wrapping_add(self, rhs)
+  850|    154|                }
+_RINvMNtCsgESxx8uoPVI_9arbitrary12unstructuredNtB3_12Unstructured12int_in_rangejEB5_:
+  293|    154|    pub fn int_in_range<T>(&mut self, range: ops::RangeInclusive<T>) -> Result<T>
+  294|    154|    where
+  295|    154|        T: Int,
+  296|    154|    {
+  297|    154|        let (result, bytes_consumed) = Self::int_in_range_impl(range, self.data.iter().cloned())?;
+  298|    154|        self.data = &self.data[bytes_consumed..];
+  299|    154|        Ok(result)
+  300|    154|    }
+_RNvXs6_NtCsgESxx8uoPVI_9arbitrary12unstructuredjNtB5_3Int11checked_add:
+  844|    154|                fn checked_add(self, rhs: Self) -> Option<Self> {
+  845|    154|                    <$ty>::checked_add(self, rhs)
+  846|    154|                }
+_RINvMNtCsgESxx8uoPVI_9arbitrary12unstructuredNtB3_12Unstructured17int_in_range_impljINtNtNtNtCs9piv4hBt564_4core4iter8adapters6cloned6ClonedINtNtNtB1t_5slice4iter4IterhEEEB5_:
+  302|    154|    fn int_in_range_impl<T>(
+  303|    154|        range: ops::RangeInclusive<T>,
+  304|    154|        mut bytes: impl Iterator<Item = u8>,
+  305|    154|    ) -> Result<(T, usize)>
+  306|    154|    where
+  307|    154|        T: Int,
+  308|    154|    {
+  309|    154|        let start = *range.start();
+  310|    154|        let end = *range.end();
+  311|    154|        assert!(
+  312|    154|            start <= end,
+  313|    154|            "`arbitrary::Unstructured::int_in_range` requires a non-empty range"
+  314|    154|        );
+  315|       |
+  316|       |        // When there is only one possible choice, don't waste any entropy from
+  317|       |        // the underlying data.
+  318|    154|        if start == end {
+  319|      0|            return Ok((start, 0));
+  320|    154|        }
+  321|    154|
+  322|    154|        // From here on out we work with the unsigned representation. All of the
+  323|    154|        // operations performed below work out just as well whether or not `T`
+  324|    154|        // is a signed or unsigned integer.
+  325|    154|        let start = start.to_unsigned();
+  326|    154|        let end = end.to_unsigned();
+  327|    154|
+  328|    154|        let delta = end.wrapping_sub(start);
+  329|    154|        debug_assert_ne!(delta, T::Unsigned::ZERO);
+  330|       |
+  331|       |        // Compute an arbitrary integer offset from the start of the range. We
+  332|       |        // do this by consuming `size_of(T)` bytes from the input to create an
+  333|       |        // arbitrary integer and then clamping that int into our range bounds
+  334|       |        // with a modulo operation.
+  335|    154|        let mut arbitrary_int = T::Unsigned::ZERO;
+  336|    154|        let mut bytes_consumed: usize = 0;
+  337|       |
+  338|    462|        while (bytes_consumed < mem::size_of::<T>())
+  339|    462|            && (delta >> T::Unsigned::from_usize(bytes_consumed * 8)) > T::Unsigned::ZERO
+  340|       |        {
+  341|    308|            let byte = match bytes.next() {
+  342|      0|                None => break,
+  343|    308|                Some(b) => b,
+  344|    308|            };
+  345|    308|            bytes_consumed += 1;
+  346|    308|
+  347|    308|            // Combine this byte into our arbitrary integer, but avoid
+  348|    308|            // overflowing the shift for `u8` and `i8`.
+  349|    308|            arbitrary_int = if mem::size_of::<T>() == 1 {
+  350|      0|                T::Unsigned::from_u8(byte)
+  351|       |            } else {
+  352|    308|                (arbitrary_int << 8) | T::Unsigned::from_u8(byte)
+  353|       |            };
+  354|       |        }
+  355|       |
+  356|    154|        let offset = if delta == T::Unsigned::MAX {
+  357|      0|            arbitrary_int
+  358|       |        } else {
+  359|    154|            arbitrary_int % (delta.checked_add(T::Unsigned::ONE).unwrap())
+  360|       |        };
+  361|       |
+  362|       |        // Finally, we add `start` to our offset from `start` to get the result
+  363|       |        // actual value within the range.
+  364|    154|        let result = start.wrapping_add(offset);
+  365|    154|
+  366|    154|        // And convert back to our maybe-signed representation.
+  367|    154|        let result = T::from_unsigned(result);
+  368|    154|        debug_assert!(*range.start() <= result);
+  369|    154|        debug_assert!(result <= *range.end());
+  370|       |
+  371|    154|        Ok((result, bytes_consumed))
+  372|    154|    }
+_RNvMNtCsgESxx8uoPVI_9arbitrary12unstructuredNtB2_12Unstructured3new:
+   85|    154|    pub fn new(data: &'a [u8]) -> Self {
+   86|    154|        Unstructured { data }
+   87|    154|    }
+_RNvMNtCsgESxx8uoPVI_9arbitrary12unstructuredNtB2_12Unstructured12choose_index:
+  450|    154|    pub fn choose_index(&mut self, len: usize) -> Result<usize> {
+  451|    154|        if len == 0 {
+  452|      0|            return Err(Error::EmptyChoose);
+  453|    154|        }
+  454|    154|        let idx = self.int_in_range(0..=len - 1)?;
+  455|    154|        Ok(idx)
+  456|    154|    }
+_RNvXs6_NtCsgESxx8uoPVI_9arbitrary12unstructuredjNtB5_3Int10from_usize:
+  840|    462|                fn from_usize(u: usize) -> Self {
+  841|    462|                    u as Self
+  842|    462|                }
+_RNvMNtCsgESxx8uoPVI_9arbitrary12unstructuredNtB2_12Unstructured11fill_buffer:
+  521|    154|    pub fn fill_buffer(&mut self, buffer: &mut [u8]) -> Result<()> {
+  522|    154|        let n = std::cmp::min(buffer.len(), self.data.len());
+  523|    154|        buffer[..n].copy_from_slice(&self.data[..n]);
+  524|    154|        for byte in buffer[n..].iter_mut() {
+  525|      0|            *byte = 0;
+  526|      0|        }
+  527|    154|        self.data = &self.data[n..];
+  528|    154|        Ok(())
+  529|    154|    }
+_RNvXs6_NtCsgESxx8uoPVI_9arbitrary12unstructuredjNtB5_3Int13from_unsigned:
+  860|    154|                fn from_unsigned(unsigned: $unsigned_ty) -> Self {
+  861|    154|                    unsigned as Self
+  862|    154|                }
+
+_RNvCs2hV4IidYGt6_4atty2is:
+   40|    154|pub fn is(stream: Stream) -> bool {
+   41|       |    extern crate libc;
+   42|       |
+   43|    154|    let fd = match stream {
+   44|      0|        Stream::Stdout => libc::STDOUT_FILENO,
+   45|    154|        Stream::Stderr => libc::STDERR_FILENO,
+   46|      0|        Stream::Stdin => libc::STDIN_FILENO,
+   47|       |    };
+   48|    154|    unsafe { libc::isatty(fd) != 0 }
+   49|    154|}
+
+_RNvMs_NtCskWXkNGMR4J8_10env_logger6filterNtB4_7Builder5parse:
+  216|    154|    pub fn parse(&mut self, filters: &str) -> &mut Self {
+  217|    154|        let (directives, filter) = parse_spec(filters);
+  218|    154|
+  219|    154|        self.filter = filter;
+  220|       |
+  221|    770|        for directive in directives {
+  222|    616|            self.directives.insert(directive.name, directive.level);
+  223|    616|        }
+  224|    154|        self
+  225|    154|    }
+_RNCNCNvMs_NtCskWXkNGMR4J8_10env_logger6filterNtB8_7Builder5builds_0s_0Ba_:
+  250|    783|                let blen = b.name.as_ref().map(|b| b.len()).unwrap_or(0);
+_RNCNCNvMs_NtCskWXkNGMR4J8_10env_logger6filterNtB8_7Builder5builds_00Ba_:
+  249|    783|                let alen = a.name.as_ref().map(|a| a.len()).unwrap_or(0);
+_RNCNvNtCskWXkNGMR4J8_10env_logger6filter10parse_spec0B5_:
+  307|    616|        for s in m.split(',').map(|ss| ss.trim()) {
+_RNvMNtCskWXkNGMR4J8_10env_logger6filterNtB2_6Filter6filter:
+  139|    154|    pub fn filter(&self) -> LevelFilter {
+  140|    154|        self.directives
+  141|    154|            .iter()
+  142|    154|            .map(|d| d.level)
+  143|    154|            .max()
+  144|    154|            .unwrap_or(LevelFilter::Off)
+  145|    154|    }
+_RNvMs_NtCskWXkNGMR4J8_10env_logger6filterNtB4_7Builder5build:
+  228|    154|    pub fn build(&mut self) -> Filter {
+  229|    154|        assert!(!self.built, "attempt to re-use consumed builder");
+  230|    154|        self.built = true;
+  231|    154|
+  232|    154|        let mut directives = Vec::new();
+  233|    154|        if self.directives.is_empty() {
+  234|      0|            // Adds the default filter if none exist
+  235|      0|            directives.push(Directive {
+  236|      0|                name: None,
+  237|      0|                level: LevelFilter::Error,
+  238|      0|            });
+  239|    154|        } else {
+  240|    154|            // Consume map of directives.
+  241|    154|            let directives_map = mem::take(&mut self.directives);
+  242|    154|            directives = directives_map
+  243|    154|                .into_iter()
+  244|    154|                .map(|(name, level)| Directive { name, level })
+  245|    154|                .collect();
+  246|    154|            // Sort the directives by length of their name, this allows a
+  247|    154|            // little more efficient lookup at runtime.
+  248|    154|            directives.sort_by(|a, b| {
+  249|       |                let alen = a.name.as_ref().map(|a| a.len()).unwrap_or(0);
+  250|       |                let blen = b.name.as_ref().map(|b| b.len()).unwrap_or(0);
+  251|       |                alen.cmp(&blen)
+  252|    154|            });
+  253|    154|        }
+  254|       |
+  255|    154|        Filter {
+  256|    154|            directives: mem::take(&mut directives),
+  257|    154|            filter: mem::replace(&mut self.filter, None),
+  258|    154|        }
+  259|    154|    }
+_RNvNtCskWXkNGMR4J8_10env_logger6filter10parse_spec:
+  292|    154|fn parse_spec(spec: &str) -> (Vec<Directive>, Option<inner::Filter>) {
+  293|    154|    let mut dirs = Vec::new();
+  294|    154|
+  295|    154|    let mut parts = spec.split('/');
+  296|    154|    let mods = parts.next();
+  297|    154|    let filter = parts.next();
+  298|    154|    if parts.next().is_some() {
+  299|      0|        eprintln!(
+  300|      0|            "warning: invalid logging spec '{}', \
+  301|      0|             ignoring it (too many '/'s)",
+  302|      0|            spec
+  303|      0|        );
+  304|      0|        return (dirs, None);
+  305|    154|    }
+  306|    154|    if let Some(m) = mods {
+  307|    616|        for s in m.split(',').map(|ss| ss.trim()) {
+  308|    616|            if s.is_empty() {
+  309|      0|                continue;
+  310|    616|            }
+  311|    616|            let mut parts = s.split('=');
+  312|    616|            let (log_level, name) =
+  313|    616|                match (parts.next(), parts.next().map(|s| s.trim()), parts.next()) {
+  314|    308|                    (Some(part0), None, None) => {
+  315|    308|                        // if the single argument is a log-level string or number,
+  316|    308|                        // treat that as a global fallback
+  317|    308|                        match part0.parse() {
+  318|      0|                            Ok(num) => (num, None),
+  319|    308|                            Err(_) => (LevelFilter::max(), Some(part0)),
+  320|       |                        }
+  321|       |                    }
+  322|    308|                    (Some(part0), Some(""), None) => (LevelFilter::max(), Some(part0)),
+  323|    308|                    (Some(part0), Some(part1), None) => match part1.parse() {
+  324|    308|                        Ok(num) => (num, Some(part0)),
+  325|       |                        _ => {
+  326|      0|                            eprintln!(
+  327|      0|                                "warning: invalid logging spec '{}', \
+  328|      0|                                 ignoring it",
+  329|      0|                                part1
+  330|      0|                            );
+  331|      0|                            continue;
+  332|       |                        }
+  333|       |                    },
+  334|       |                    _ => {
+  335|      0|                        eprintln!(
+  336|      0|                            "warning: invalid logging spec '{}', \
+  337|      0|                             ignoring it",
+  338|      0|                            s
+  339|      0|                        );
+  340|      0|                        continue;
+  341|       |                    }
+  342|       |                };
+  343|    616|            dirs.push(Directive {
+  344|    616|                name: name.map(|s| s.to_string()),
+  345|    616|                level: log_level,
+  346|    616|            });
+  347|       |        }
+  348|      0|    }
+  349|       |
+  350|    154|    let filter = filter.and_then(|filter| match inner::Filter::new(filter) {
+  351|       |        Ok(re) => Some(re),
+  352|       |        Err(e) => {
+  353|       |            eprintln!("warning: invalid regex filter - {}", e);
+  354|       |            None
+  355|       |        }
+  356|    154|    });
+  357|    154|
+  358|    154|    (dirs, filter)
+  359|    154|}
+_RNvXs0_NtCskWXkNGMR4J8_10env_logger6filterNtB5_7BuilderNtNtCs9piv4hBt564_4core7default7Default7default:
+  263|    154|    fn default() -> Self {
+  264|    154|        Builder::new()
+  265|    154|    }
+_RNCNvNtCskWXkNGMR4J8_10env_logger6filter10parse_specs0_0B5_:
+  344|    616|                name: name.map(|s| s.to_string()),
+_RNvMs_NtCskWXkNGMR4J8_10env_logger6filterNtB4_7Builder3new:
+  173|    154|    pub fn new() -> Builder {
+  174|    154|        Builder {
+  175|    154|            directives: HashMap::new(),
+  176|    154|            filter: None,
+  177|    154|            built: false,
+  178|    154|        }
+  179|    154|    }
+_RNvNtCskWXkNGMR4J8_10env_logger6filter7enabled:
+  362|  1.23k|fn enabled(directives: &[Directive], level: Level, target: &str) -> bool {
+  363|       |    // Search for the longest match, the vector is assumed to be pre-sorted.
+  364|  2.76k|    for directive in directives.iter().rev() {
+  365|  2.76k|        match directive.name {
+  366|  2.76k|            Some(ref name) if !target.starts_with(&**name) => {}
+  367|  1.07k|            Some(..) | None => return level <= directive.level,
+  368|       |        }
+  369|       |    }
+  370|    153|    false
+  371|  1.23k|}
+_RNCNvMNtCskWXkNGMR4J8_10env_logger6filterNtB4_6Filter6filter0B6_:
+  142|    616|            .map(|d| d.level)
+_RNCNvMs_NtCskWXkNGMR4J8_10env_logger6filterNtB6_7Builder5builds_0B8_:
+  248|    783|            directives.sort_by(|a, b| {
+  249|    783|                let alen = a.name.as_ref().map(|a| a.len()).unwrap_or(0);
+  250|    783|                let blen = b.name.as_ref().map(|b| b.len()).unwrap_or(0);
+  251|    783|                alen.cmp(&blen)
+  252|    783|            });
+_RNCNvMs_NtCskWXkNGMR4J8_10env_logger6filterNtB6_7Builder5build0B8_:
+  244|    616|                .map(|(name, level)| Directive { name, level })
+_RNCNvNtCskWXkNGMR4J8_10env_logger6filter10parse_specs_0B5_:
+  313|    308|                match (parts.next(), parts.next().map(|s| s.trim()), parts.next()) {
+_RNvMNtCskWXkNGMR4J8_10env_logger6filterNtB2_6Filter7enabled:
+  163|  1.23k|    pub fn enabled(&self, metadata: &Metadata) -> bool {
+  164|  1.23k|        let level = metadata.level();
+  165|  1.23k|        let target = metadata.target();
+  166|  1.23k|
+  167|  1.23k|        enabled(&self.directives, level, target)
+  168|  1.23k|    }
+_RNvMNtCskWXkNGMR4J8_10env_logger6filterNtB2_6Filter7matches:
+  148|  1.23k|    pub fn matches(&self, record: &Record) -> bool {
+  149|  1.23k|        if !self.enabled(record.metadata()) {
+  150|    153|            return false;
+  151|  1.07k|        }
+  152|       |
+  153|  1.07k|        if let Some(filter) = self.filter.as_ref() {
+  154|      0|            if !filter.is_match(&record.args().to_string()) {
+  155|      0|                return false;
+  156|      0|            }
+  157|  1.07k|        }
+  158|       |
+  159|  1.07k|        true
+  160|  1.23k|    }
+
+_RNvMNtNtNtCskWXkNGMR4J8_10env_logger3fmt9humantime3impNtB6_9Formatter17timestamp_seconds:
+   43|  1.07k|    pub fn timestamp_seconds(&self) -> Timestamp {
+   44|  1.07k|        Timestamp {
+   45|  1.07k|            time: SystemTime::now(),
+   46|  1.07k|            precision: TimestampPrecision::Seconds,
+   47|  1.07k|        }
+   48|  1.07k|    }
+_RNvXs0_NtNtNtCskWXkNGMR4J8_10env_logger3fmt9humantime3impNtB5_9TimestampNtNtCs9piv4hBt564_4core3fmt7Display3fmt:
+  108|  1.07k|    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+  109|  1.07k|        let formatter = match self.precision {
+  110|  1.07k|            TimestampPrecision::Seconds => format_rfc3339_seconds,
+  111|      0|            TimestampPrecision::Millis => format_rfc3339_millis,
+  112|      0|            TimestampPrecision::Micros => format_rfc3339_micros,
+  113|      0|            TimestampPrecision::Nanos => format_rfc3339_nanos,
+  114|       |        };
+  115|       |
+  116|  1.07k|        formatter(self.time).fmt(f)
+  117|  1.07k|    }
+
+_RNvMs4_NtCskWXkNGMR4J8_10env_logger3fmtNtB5_13DefaultFormat12write_target:
+  319|  1.07k|    fn write_target(&mut self, record: &Record) -> io::Result<()> {
+  320|  1.07k|        if !self.target {
+  321|      0|            return Ok(());
+  322|  1.07k|        }
+  323|  1.07k|
+  324|  1.07k|        match record.target() {
+  325|  1.07k|            "" => Ok(()),
+  326|  1.07k|            target => self.write_header_value(target),
+  327|       |        }
+  328|  1.07k|    }
+_RNvMs3_NtCskWXkNGMR4J8_10env_logger3fmtNtB5_7Builder5build:
+  173|    154|    pub fn build(&mut self) -> FormatFn {
+  174|    154|        assert!(!self.built, "attempt to re-use consumed builder");
+  175|       |
+  176|    154|        let built = mem::replace(
+  177|    154|            self,
+  178|    154|            Builder {
+  179|    154|                built: true,
+  180|    154|                ..Default::default()
+  181|    154|            },
+  182|    154|        );
+  183|       |
+  184|    154|        if let Some(fmt) = built.custom_format {
+  185|      0|            fmt
+  186|       |        } else {
+  187|    154|            Box::new(move |buf, record| {
+  188|       |                let fmt = DefaultFormat {
+  189|       |                    timestamp: built.format_timestamp,
+  190|       |                    module_path: built.format_module_path,
+  191|       |                    target: built.format_target,
+  192|       |                    level: built.format_level,
+  193|       |                    written_header_value: false,
+  194|       |                    indent: built.format_indent,
+  195|       |                    suffix: built.format_suffix,
+  196|       |                    buf,
+  197|       |                };
+  198|       |
+  199|       |                fmt.write(record)
+  200|    154|            })
+  201|       |        }
+  202|    154|    }
+_RNvMs4_NtCskWXkNGMR4J8_10env_logger3fmtNtB5_13DefaultFormat17write_module_path:
+  307|  1.07k|    fn write_module_path(&mut self, record: &Record) -> io::Result<()> {
+  308|  1.07k|        if !self.module_path {
+  309|  1.07k|            return Ok(());
+  310|      0|        }
+  311|       |
+  312|      0|        if let Some(module_path) = record.module_path() {
+  313|      0|            self.write_header_value(module_path)
+  314|       |        } else {
+  315|      0|            Ok(())
+  316|       |        }
+  317|  1.07k|    }
+_RINvMs4_NtCskWXkNGMR4J8_10env_logger3fmtNtB6_13DefaultFormat18write_header_valueReEB8_:
+  251|  1.07k|    fn write_header_value<T>(&mut self, value: T) -> io::Result<()>
+  252|  1.07k|    where
+  253|  1.07k|        T: Display,
+  254|  1.07k|    {
+  255|  1.07k|        if !self.written_header_value {
+  256|      0|            self.written_header_value = true;
+  257|      0|
+  258|      0|            let open_brace = self.subtle_style("[");
+  259|      0|            write!(self.buf, "{}{}", open_brace, value)
+  260|       |        } else {
+  261|  1.07k|            write!(self.buf, " {}", value)
+  262|       |        }
+  263|  1.07k|    }
+_RNvXs2_NtCskWXkNGMR4J8_10env_logger3fmtNtB5_7BuilderNtNtCs9piv4hBt564_4core7default7Default7default:
+  153|    308|    fn default() -> Self {
+  154|    308|        Builder {
+  155|    308|            format_timestamp: Some(Default::default()),
+  156|    308|            format_module_path: false,
+  157|    308|            format_target: true,
+  158|    308|            format_level: true,
+  159|    308|            format_indent: Some(4),
+  160|    308|            custom_format: None,
+  161|    308|            format_suffix: "\n",
+  162|    308|            built: false,
+  163|    308|        }
+  164|    308|    }
+_RNvMs4_NtCskWXkNGMR4J8_10env_logger3fmtNtB5_13DefaultFormat12subtle_style:
+  235|  2.15k|    fn subtle_style(&self, text: &'static str) -> SubtleStyle {
+  236|  2.15k|        #[cfg(feature = "termcolor")]
+  237|  2.15k|        {
+  238|  2.15k|            self.buf
+  239|  2.15k|                .style()
+  240|  2.15k|                .set_color(Color::Black)
+  241|  2.15k|                .set_intense(true)
+  242|  2.15k|                .clone()
+  243|  2.15k|                .into_value(text)
+  244|  2.15k|        }
+  245|  2.15k|        #[cfg(not(feature = "termcolor"))]
+  246|  2.15k|        {
+  247|  2.15k|            text
+  248|  2.15k|        }
+  249|  2.15k|    }
+_RNCNvXNvMs4_NtCskWXkNGMR4J8_10env_logger3fmtNtBa_13DefaultFormat10write_argsNtB4_13IndentWrapperNtNtCsVuGcMwCl0V_3std2io5Write5write0Bc_:
+  355|  78.6k|                        for chunk in buf.split(|&x| x == b'\n') {
+_RNvMs4_NtCskWXkNGMR4J8_10env_logger3fmtNtB5_13DefaultFormat5write:
+  226|  1.07k|        self.write_timestamp()?;
+  227|  1.07k|        self.write_level(record)?;
+  228|  1.07k|        self.write_module_path(record)?;
+  229|  1.07k|        self.write_target(record)?;
+  230|  1.07k|        self.finish_header()?;
+  231|       |
+  232|  1.07k|        self.write_args(record)
+  233|  1.07k|    }
+_RINvMs4_NtCskWXkNGMR4J8_10env_logger3fmtNtB6_13DefaultFormat18write_header_valueNtNtNtB6_9humantime3imp9TimestampEB8_:
+  251|  1.07k|    fn write_header_value<T>(&mut self, value: T) -> io::Result<()>
+  252|  1.07k|    where
+  253|  1.07k|        T: Display,
+  254|  1.07k|    {
+  255|  1.07k|        if !self.written_header_value {
+  256|  1.07k|            self.written_header_value = true;
+  257|  1.07k|
+  258|  1.07k|            let open_brace = self.subtle_style("[");
+  259|  1.07k|            write!(self.buf, "{}{}", open_brace, value)
+  260|       |        } else {
+  261|      0|            write!(self.buf, " {}", value)
+  262|       |        }
+  263|  1.07k|    }
+_RNvMs_NtCskWXkNGMR4J8_10env_logger3fmtNtB4_9Formatter5print:
+  114|  1.07k|    pub(crate) fn print(&self, writer: &Writer) -> io::Result<()> {
+  115|  1.07k|        writer.print(&self.buf.borrow())
+  116|  1.07k|    }
+_RNvMs4_NtCskWXkNGMR4J8_10env_logger3fmtNtB5_13DefaultFormat15write_timestamp:
+  284|  1.07k|    fn write_timestamp(&mut self) -> io::Result<()> {
+  285|       |        #[cfg(feature = "humantime")]
+  286|       |        {
+  287|       |            use self::TimestampPrecision::*;
+  288|  1.07k|            let ts = match self.timestamp {
+  289|      0|                None => return Ok(()),
+  290|  1.07k|                Some(Seconds) => self.buf.timestamp_seconds(),
+  291|      0|                Some(Millis) => self.buf.timestamp_millis(),
+  292|      0|                Some(Micros) => self.buf.timestamp_micros(),
+  293|      0|                Some(Nanos) => self.buf.timestamp_nanos(),
+  294|       |            };
+  295|       |
+  296|  1.07k|            self.write_header_value(ts)
+  297|       |        }
+  298|       |        #[cfg(not(feature = "humantime"))]
+  299|       |        {
+  300|       |            // Trick the compiler to think we have used self.timestamp
+  301|       |            // Workaround for "field is never used: `timestamp`" compiler nag.
+  302|       |            let _ = self.timestamp;
+  303|       |            Ok(())
+  304|       |        }
+  305|  1.07k|    }
+_RNvXNvMs4_NtCskWXkNGMR4J8_10env_logger3fmtNtB8_13DefaultFormat10write_argsNtB2_13IndentWrapperNtNtCsVuGcMwCl0V_3std2io5Write5write:
+  353|  11.5k|                    fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
+  354|  11.5k|                        let mut first = true;
+  355|  11.5k|                        for chunk in buf.split(|&x| x == b'\n') {
+  356|  11.5k|                            if !first {
+  357|      0|                                write!(
+  358|      0|                                    self.fmt.buf,
+  359|      0|                                    "{}{:width$}",
+  360|      0|                                    self.fmt.suffix,
+  361|      0|                                    "",
+  362|      0|                                    width = self.indent_count
+  363|      0|                                )?;
+  364|  11.5k|                            }
+  365|  11.5k|                            self.fmt.buf.write_all(chunk)?;
+  366|  11.5k|                            first = false;
+  367|       |                        }
+  368|       |
+  369|  11.5k|                        Ok(buf.len())
+  370|  11.5k|                    }
+_RNvMs4_NtCskWXkNGMR4J8_10env_logger3fmtNtB5_13DefaultFormat11write_level:
+  265|  1.07k|    fn write_level(&mut self, record: &Record) -> io::Result<()> {
+  266|  1.07k|        if !self.level {
+  267|      0|            return Ok(());
+  268|  1.07k|        }
+  269|  1.07k|
+  270|  1.07k|        let level = {
+  271|  1.07k|            #[cfg(feature = "termcolor")]
+  272|  1.07k|            {
+  273|  1.07k|                self.buf.default_styled_level(record.level())
+  274|  1.07k|            }
+  275|  1.07k|            #[cfg(not(feature = "termcolor"))]
+  276|  1.07k|            {
+  277|  1.07k|                record.level()
+  278|  1.07k|            }
+  279|  1.07k|        };
+  280|  1.07k|
+  281|  1.07k|        self.write_header_value(format_args!("{:<5}", level))
+  282|  1.07k|    }
+_RNvMs_NtCskWXkNGMR4J8_10env_logger3fmtNtB4_9Formatter11write_style:
+  110|  1.07k|    pub(crate) fn write_style(&self) -> WriteStyle {
+  111|  1.07k|        self.write_style
+  112|  1.07k|    }
+_RNvXs0_NtCskWXkNGMR4J8_10env_logger3fmtNtB5_9FormatterNtNtCsVuGcMwCl0V_3std2io5Write5write:
+  124|  21.2k|    fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
+  125|  21.2k|        self.buf.borrow_mut().write(buf)
+  126|  21.2k|    }
+_RNCNvMs3_NtCskWXkNGMR4J8_10env_logger3fmtNtB7_7Builder5build0B9_:
+  187|  1.07k|            Box::new(move |buf, record| {
+  188|  1.07k|                let fmt = DefaultFormat {
+  189|  1.07k|                    timestamp: built.format_timestamp,
+  190|  1.07k|                    module_path: built.format_module_path,
+  191|  1.07k|                    target: built.format_target,
+  192|  1.07k|                    level: built.format_level,
+  193|  1.07k|                    written_header_value: false,
+  194|  1.07k|                    indent: built.format_indent,
+  195|  1.07k|                    suffix: built.format_suffix,
+  196|  1.07k|                    buf,
+  197|  1.07k|                };
+  198|  1.07k|
+  199|  1.07k|                fmt.write(record)
+  200|  1.07k|            })
+_RNvMs_NtCskWXkNGMR4J8_10env_logger3fmtNtB4_9Formatter5clear:
+  118|  1.07k|    pub(crate) fn clear(&mut self) {
+  119|  1.07k|        self.buf.borrow_mut().clear()
+  120|  1.07k|    }
+_RNvXNtCskWXkNGMR4J8_10env_logger3fmtNtB2_18TimestampPrecisionNtNtCs9piv4hBt564_4core7default7Default7default:
+   71|    308|    fn default() -> Self {
+   72|    308|        TimestampPrecision::Seconds
+   73|    308|    }
+_RINvMs4_NtCskWXkNGMR4J8_10env_logger3fmtNtB6_13DefaultFormat18write_header_valueNtNtCs9piv4hBt564_4core3fmt9ArgumentsEB8_:
+  251|  1.07k|    fn write_header_value<T>(&mut self, value: T) -> io::Result<()>
+  252|  1.07k|    where
+  253|  1.07k|        T: Display,
+  254|  1.07k|    {
+  255|  1.07k|        if !self.written_header_value {
+  256|      0|            self.written_header_value = true;
+  257|      0|
+  258|      0|            let open_brace = self.subtle_style("[");
+  259|      0|            write!(self.buf, "{}{}", open_brace, value)
+  260|       |        } else {
+  261|  1.07k|            write!(self.buf, " {}", value)
+  262|       |        }
+  263|  1.07k|    }
+_RNvMs4_NtCskWXkNGMR4J8_10env_logger3fmtNtB5_13DefaultFormat10write_args:
+  339|  1.07k|    fn write_args(&mut self, record: &Record) -> io::Result<()> {
+  340|  1.07k|        match self.indent {
+  341|       |            // Fast path for no indentation
+  342|      0|            None => write!(self.buf, "{}{}", record.args(), self.suffix),
+  343|       |
+  344|  1.07k|            Some(indent_count) => {
+  345|  1.07k|                // Create a wrapper around the buffer only if we have to actually indent the message
+  346|  1.07k|
+  347|  1.07k|                struct IndentWrapper<'a, 'b: 'a> {
+  348|  1.07k|                    fmt: &'a mut DefaultFormat<'b>,
+  349|  1.07k|                    indent_count: usize,
+  350|  1.07k|                }
+  351|  1.07k|
+  352|  1.07k|                impl<'a, 'b> Write for IndentWrapper<'a, 'b> {
+  353|  1.07k|                    fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
+  354|  1.07k|                        let mut first = true;
+  355|  1.07k|                        for chunk in buf.split(|&x| x == b'\n') {
+  356|  1.07k|                            if !first {
+  357|  1.07k|                                write!(
+  358|  1.07k|                                    self.fmt.buf,
+  359|  1.07k|                                    "{}{:width$}",
+  360|  1.07k|                                    self.fmt.suffix,
+  361|  1.07k|                                    "",
+  362|  1.07k|                                    width = self.indent_count
+  363|  1.07k|                                )?;
+  364|  1.07k|                            }
+  365|  1.07k|                            self.fmt.buf.write_all(chunk)?;
+  366|  1.07k|                            first = false;
+  367|  1.07k|                        }
+  368|  1.07k|
+  369|  1.07k|                        Ok(buf.len())
+  370|  1.07k|                    }
+  371|  1.07k|
+  372|  1.07k|                    fn flush(&mut self) -> io::Result<()> {
+  373|  1.07k|                        self.fmt.buf.flush()
+  374|  1.07k|                    }
+  375|  1.07k|                }
+  376|  1.07k|
+  377|  1.07k|                // The explicit scope here is just to make older versions of Rust happy
+  378|  1.07k|                {
+  379|  1.07k|                    let mut wrapper = IndentWrapper {
+  380|  1.07k|                        fmt: self,
+  381|  1.07k|                        indent_count,
+  382|  1.07k|                    };
+  383|  1.07k|                    write!(wrapper, "{}", record.args())?;
+  384|       |                }
+  385|       |
+  386|  1.07k|                write!(self.buf, "{}", self.suffix)?;
+  387|       |
+  388|  1.07k|                Ok(())
+  389|       |            }
+  390|       |        }
+  391|  1.07k|    }
+_RNvMs_NtCskWXkNGMR4J8_10env_logger3fmtNtB4_9Formatter3new:
+  103|      1|    pub(crate) fn new(writer: &Writer) -> Self {
+  104|      1|        Formatter {
+  105|      1|            buf: Rc::new(RefCell::new(writer.buffer())),
+  106|      1|            write_style: writer.write_style(),
+  107|      1|        }
+  108|      1|    }
+_RNvMs4_NtCskWXkNGMR4J8_10env_logger3fmtNtB5_13DefaultFormat13finish_header:
+  330|  1.07k|    fn finish_header(&mut self) -> io::Result<()> {
+  331|  1.07k|        if self.written_header_value {
+  332|  1.07k|            let close_brace = self.subtle_style("]");
+  333|  1.07k|            write!(self.buf, "{} ", close_brace)
+  334|       |        } else {
+  335|      0|            Ok(())
+  336|       |        }
+  337|  1.07k|    }
+
+_RNvNtNtNtNtCskWXkNGMR4J8_10env_logger3fmt6writer4atty3imp9is_stderr:
+   16|    154|    pub(in crate::fmt) fn is_stderr() -> bool {
+   17|    154|        atty::is(atty::Stream::Stderr)
+   18|    154|    }
+
+_RNvXsf_NtNtCskWXkNGMR4J8_10env_logger3fmt6writerNtB5_10WriteStyleNtNtCs9piv4hBt564_4core3cmp9PartialEq2eq:
+   88|  1.07k|#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+_RNvXs6_NtNtCskWXkNGMR4J8_10env_logger3fmt6writerNtB5_7BuilderNtNtCs9piv4hBt564_4core7default7Default7default:
+  207|    154|    fn default() -> Self {
+  208|    154|        Builder::new()
+  209|    154|    }
+_RNvMs5_NtNtCskWXkNGMR4J8_10env_logger3fmt6writerNtB5_7Builder5build:
+  174|    154|    pub(crate) fn build(&mut self) -> Writer {
+  175|    154|        assert!(!self.built, "attempt to re-use consumed builder");
+  176|    154|        self.built = true;
+  177|       |
+  178|    154|        let color_choice = match self.write_style {
+  179|       |            WriteStyle::Auto => {
+  180|    154|                if match &self.target {
+  181|    154|                    WritableTarget::Stderr => is_stderr(),
+  182|      0|                    WritableTarget::Stdout => is_stdout(),
+  183|      0|                    WritableTarget::Pipe(_) => false,
+  184|       |                } {
+  185|      0|                    WriteStyle::Auto
+  186|       |                } else {
+  187|    154|                    WriteStyle::Never
+  188|       |                }
+  189|       |            }
+  190|      0|            color_choice => color_choice,
+  191|       |        };
+  192|       |
+  193|    154|        let writer = match mem::take(&mut self.target) {
+  194|    154|            WritableTarget::Stderr => BufferWriter::stderr(self.is_test, color_choice),
+  195|      0|            WritableTarget::Stdout => BufferWriter::stdout(self.is_test, color_choice),
+  196|      0|            WritableTarget::Pipe(pipe) => BufferWriter::pipe(color_choice, pipe),
+  197|       |        };
+  198|       |
+  199|    154|        Writer {
+  200|    154|            inner: writer,
+  201|    154|            write_style: self.write_style,
+  202|    154|        }
+  203|    154|    }
+_RNvXs0_NtNtCskWXkNGMR4J8_10env_logger3fmt6writerNtB5_14WritableTargetINtNtCs9piv4hBt564_4core7convert4FromNtB5_6TargetE4from:
+   59|    308|    fn from(target: Target) -> Self {
+   60|    308|        match target {
+   61|      0|            Target::Stdout => Self::Stdout,
+   62|    308|            Target::Stderr => Self::Stderr,
+   63|      0|            Target::Pipe(pipe) => Self::Pipe(Box::new(Mutex::new(pipe))),
+   64|       |        }
+   65|    308|    }
+_RNvMs5_NtNtCskWXkNGMR4J8_10env_logger3fmt6writerNtB5_7Builder3new:
+  137|    154|    pub(crate) fn new() -> Self {
+  138|    154|        Builder {
+  139|    154|            target: Default::default(),
+  140|    154|            write_style: Default::default(),
+  141|    154|            is_test: false,
+  142|    154|            built: false,
+  143|    154|        }
+  144|    154|    }
+_RNvXs1_NtNtCskWXkNGMR4J8_10env_logger3fmt6writerNtB5_14WritableTargetNtNtCs9piv4hBt564_4core7default7Default7default:
+   69|    308|    fn default() -> Self {
+   70|    308|        Self::from(Target::default())
+   71|    308|    }
+_RNvXNtNtCskWXkNGMR4J8_10env_logger3fmt6writerNtB2_6TargetNtNtCs9piv4hBt564_4core7default7Default7default:
+   27|    308|    fn default() -> Self {
+   28|    308|        Target::Stderr
+   29|    308|    }
+_RNvMs4_NtNtCskWXkNGMR4J8_10env_logger3fmt6writerNtB5_6Writer6buffer:
+  115|      1|    pub(super) fn buffer(&self) -> Buffer {
+  116|      1|        self.inner.buffer()
+  117|      1|    }
+_RNvMs4_NtNtCskWXkNGMR4J8_10env_logger3fmt6writerNtB5_6Writer11write_style:
+  111|  1.07k|    pub fn write_style(&self) -> WriteStyle {
+  112|  1.07k|        self.write_style
+  113|  1.07k|    }
+_RNvXs3_NtNtCskWXkNGMR4J8_10env_logger3fmt6writerNtB5_10WriteStyleNtNtCs9piv4hBt564_4core7default7Default7default:
+   99|    154|    fn default() -> Self {
+  100|    154|        WriteStyle::Auto
+  101|    154|    }
+_RNvMs4_NtNtCskWXkNGMR4J8_10env_logger3fmt6writerNtB5_6Writer5print:
+  119|  1.07k|    pub(super) fn print(&self, buf: &Buffer) -> io::Result<()> {
+  120|  1.07k|        self.inner.print(buf)
+  121|  1.07k|    }
+
+_RINvMs2_NtNtNtNtCskWXkNGMR4J8_10env_logger3fmt6writer9termcolor3impNtB6_5Style10into_valueNtCs7rqf0906L6R_3log5LevelEBe_:
+  421|  1.07k|    pub(crate) fn into_value<T>(self, value: T) -> StyledValue<'static, T> {
+  422|  1.07k|        StyledValue {
+  423|  1.07k|            style: Cow::Owned(self),
+  424|  1.07k|            value,
+  425|  1.07k|        }
+  426|  1.07k|    }
+_RNvMs2_NtNtNtNtCskWXkNGMR4J8_10env_logger3fmt6writer9termcolor3impNtB5_5Style9set_color:
+  278|  3.23k|    pub fn set_color(&mut self, color: Color) -> &mut Style {
+  279|  3.23k|        self.spec.set_fg(Some(color.into_termcolor()));
+  280|  3.23k|        self
+  281|  3.23k|    }
+_RNvMs_NtNtNtNtCskWXkNGMR4J8_10env_logger3fmt6writer9termcolor3impNtB4_12BufferWriter6stderr:
+   83|    154|    pub(in crate::fmt::writer) fn stderr(is_test: bool, write_style: WriteStyle) -> Self {
+   84|    154|        BufferWriter {
+   85|    154|            inner: termcolor::BufferWriter::stderr(write_style.into_color_choice()),
+   86|    154|            uncolored_target: if is_test {
+   87|      0|                Some(WritableTarget::Stderr)
+   88|       |            } else {
+   89|    154|                None
+   90|       |            },
+   91|       |        }
+   92|    154|    }
+_RNvMs0_NtNtNtNtCskWXkNGMR4J8_10env_logger3fmt6writer9termcolor3impNtB5_6Buffer5clear:
+  144|  1.07k|    pub(in crate::fmt) fn clear(&mut self) {
+  145|  1.07k|        self.inner.clear()
+  146|  1.07k|    }
+_RINvMs3_NtNtNtNtCskWXkNGMR4J8_10env_logger3fmt6writer9termcolor3impINtB6_11StyledValueReE9write_fmtNCNvXs8_B6_B13_NtNtCs9piv4hBt564_4core3fmt7Display3fmt0EBe_:
+  434|  2.15k|        self.style
+  435|  2.15k|            .buf
+  436|  2.15k|            .borrow_mut()
+  437|  2.15k|            .set_color(&self.style.spec)
+  438|  2.15k|            .map_err(|_| fmt::Error)?;
+  439|       |
+  440|       |        // Always try to reset the terminal style, even if writing failed
+  441|  2.15k|        let write = f();
+  442|  2.15k|        let reset = self.style.buf.borrow_mut().reset().map_err(|_| fmt::Error);
+  443|  2.15k|
+  444|  2.15k|        write.and(reset)
+  445|  2.15k|    }
+_RNvMs0_NtNtNtNtCskWXkNGMR4J8_10env_logger3fmt6writer9termcolor3impNtB5_6Buffer9set_color:
+  160|  3.23k|    fn set_color(&mut self, spec: &ColorSpec) -> io::Result<()> {
+  161|  3.23k|        // Ignore styles for test captured logs because they can't be printed
+  162|  3.23k|        if !self.has_uncolored_target {
+  163|  3.23k|            self.inner.set_color(spec)
+  164|       |        } else {
+  165|      0|            Ok(())
+  166|       |        }
+  167|  3.23k|    }
+_RNCNvXs8_NtNtNtNtCskWXkNGMR4J8_10env_logger3fmt6writer9termcolor3impINtB7_11StyledValueNtCs7rqf0906L6R_3log5LevelENtNtCs9piv4hBt564_4core3fmt7Display3fmt0Bf_:
+  466|  1.07k|impl_styled_value_fmt!(
+  467|  1.07k|    fmt::Debug,
+  468|  1.07k|    fmt::Display,
+  469|  1.07k|    fmt::Pointer,
+  470|  1.07k|    fmt::Octal,
+  471|  1.07k|    fmt::Binary,
+  472|  1.07k|    fmt::UpperHex,
+  473|  1.07k|    fmt::LowerHex,
+  474|  1.07k|    fmt::UpperExp,
+  475|  1.07k|    fmt::LowerExp
+  476|  1.07k|);
+_RINvMs2_NtNtNtNtCskWXkNGMR4J8_10env_logger3fmt6writer9termcolor3impNtB6_5Style10into_valueReEBe_:
+  421|  2.15k|    pub(crate) fn into_value<T>(self, value: T) -> StyledValue<'static, T> {
+  422|  2.15k|        StyledValue {
+  423|  2.15k|            style: Cow::Owned(self),
+  424|  2.15k|            value,
+  425|  2.15k|        }
+  426|  2.15k|    }
+_RNvMs_NtNtNtNtCskWXkNGMR4J8_10env_logger3fmt6writer9termcolor3impNtB4_12BufferWriter5print:
+  124|  1.07k|        if let Some(target) = &self.uncolored_target {
+  125|       |            // This impl uses the `eprint` and `print` macros
+  126|       |            // instead of `termcolor`'s buffer.
+  127|       |            // This is so their output can be captured by `cargo test`
+  128|      0|            let log = String::from_utf8_lossy(buf.bytes());
+  129|      0|
+  130|      0|            match target {
+  131|      0|                WritableTarget::Stderr => eprint!("{}", log),
+  132|      0|                WritableTarget::Stdout => print!("{}", log),
+  133|      0|                WritableTarget::Pipe(pipe) => write!(pipe.lock().unwrap(), "{}", log)?,
+  134|       |            }
+  135|       |
+  136|      0|            Ok(())
+  137|       |        } else {
+  138|  1.07k|            self.inner.print(&buf.inner)
+  139|       |        }
+  140|  1.07k|    }
+_RNvMs_NtNtNtNtCskWXkNGMR4J8_10env_logger3fmt6writer9termcolor3impNtB4_12BufferWriter6buffer:
+  116|      1|    pub(in crate::fmt::writer) fn buffer(&self) -> Buffer {
+  117|      1|        Buffer {
+  118|      1|            inner: self.inner.buffer(),
+  119|      1|            has_uncolored_target: self.uncolored_target.is_some(),
+  120|      1|        }
+  121|      1|    }
+_RNvMs0_NtNtNtNtCskWXkNGMR4J8_10env_logger3fmt6writer9termcolor3impNtB5_6Buffer5reset:
+  169|  3.23k|    fn reset(&mut self) -> io::Result<()> {
+  170|  3.23k|        // Ignore styles for test captured logs because they can't be printed
+  171|  3.23k|        if !self.has_uncolored_target {
+  172|  3.23k|            self.inner.reset()
+  173|       |        } else {
+  174|      0|            Ok(())
+  175|       |        }
+  176|  3.23k|    }
+_RNvMNtNtNtNtCskWXkNGMR4J8_10env_logger3fmt6writer9termcolor3impNtB8_9Formatter19default_level_style:
+   52|  1.07k|    pub fn default_level_style(&self, level: Level) -> Style {
+   53|  1.07k|        let mut level_style = self.style();
+   54|  1.07k|        match level {
+   55|      0|            Level::Trace => level_style.set_color(Color::Cyan),
+   56|  1.07k|            Level::Debug => level_style.set_color(Color::Blue),
+   57|      0|            Level::Info => level_style.set_color(Color::Green),
+   58|      0|            Level::Warn => level_style.set_color(Color::Yellow),
+   59|      0|            Level::Error => level_style.set_color(Color::Red).set_bold(true),
+   60|       |        };
+   61|  1.07k|        level_style
+   62|  1.07k|    }
+_RNvMs0_NtNtNtNtCskWXkNGMR4J8_10env_logger3fmt6writer9termcolor3impNtB5_6Buffer5write:
+  148|  21.2k|    pub(in crate::fmt) fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
+  149|  21.2k|        self.inner.write(buf)
+  150|  21.2k|    }
+_RNvMNtNtNtNtCskWXkNGMR4J8_10env_logger3fmt6writer9termcolor3impNtB8_9Formatter5style:
+   42|  3.23k|    pub fn style(&self) -> Style {
+   43|  3.23k|        Style {
+   44|  3.23k|            buf: self.buf.clone(),
+   45|  3.23k|            spec: ColorSpec::new(),
+   46|  3.23k|        }
+   47|  3.23k|    }
+_RNvXs8_NtNtNtNtCskWXkNGMR4J8_10env_logger3fmt6writer9termcolor3impINtB5_11StyledValueNtCs7rqf0906L6R_3log5LevelENtNtCs9piv4hBt564_4core3fmt7Display3fmtBd_:
+  458|  1.07k|                fn fmt(&self, f: &mut fmt::Formatter)->fmt::Result {
+  459|  1.07k|                    self.write_fmt(|| T::fmt(&self.value, f))
+  460|  1.07k|                }
+_RINvMs3_NtNtNtNtCskWXkNGMR4J8_10env_logger3fmt6writer9termcolor3impINtB6_11StyledValueNtCs7rqf0906L6R_3log5LevelE9write_fmtNCNvXs8_B6_B13_NtNtCs9piv4hBt564_4core3fmt7Display3fmt0EBe_:
+  434|  1.07k|        self.style
+  435|  1.07k|            .buf
+  436|  1.07k|            .borrow_mut()
+  437|  1.07k|            .set_color(&self.style.spec)
+  438|  1.07k|            .map_err(|_| fmt::Error)?;
+  439|       |
+  440|       |        // Always try to reset the terminal style, even if writing failed
+  441|  1.07k|        let write = f();
+  442|  1.07k|        let reset = self.style.buf.borrow_mut().reset().map_err(|_| fmt::Error);
+  443|  1.07k|
+  444|  1.07k|        write.and(reset)
+  445|  1.07k|    }
+_RNvMs1_NtNtNtNtCskWXkNGMR4J8_10env_logger3fmt6writer9termcolor3impNtB9_10WriteStyle17into_color_choice:
+  180|    154|    fn into_color_choice(self) -> ColorChoice {
+  181|    154|        match self {
+  182|      0|            WriteStyle::Always => ColorChoice::Always,
+  183|      0|            WriteStyle::Auto => ColorChoice::Auto,
+  184|    154|            WriteStyle::Never => ColorChoice::Never,
+  185|       |        }
+  186|    154|    }
+_RNvMs5_NtNtNtNtCskWXkNGMR4J8_10env_logger3fmt6writer9termcolor3impNtB5_5Color14into_termcolor:
+  518|  3.23k|    fn into_termcolor(self) -> termcolor::Color {
+  519|  3.23k|        match self {
+  520|  2.15k|            Color::Black => termcolor::Color::Black,
+  521|  1.07k|            Color::Blue => termcolor::Color::Blue,
+  522|      0|            Color::Green => termcolor::Color::Green,
+  523|      0|            Color::Red => termcolor::Color::Red,
+  524|      0|            Color::Cyan => termcolor::Color::Cyan,
+  525|      0|            Color::Magenta => termcolor::Color::Magenta,
+  526|      0|            Color::Yellow => termcolor::Color::Yellow,
+  527|      0|            Color::White => termcolor::Color::White,
+  528|      0|            Color::Ansi256(value) => termcolor::Color::Ansi256(value),
+  529|      0|            Color::Rgb(r, g, b) => termcolor::Color::Rgb(r, g, b),
+  530|       |        }
+  531|  3.23k|    }
+_RNvMNtNtNtNtCskWXkNGMR4J8_10env_logger3fmt6writer9termcolor3impNtB8_9Formatter20default_styled_level:
+   67|  1.07k|    pub fn default_styled_level(&self, level: Level) -> StyledValue<'static, Level> {
+   68|  1.07k|        self.default_level_style(level).into_value(level)
+   69|  1.07k|    }
+_RNvXs8_NtNtNtNtCskWXkNGMR4J8_10env_logger3fmt6writer9termcolor3impINtB5_11StyledValueReENtNtCs9piv4hBt564_4core3fmt7Display3fmtBd_:
+  458|  2.15k|                fn fmt(&self, f: &mut fmt::Formatter)->fmt::Result {
+  459|  2.15k|                    self.write_fmt(|| T::fmt(&self.value, f))
+  460|  2.15k|                }
+_RNvMs2_NtNtNtNtCskWXkNGMR4J8_10env_logger3fmt6writer9termcolor3impNtB5_5Style11set_intense:
+  332|  2.15k|    pub fn set_intense(&mut self, yes: bool) -> &mut Style {
+  333|  2.15k|        self.spec.set_intense(yes);
+  334|  2.15k|        self
+  335|  2.15k|    }
+_RNvXs6_NtNtNtNtCskWXkNGMR4J8_10env_logger3fmt6writer9termcolor3impNtB5_5StyleNtNtCs9piv4hBt564_4core5clone5Clone5clone:
+  241|  2.15k|#[derive(Clone)]
+_RNCNvXs8_NtNtNtNtCskWXkNGMR4J8_10env_logger3fmt6writer9termcolor3impINtB7_11StyledValueReENtNtCs9piv4hBt564_4core3fmt7Display3fmt0Bf_:
+  466|  2.15k|impl_styled_value_fmt!(
+  467|  2.15k|    fmt::Debug,
+  468|  2.15k|    fmt::Display,
+  469|  2.15k|    fmt::Pointer,
+  470|  2.15k|    fmt::Octal,
+  471|  2.15k|    fmt::Binary,
+  472|  2.15k|    fmt::UpperHex,
+  473|  2.15k|    fmt::LowerHex,
+  474|  2.15k|    fmt::UpperExp,
+  475|  2.15k|    fmt::LowerExp
+  476|  2.15k|);
+
+_RNvCskWXkNGMR4J8_10env_logger8try_init:
+ 1140|    154|pub fn try_init() -> Result<(), SetLoggerError> {
+ 1141|    154|    try_init_from_env(Env::default())
+ 1142|    154|}
+_RINvMCskWXkNGMR4J8_10env_loggerNtB3_7Builder8from_envNtB3_3EnvEB3_:
+  443|    154|    pub fn from_env<'a, E>(env: E) -> Self
+  444|    154|    where
+  445|    154|        E: Into<Env<'a>>,
+  446|    154|    {
+  447|    154|        let mut builder = Builder::new();
+  448|    154|        builder.parse_env(env);
+  449|    154|        builder
+  450|    154|    }
+_RNvMs2_CskWXkNGMR4J8_10env_loggerNtB5_3Var3get:
+ 1080|    308|    fn get(&self) -> Option<String> {
+ 1081|    308|        env::var(&*self.name)
+ 1082|    308|            .ok()
+ 1083|    308|            .or_else(|| self.default.to_owned().map(|v| v.into_owned()))
+ 1084|    308|    }
+_RNvMs1_CskWXkNGMR4J8_10env_loggerNtB5_3Env15get_write_style:
+ 1053|    154|    fn get_write_style(&self) -> Option<String> {
+ 1054|    154|        self.write_style.get()
+ 1055|    154|    }
+_RNvXs0_CskWXkNGMR4J8_10env_loggerNtB5_6LoggerNtCs7rqf0906L6R_3log3Log3log:
+  907|  1.23k|    fn log(&self, record: &Record) {
+  908|  1.23k|        if self.matches(record) {
+  909|       |            // Log records are written to a thread-local buffer before being printed
+  910|       |            // to the terminal. We clear these buffers afterwards, but they aren't shrinked
+  911|       |            // so will always at least have capacity for the largest log record formatted
+  912|       |            // on that thread.
+  913|       |            //
+  914|       |            // If multiple `Logger`s are used by the same threads then the thread-local
+  915|       |            // formatter might have different color support. If this is the case the
+  916|       |            // formatter and its buffer are discarded and recreated.
+  917|       |
+  918|       |            thread_local! {
+  919|       |                static FORMATTER: RefCell<Option<Formatter>> = RefCell::new(None);
+  920|       |            }
+  921|       |
+  922|  1.07k|            let print = |formatter: &mut Formatter, record: &Record| {
+  923|       |                let _ =
+  924|       |                    (self.format)(formatter, record).and_then(|_| formatter.print(&self.writer));
+  925|       |
+  926|       |                // Always clear the buffer afterwards
+  927|       |                formatter.clear();
+  928|       |            };
+  929|       |
+  930|  1.07k|            let printed = FORMATTER
+  931|  1.07k|                .try_with(|tl_buf| {
+  932|       |                    match tl_buf.try_borrow_mut() {
+  933|       |                        // There are no active borrows of the buffer
+  934|       |                        Ok(mut tl_buf) => match *tl_buf {
+  935|       |                            // We have a previously set formatter
+  936|       |                            Some(ref mut formatter) => {
+  937|       |                                // Check the buffer style. If it's different from the logger's
+  938|       |                                // style then drop the buffer and recreate it.
+  939|       |                                if formatter.write_style() != self.writer.write_style() {
+  940|       |                                    *formatter = Formatter::new(&self.writer);
+  941|       |                                }
+  942|       |
+  943|       |                                print(formatter, record);
+  944|       |                            }
+  945|       |                            // We don't have a previously set formatter
+  946|       |                            None => {
+  947|       |                                let mut formatter = Formatter::new(&self.writer);
+  948|       |                                print(&mut formatter, record);
+  949|       |
+  950|       |                                *tl_buf = Some(formatter);
+  951|       |                            }
+  952|       |                        },
+  953|       |                        // There's already an active borrow of the buffer (due to re-entrancy)
+  954|       |                        Err(_) => {
+  955|       |                            print(&mut Formatter::new(&self.writer), record);
+  956|       |                        }
+  957|       |                    }
+  958|  1.07k|                })
+  959|  1.07k|                .is_ok();
+  960|  1.07k|
+  961|  1.07k|            if !printed {
+  962|      0|                // The thread-local storage was not available (because its
+  963|      0|                // destructor has already run). Create a new single-use
+  964|      0|                // Formatter on the stack for this call.
+  965|      0|                print(&mut Formatter::new(&self.writer), record);
+  966|  1.07k|            }
+  967|    153|        }
+  968|  1.23k|    }
+_RNvMs_CskWXkNGMR4J8_10env_loggerNtB4_6Logger6filter:
+  892|    154|    pub fn filter(&self) -> LevelFilter {
+  893|    154|        self.filter.filter()
+  894|    154|    }
+_RINvMCskWXkNGMR4J8_10env_loggerNtB3_7Builder9parse_envNtB3_3EnvEB3_:
+  488|    154|    pub fn parse_env<'a, E>(&mut self, env: E) -> &mut Self
+  489|    154|    where
+  490|    154|        E: Into<Env<'a>>,
+  491|    154|    {
+  492|    154|        let env = env.into();
+  493|       |
+  494|    154|        if let Some(s) = env.get_filter() {
+  495|    154|            self.parse_filters(&s);
+  496|    154|        }
+  497|       |
+  498|    154|        if let Some(s) = env.get_write_style() {
+  499|      0|            self.parse_write_style(&s);
+  500|    154|        }
+  501|       |
+  502|    154|        self
+  503|    154|    }
+_RNvMCskWXkNGMR4J8_10env_loggerNtB2_7Builder3new:
+  411|    154|    pub fn new() -> Builder {
+  412|    154|        Default::default()
+  413|    154|    }
+_RINvCskWXkNGMR4J8_10env_logger17try_init_from_envNtB2_3EnvEB2_:
+ 1185|    154|pub fn try_init_from_env<'a, E>(env: E) -> Result<(), SetLoggerError>
+ 1186|    154|where
+ 1187|    154|    E: Into<Env<'a>>,
+ 1188|    154|{
+ 1189|    154|    let mut builder = Builder::from_env(env);
+ 1190|    154|
+ 1191|    154|    builder.try_init()
+ 1192|    154|}
+_RNvMCskWXkNGMR4J8_10env_loggerNtB2_7Builder8try_init:
+  792|    154|    pub fn try_init(&mut self) -> Result<(), SetLoggerError> {
+  793|    154|        let logger = self.build();
+  794|    154|
+  795|    154|        let max_level = logger.filter();
+  796|    154|        let r = log::set_boxed_logger(Box::new(logger));
+  797|    154|
+  798|    154|        if r.is_ok() {
+  799|      1|            log::set_max_level(max_level);
+  800|    153|        }
+  801|       |
+  802|    154|        r
+  803|    154|    }
+_RNCNvMs2_CskWXkNGMR4J8_10env_loggerNtB7_3Var3get0B7_:
+ 1083|    154|            .or_else(|| self.default.to_owned().map(|v| v.into_owned()))
+_RINvMs2_CskWXkNGMR4J8_10env_loggerNtB6_3Var3newReEB6_:
+ 1059|    308|    fn new<E>(name: E) -> Self
+ 1060|    308|    where
+ 1061|    308|        E: Into<Cow<'a, str>>,
+ 1062|    308|    {
+ 1063|    308|        Var {
+ 1064|    308|            name: name.into(),
+ 1065|    308|            default: None,
+ 1066|    308|        }
+ 1067|    308|    }
+_RNCNCNvXs0_CskWXkNGMR4J8_10env_loggerNtB9_6LoggerNtCs7rqf0906L6R_3log3Log3log00B9_:
+  924|  1.07k|                    (self.format)(formatter, record).and_then(|_| formatter.print(&self.writer));
+_RNvXs7_CskWXkNGMR4J8_10env_loggerNtB5_7BuilderNtNtCs9piv4hBt564_4core7default7Default7default:
+  376|    154|#[derive(Default)]
+_RNvMCskWXkNGMR4J8_10env_loggerNtB2_7Builder13parse_filters:
+  716|    154|    pub fn parse_filters(&mut self, filters: &str) -> &mut Self {
+  717|    154|        self.filter.parse(filters);
+  718|    154|        self
+  719|    154|    }
+_RNvMCskWXkNGMR4J8_10env_loggerNtB2_7Builder5build:
+  823|    154|    pub fn build(&mut self) -> Logger {
+  824|    154|        assert!(!self.built, "attempt to re-use consumed builder");
+  825|    154|        self.built = true;
+  826|    154|
+  827|    154|        Logger {
+  828|    154|            writer: self.writer.build(),
+  829|    154|            filter: self.filter.build(),
+  830|    154|            format: self.format.build(),
+  831|    154|        }
+  832|    154|    }
+_RNCNvNvNvXs0_CskWXkNGMR4J8_10env_loggerNtBb_6LoggerNtCs7rqf0906L6R_3log3Log3log9FORMATTER7___getit0Bb_:
+  918|      1|            thread_local! {
+  919|      1|                static FORMATTER: RefCell<Option<Formatter>> = RefCell::new(None);
+  920|      1|            }
+_RNvMs1_CskWXkNGMR4J8_10env_loggerNtB5_3Env10get_filter:
+ 1014|    154|    fn get_filter(&self) -> Option<String> {
+ 1015|    154|        self.filter.get()
+ 1016|    154|    }
+_RNCNvXs0_CskWXkNGMR4J8_10env_loggerNtB7_6LoggerNtCs7rqf0906L6R_3log3Log3logs_0B7_:
+  931|  1.07k|                .try_with(|tl_buf| {
+  932|  1.07k|                    match tl_buf.try_borrow_mut() {
+  933|       |                        // There are no active borrows of the buffer
+  934|  1.07k|                        Ok(mut tl_buf) => match *tl_buf {
+  935|       |                            // We have a previously set formatter
+  936|  1.07k|                            Some(ref mut formatter) => {
+  937|  1.07k|                                // Check the buffer style. If it's different from the logger's
+  938|  1.07k|                                // style then drop the buffer and recreate it.
+  939|  1.07k|                                if formatter.write_style() != self.writer.write_style() {
+  940|      0|                                    *formatter = Formatter::new(&self.writer);
+  941|  1.07k|                                }
+  942|       |
+  943|  1.07k|                                print(formatter, record);
+  944|       |                            }
+  945|       |                            // We don't have a previously set formatter
+  946|      1|                            None => {
+  947|      1|                                let mut formatter = Formatter::new(&self.writer);
+  948|      1|                                print(&mut formatter, record);
+  949|      1|
+  950|      1|                                *tl_buf = Some(formatter);
+  951|      1|                            }
+  952|       |                        },
+  953|       |                        // There's already an active borrow of the buffer (due to re-entrancy)
+  954|      0|                        Err(_) => {
+  955|      0|                            print(&mut Formatter::new(&self.writer), record);
+  956|      0|                        }
+  957|       |                    }
+  958|  1.07k|                })
+_RNCNvXs0_CskWXkNGMR4J8_10env_loggerNtB7_6LoggerNtCs7rqf0906L6R_3log3Log3log0B7_:
+  922|  1.07k|            let print = |formatter: &mut Formatter, record: &Record| {
+  923|  1.07k|                let _ =
+  924|  1.07k|                    (self.format)(formatter, record).and_then(|_| formatter.print(&self.writer));
+  925|  1.07k|
+  926|  1.07k|                // Always clear the buffer afterwards
+  927|  1.07k|                formatter.clear();
+  928|  1.07k|            };
+_RNvXs4_CskWXkNGMR4J8_10env_loggerNtB5_3EnvNtNtCs9piv4hBt564_4core7default7Default7default:
+ 1097|    154|    fn default() -> Self {
+ 1098|    154|        Env {
+ 1099|    154|            filter: Var::new(DEFAULT_FILTER_ENV),
+ 1100|    154|            write_style: Var::new(DEFAULT_WRITE_STYLE_ENV),
+ 1101|    154|        }
+ 1102|    154|    }
+_RNvMs_CskWXkNGMR4J8_10env_loggerNtB4_6Logger7matches:
+  897|  1.23k|    pub fn matches(&self, record: &Record) -> bool {
+  898|  1.23k|        self.filter.matches(record)
+  899|  1.23k|    }
+
+_RNvXsa_NtCs7XsFJTEhLeG_9humantime4dateNtB5_9PrecisionNtNtCs9piv4hBt564_4core3cmp9PartialEq2eq:
+   58|  1.07k|#[derive(Debug, Clone, PartialEq, Eq)]
+_RNvNtCs7XsFJTEhLeG_9humantime4date22format_rfc3339_seconds:
+  212|  1.07k|pub fn format_rfc3339_seconds(system_time: SystemTime) -> Rfc3339Timestamp {
+  213|  1.07k|    Rfc3339Timestamp(system_time, Precision::Seconds)
+  214|  1.07k|}
+_RNvXs1_NtCs7XsFJTEhLeG_9humantime4dateNtB5_16Rfc3339TimestampNtNtCs9piv4hBt564_4core3fmt7Display3fmt:
+  251|  1.07k|    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+  252|  1.07k|        use self::Precision::*;
+  253|  1.07k|
+  254|  1.07k|        let dur = self.0.duration_since(UNIX_EPOCH)
+  255|  1.07k|            .expect("all times should be after the epoch");
+  256|  1.07k|        let secs_since_epoch = dur.as_secs();
+  257|  1.07k|        let nanos = dur.subsec_nanos();
+  258|  1.07k|
+  259|  1.07k|        if secs_since_epoch >= 253_402_300_800 { // year 9999
+  260|      0|            return Err(fmt::Error);
+  261|  1.07k|        }
+  262|  1.07k|
+  263|  1.07k|        /* 2000-03-01 (mod 400 year, immediately after feb29 */
+  264|  1.07k|        const LEAPOCH: i64 = 11017;
+  265|  1.07k|        const DAYS_PER_400Y: i64 = 365*400 + 97;
+  266|  1.07k|        const DAYS_PER_100Y: i64 = 365*100 + 24;
+  267|  1.07k|        const DAYS_PER_4Y: i64 = 365*4 + 1;
+  268|  1.07k|
+  269|  1.07k|        let days = (secs_since_epoch / 86400) as i64 - LEAPOCH;
+  270|  1.07k|        let secs_of_day = secs_since_epoch % 86400;
+  271|  1.07k|
+  272|  1.07k|        let mut qc_cycles = days / DAYS_PER_400Y;
+  273|  1.07k|        let mut remdays = days % DAYS_PER_400Y;
+  274|  1.07k|
+  275|  1.07k|        if remdays < 0 {
+  276|      0|            remdays += DAYS_PER_400Y;
+  277|      0|            qc_cycles -= 1;
+  278|  1.07k|        }
+  279|       |
+  280|  1.07k|        let mut c_cycles = remdays / DAYS_PER_100Y;
+  281|  1.07k|        if c_cycles == 4 { c_cycles -= 1; }
+  282|  1.07k|        remdays -= c_cycles * DAYS_PER_100Y;
+  283|  1.07k|
+  284|  1.07k|        let mut q_cycles = remdays / DAYS_PER_4Y;
+  285|  1.07k|        if q_cycles == 25 { q_cycles -= 1; }
+  286|  1.07k|        remdays -= q_cycles * DAYS_PER_4Y;
+  287|  1.07k|
+  288|  1.07k|        let mut remyears = remdays / 365;
+  289|  1.07k|        if remyears == 4 { remyears -= 1; }
+  290|  1.07k|        remdays -= remyears * 365;
+  291|  1.07k|
+  292|  1.07k|        let mut year = 2000 +
+  293|  1.07k|            remyears + 4*q_cycles + 100*c_cycles + 400*qc_cycles;
+  294|  1.07k|
+  295|  1.07k|        let months = [31,30,31,30,31,31,30,31,30,31,31,29];
+  296|  1.07k|        let mut mon = 0;
+  297|  10.7k|        for mon_len in months.iter() {
+  298|  10.7k|            mon += 1;
+  299|  10.7k|            if remdays < *mon_len {
+  300|  1.07k|                break;
+  301|  9.70k|            }
+  302|  9.70k|            remdays -= *mon_len;
+  303|       |        }
+  304|  1.07k|        let mday = remdays+1;
+  305|  1.07k|        let mon = if mon + 2 > 12 {
+  306|      0|            year += 1;
+  307|      0|            mon - 10
+  308|       |        } else {
+  309|  1.07k|            mon + 2
+  310|       |        };
+  311|       |
+  312|  1.07k|        let mut buf: [u8; 30] = [
+  313|  1.07k|            // Too long to write as: b"0000-00-00T00:00:00.000000000Z"
+  314|  1.07k|            b'0', b'0', b'0', b'0', b'-', b'0', b'0', b'-', b'0', b'0', b'T',
+  315|  1.07k|            b'0', b'0', b':', b'0', b'0', b':', b'0', b'0',
+  316|  1.07k|            b'.', b'0', b'0', b'0', b'0', b'0', b'0', b'0', b'0', b'0', b'Z',
+  317|  1.07k|        ];
+  318|  1.07k|        buf[0] = b'0' + (year / 1000) as u8;
+  319|  1.07k|        buf[1] = b'0' + (year / 100 % 10) as u8;
+  320|  1.07k|        buf[2] = b'0' + (year / 10 % 10) as u8;
+  321|  1.07k|        buf[3] = b'0' + (year % 10) as u8;
+  322|  1.07k|        buf[5] = b'0' + (mon / 10) as u8;
+  323|  1.07k|        buf[6] = b'0' + (mon % 10) as u8;
+  324|  1.07k|        buf[8] = b'0' + (mday / 10) as u8;
+  325|  1.07k|        buf[9] = b'0' + (mday % 10) as u8;
+  326|  1.07k|        buf[11] = b'0' + (secs_of_day / 3600 / 10) as u8;
+  327|  1.07k|        buf[12] = b'0' + (secs_of_day / 3600 % 10) as u8;
+  328|  1.07k|        buf[14] = b'0' + (secs_of_day / 60 / 10 % 6) as u8;
+  329|  1.07k|        buf[15] = b'0' + (secs_of_day / 60 % 10) as u8;
+  330|  1.07k|        buf[17] = b'0' + (secs_of_day / 10 % 6) as u8;
+  331|  1.07k|        buf[18] = b'0' + (secs_of_day % 10) as u8;
+  332|       |
+  333|  1.07k|        let offset = if self.1 == Seconds || nanos == 0 && self.1 == Smart {
+  334|  1.07k|            buf[19] = b'Z';
+  335|  1.07k|            19
+  336|      0|        } else if self.1 == Millis {
+  337|      0|            buf[20] = b'0' + (nanos / 100_000_000) as u8;
+  338|      0|            buf[21] = b'0' + (nanos / 10_000_000 % 10) as u8;
+  339|      0|            buf[22] = b'0' + (nanos / 1_000_000 % 10) as u8;
+  340|      0|            buf[23] = b'Z';
+  341|      0|            23
+  342|      0|        } else if self.1 == Micros {
+  343|      0|            buf[20] = b'0' + (nanos / 100_000_000) as u8;
+  344|      0|            buf[21] = b'0' + (nanos / 10_000_000 % 10) as u8;
+  345|      0|            buf[22] = b'0' + (nanos / 1_000_000 % 10) as u8;
+  346|      0|            buf[23] = b'0' + (nanos / 100_000 % 10) as u8;
+  347|      0|            buf[24] = b'0' + (nanos / 10_000 % 10) as u8;
+  348|      0|            buf[25] = b'0' + (nanos / 1_000 % 10) as u8;
+  349|      0|            buf[26] = b'Z';
+  350|      0|            26
+  351|       |        } else {
+  352|      0|            buf[20] = b'0' + (nanos / 100_000_000) as u8;
+  353|      0|            buf[21] = b'0' + (nanos / 10_000_000 % 10) as u8;
+  354|      0|            buf[22] = b'0' + (nanos / 1_000_000 % 10) as u8;
+  355|      0|            buf[23] = b'0' + (nanos / 100_000 % 10) as u8;
+  356|      0|            buf[24] = b'0' + (nanos / 10_000 % 10) as u8;
+  357|      0|            buf[25] = b'0' + (nanos / 1_000 % 10) as u8;
+  358|      0|            buf[26] = b'0' + (nanos / 100 % 10) as u8;
+  359|      0|            buf[27] = b'0' + (nanos / 10 % 10) as u8;
+  360|      0|            buf[28] = b'0' + (nanos / 1 % 10) as u8;
+  361|      0|            // 29th is 'Z'
+  362|      0|            29
+  363|       |        };
+  364|       |
+  365|       |        // we know our chars are all ascii
+  366|  1.07k|        f.write_str(str::from_utf8(&buf[..=offset]).expect("Conversion to utf8 failed"))
+  367|  1.07k|    }
+
+_RNvNvCs8G9iWBnlMIE_22instrument_with_mutate1__3run:
+  241|    307|            fn run($bytes: &[u8]) {
+rust_fuzzer_test_input:
+  215|    154|                if let Some(path) = $crate::RUST_LIBFUZZER_DEBUG_PATH.get() {
+  216|       |                    use std::io::Write;
+  217|      0|                    let mut file = std::fs::File::create(path)
+  218|      0|                        .expect("failed to create `RUST_LIBFUZZER_DEBUG_PATH` file");
+  219|      0|                    writeln!(&mut file, "{:?}", bytes)
+  220|      0|                        .expect("failed to write to `RUST_LIBFUZZER_DEBUG_PATH` file");
+  221|      0|                    return 0;
+  222|    154|                }
+  223|    154|
+  224|    154|                run(bytes);
+  225|    154|                0
+  226|    154|            }
+LLVMFuzzerTestOneInput:
+   58|    154|pub fn test_input_wrap(data: *const u8, size: usize) -> i32 {
+   59|    154|    let test_input = ::std::panic::catch_unwind(|| unsafe {
+   60|       |        let data_slice = ::std::slice::from_raw_parts(data, size);
+   61|       |        rust_fuzzer_test_input(data_slice)
+   62|    154|    });
+   63|    154|
+   64|    154|    match test_input {
+   65|    154|        Ok(i) => i,
+   66|       |        Err(_) => {
+   67|       |            // hopefully the custom panic hook will be called before and abort the
+   68|       |            // process before the stack frames are unwinded.
+   69|      0|            ::std::process::abort();
+   70|       |        }
+   71|       |    }
+   72|    154|}
+_RNCNvCs4Yfkomc8kop_13libfuzzer_sys15test_input_wrap0B3_:
+   59|    154|    let test_input = ::std::panic::catch_unwind(|| unsafe {
+   60|    154|        let data_slice = ::std::slice::from_raw_parts(data, size);
+   61|    154|        rust_fuzzer_test_input(data_slice)
+   62|    154|    });
 LLVMFuzzerInitialize:
    79|      2|pub fn initialize(_argc: *const isize, _argv: *const *const *const u8) -> isize {
    80|      2|    // Registers a panic hook that aborts the process before unwinding.
@@ -23,4 +1353,1486 @@ LLVMFuzzerInitialize:
   100|      2|    }
   101|      2|    0
   102|      2|}
+
+_RNvXs2_Cs7rqf0906L6R_3logNtB5_5LevelINtNtCs9piv4hBt564_4core3cmp10PartialOrdNtB5_11LevelFilterE2le:
+  511|  3.54k|    fn le(&self, other: &LevelFilter) -> bool {
+  512|  3.54k|        *self as usize <= *other as usize
+  513|  3.54k|    }
+_RNvCs7rqf0906L6R_3log9max_level:
+ 1383|  1.23k|pub fn max_level() -> LevelFilter {
+ 1384|  1.23k|    // Since `LevelFilter` is `repr(usize)`,
+ 1385|  1.23k|    // this transmute is sound if and only if `MAX_LOG_LEVEL_FILTER`
+ 1386|  1.23k|    // is set to a usize that is a valid discriminant for `LevelFilter`.
+ 1387|  1.23k|    // Since `MAX_LOG_LEVEL_FILTER` is private, the only time it's set
+ 1388|  1.23k|    // is by `set_max_level` above, i.e. by casting a `LevelFilter` to `usize`.
+ 1389|  1.23k|    // So any usize stored in `MAX_LOG_LEVEL_FILTER` is a valid discriminant.
+ 1390|  1.23k|    unsafe { mem::transmute(MAX_LOG_LEVEL_FILTER.load(Ordering::Relaxed)) }
+ 1391|  1.23k|}
+_RNvMsj_Cs7rqf0906L6R_3logNtB5_8Metadata5level:
+ 1198|  2.30k|    pub fn level(&self) -> Level {
+ 1199|  2.30k|        self.level
+ 1200|  2.30k|    }
+_RNvCs7rqf0906L6R_3log13set_max_level:
+ 1365|      1|pub fn set_max_level(level: LevelFilter) {
+ 1366|      1|    MAX_LOG_LEVEL_FILTER.store(level as usize, Ordering::Relaxed)
+ 1367|      1|}
+_RNvMsh_Cs7rqf0906L6R_3logNtB5_6Record8metadata:
+  916|  1.23k|    pub fn metadata(&self) -> &Metadata<'a> {
+  917|  1.23k|        &self.metadata
+  918|  1.23k|    }
+_RNvMsj_Cs7rqf0906L6R_3logNtB5_8Metadata6target:
+ 1204|  2.30k|    pub fn target(&self) -> &'a str {
+ 1205|  2.30k|        self.target
+ 1206|  2.30k|    }
+_RNvMsh_Cs7rqf0906L6R_3logNtB5_6Record4args:
+  910|  1.07k|    pub fn args(&self) -> &fmt::Arguments<'a> {
+  911|  1.07k|        &self.args
+  912|  1.07k|    }
+_RNvMsh_Cs7rqf0906L6R_3logNtB5_6Record6target:
+  928|  1.07k|    pub fn target(&self) -> &'a str {
+  929|  1.07k|        self.metadata.target()
+  930|  1.07k|    }
+_RNvMsh_Cs7rqf0906L6R_3logNtB5_6Record5level:
+  922|  1.07k|    pub fn level(&self) -> Level {
+  923|  1.07k|        self.metadata.level()
+  924|  1.07k|    }
+_RNvXsc_Cs7rqf0906L6R_3logNtB5_11LevelFilterNtNtCs9piv4hBt564_4core3cmp3Ord3cmp:
+  735|    462|    fn cmp(&self, other: &LevelFilter) -> cmp::Ordering {
+  736|    462|        (*self as usize).cmp(&(*other as usize))
+  737|    462|    }
+_RNvMsf_Cs7rqf0906L6R_3logNtB5_11LevelFilter3max:
+  774|    308|    pub fn max() -> LevelFilter {
+  775|    308|        LevelFilter::Trace
+  776|    308|    }
+_RNvMsi_Cs7rqf0906L6R_3logNtB5_13RecordBuilder5level:
+ 1083|  1.23k|    pub fn level(&mut self, level: Level) -> &mut RecordBuilder<'a> {
+ 1084|  1.23k|        self.record.metadata.level = level;
+ 1085|  1.23k|        self
+ 1086|  1.23k|    }
+_RNvMs6_Cs7rqf0906L6R_3logNtB5_5Level6as_str:
+  608|  1.07k|    pub fn as_str(&self) -> &'static str {
+  609|  1.07k|        LOG_LEVEL_NAMES[*self as usize]
+  610|  1.07k|    }
+_RNvMsk_Cs7rqf0906L6R_3logNtB5_15MetadataBuilder5build:
+ 1263|  1.23k|    pub fn build(&self) -> Metadata<'a> {
+ 1264|  1.23k|        self.metadata.clone()
+ 1265|  1.23k|    }
+_RNvMsh_Cs7rqf0906L6R_3logNtB5_6Record7builder:
+  904|  1.23k|    pub fn builder() -> RecordBuilder<'a> {
+  905|  1.23k|        RecordBuilder::new()
+  906|  1.23k|    }
+_RNvMsi_Cs7rqf0906L6R_3logNtB5_13RecordBuilder11file_static:
+ 1118|  1.23k|    pub fn file_static(&mut self, file: Option<&'static str>) -> &mut RecordBuilder<'a> {
+ 1119|  1.23k|        self.record.file = file.map(MaybeStaticStr::Static);
+ 1120|  1.23k|        self
+ 1121|  1.23k|    }
+_RNvMsf_Cs7rqf0906L6R_3logNtB5_11LevelFilter10from_usize:
+  760|    308|    fn from_usize(u: usize) -> Option<LevelFilter> {
+  761|    308|        match u {
+  762|      0|            0 => Some(LevelFilter::Off),
+  763|      0|            1 => Some(LevelFilter::Error),
+  764|      0|            2 => Some(LevelFilter::Warn),
+  765|      0|            3 => Some(LevelFilter::Info),
+  766|    154|            4 => Some(LevelFilter::Debug),
+  767|    154|            5 => Some(LevelFilter::Trace),
+  768|      0|            _ => None,
+  769|       |        }
+  770|    308|    }
+_RNvMsi_Cs7rqf0906L6R_3logNtB5_13RecordBuilder5build:
+ 1140|  1.23k|    pub fn build(&self) -> Record<'a> {
+ 1141|  1.23k|        self.record.clone()
+ 1142|  1.23k|    }
+_RNvXsE_Cs7rqf0906L6R_3logNtB5_14MaybeStaticStrNtNtCs9piv4hBt564_4core5clone5Clone5clone:
+  812|  2.46k|#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
+_RNvXs5_Cs7rqf0906L6R_3logNtB5_5LevelNtNtCs9piv4hBt564_4core3fmt7Display3fmt:
+  576|  1.07k|    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+  577|  1.07k|        fmt.pad(self.as_str())
+  578|  1.07k|    }
+_RINvCs7rqf0906L6R_3log5ok_orNtB2_11LevelFilterNtB2_15ParseLevelErrorEB2_:
+  533|    616|fn ok_or<T, E>(t: Option<T>, e: E) -> Result<T, E> {
+  534|    616|    match t {
+  535|    308|        Some(t) => Ok(t),
+  536|    308|        None => Err(e),
+  537|       |    }
+  538|    616|}
+_RNCNvCs7rqf0906L6R_3log20eq_ignore_ascii_case0B3_:
+  553|  2.00k|            .all(|(a, b)| to_ascii_uppercase(a) == to_ascii_uppercase(b))
+_RNvXsN_Cs7rqf0906L6R_3logNtB5_6RecordNtNtCs9piv4hBt564_4core5clone5Clone5clone:
+  873|  1.23k|#[derive(Clone, Debug)]
+_RNvMsi_Cs7rqf0906L6R_3logNtB5_13RecordBuilder3new:
+ 1053|  1.23k|    pub fn new() -> RecordBuilder<'a> {
+ 1054|  1.23k|        RecordBuilder {
+ 1055|  1.23k|            record: Record {
+ 1056|  1.23k|                args: format_args!(""),
+ 1057|  1.23k|                metadata: Metadata::builder().build(),
+ 1058|  1.23k|                module_path: None,
+ 1059|  1.23k|                file: None,
+ 1060|  1.23k|                line: None,
+ 1061|  1.23k|                #[cfg(feature = "kv_unstable")]
+ 1062|  1.23k|                key_values: KeyValues(&Option::None::<(kv::Key, kv::Value)>),
+ 1063|  1.23k|            },
+ 1064|  1.23k|        }
+ 1065|  1.23k|    }
+_RNCNvXsd_Cs7rqf0906L6R_3logNtB7_11LevelFilterNtNtNtCs9piv4hBt564_4core3str6traits7FromStr8from_str0B7_:
+  746|  3.54k|                .position(|&name| eq_ignore_ascii_case(name, level))
+_RNvCs7rqf0906L6R_3log20eq_ignore_ascii_case:
+  541|  3.54k|fn eq_ignore_ascii_case(a: &str, b: &str) -> bool {
+  542|  3.54k|    fn to_ascii_uppercase(c: u8) -> u8 {
+  543|  3.54k|        if c >= b'a' && c <= b'z' {
+  544|  3.54k|            c - b'a' + b'A'
+  545|  3.54k|        } else {
+  546|  3.54k|            c
+  547|  3.54k|        }
+  548|  3.54k|    }
+  549|  3.54k|
+  550|  3.54k|    if a.len() == b.len() {
+  551|    770|        a.bytes()
+  552|    770|            .zip(b.bytes())
+  553|    770|            .all(|(a, b)| to_ascii_uppercase(a) == to_ascii_uppercase(b))
+  554|       |    } else {
+  555|  2.77k|        false
+  556|       |    }
+  557|  3.54k|}
+_RNvMsi_Cs7rqf0906L6R_3logNtB5_13RecordBuilder6target:
+ 1090|  1.23k|    pub fn target(&mut self, target: &'a str) -> &mut RecordBuilder<'a> {
+ 1091|  1.23k|        self.record.metadata.target = target;
+ 1092|  1.23k|        self
+ 1093|  1.23k|    }
+_RNCNvCs7rqf0906L6R_3log16set_boxed_logger0B3_:
+ 1408|      1|    set_logger_inner(|| Box::leak(logger))
+_RNCNvXsd_Cs7rqf0906L6R_3logNtB7_11LevelFilterNtNtNtCs9piv4hBt564_4core3str6traits7FromStr8from_strs_0B7_:
+  747|    308|                .map(|p| LevelFilter::from_usize(p).unwrap()),
+_RNvXCs7rqf0906L6R_3logNtB2_5LevelNtNtCs9piv4hBt564_4core5clone5Clone5clone:
+  453|  2.46k|    fn clone(&self) -> Level {
+  454|  2.46k|        *self
+  455|  2.46k|    }
+_RNvCs7rqf0906L6R_3log17___private_api_log:
+ 1591|  1.23k|    if kvs.is_some() {
+ 1592|      0|        panic!(
+ 1593|      0|            "key-value support is experimental and must be enabled using the `kv_unstable` feature"
+ 1594|      0|        )
+ 1595|  1.23k|    }
+ 1596|  1.23k|
+ 1597|  1.23k|    logger().log(
+ 1598|  1.23k|        &Record::builder()
+ 1599|  1.23k|            .args(args)
+ 1600|  1.23k|            .level(level)
+ 1601|  1.23k|            .target(target)
+ 1602|  1.23k|            .module_path_static(Some(module_path))
+ 1603|  1.23k|            .file_static(Some(file))
+ 1604|  1.23k|            .line(Some(line))
+ 1605|  1.23k|            .build(),
+ 1606|  1.23k|    );
+ 1607|  1.23k|}
+_RINvCs7rqf0906L6R_3log16set_logger_innerNCNvB2_16set_boxed_logger0EB2_:
+ 1470|    154|fn set_logger_inner<F>(make_logger: F) -> Result<(), SetLoggerError>
+ 1471|    154|where
+ 1472|    154|    F: FnOnce() -> &'static dyn Log,
+ 1473|    154|{
+ 1474|    154|    let old_state = match STATE.compare_exchange(
+ 1475|    154|        UNINITIALIZED,
+ 1476|    154|        INITIALIZING,
+ 1477|    154|        Ordering::SeqCst,
+ 1478|    154|        Ordering::SeqCst,
+ 1479|    154|    ) {
+ 1480|    154|        Ok(s) | Err(s) => s,
+ 1481|    154|    };
+ 1482|    154|    match old_state {
+ 1483|       |        UNINITIALIZED => {
+ 1484|      1|            unsafe {
+ 1485|      1|                LOGGER = make_logger();
+ 1486|      1|            }
+ 1487|      1|            STATE.store(INITIALIZED, Ordering::SeqCst);
+ 1488|      1|            Ok(())
+ 1489|       |        }
+ 1490|       |        INITIALIZING => {
+ 1491|      0|            while STATE.load(Ordering::SeqCst) == INITIALIZING {
+ 1492|      0|                // TODO: replace with `hint::spin_loop` once MSRV is 1.49.0.
+ 1493|      0|                #[allow(deprecated)]
+ 1494|      0|                std::sync::atomic::spin_loop_hint();
+ 1495|      0|            }
+ 1496|      0|            Err(SetLoggerError(()))
+ 1497|       |        }
+ 1498|    153|        _ => Err(SetLoggerError(())),
+ 1499|       |    }
+ 1500|    154|}
+_RNvMsi_Cs7rqf0906L6R_3logNtB5_13RecordBuilder18module_path_static:
+ 1104|  1.23k|    pub fn module_path_static(&mut self, path: Option<&'static str>) -> &mut RecordBuilder<'a> {
+ 1105|  1.23k|        self.record.module_path = path.map(MaybeStaticStr::Static);
+ 1106|  1.23k|        self
+ 1107|  1.23k|    }
+_RNvNvCs7rqf0906L6R_3log20eq_ignore_ascii_case18to_ascii_uppercase:
+  542|  4.00k|    fn to_ascii_uppercase(c: u8) -> u8 {
+  543|  4.00k|        if c >= b'a' && c <= b'z' {
+  544|  2.00k|            c - b'a' + b'A'
+  545|       |        } else {
+  546|  2.00k|            c
+  547|       |        }
+  548|  4.00k|    }
+_RNvXsd_Cs7rqf0906L6R_3logNtB5_11LevelFilterNtNtNtCs9piv4hBt564_4core3str6traits7FromStr8from_str:
+  742|    616|    fn from_str(level: &str) -> Result<LevelFilter, Self::Err> {
+  743|    616|        ok_or(
+  744|    616|            LOG_LEVEL_NAMES
+  745|    616|                .iter()
+  746|    616|                .position(|&name| eq_ignore_ascii_case(name, level))
+  747|    616|                .map(|p| LevelFilter::from_usize(p).unwrap()),
+  748|    616|            ParseLevelError(()),
+  749|    616|        )
+  750|    616|    }
+_RNvMsj_Cs7rqf0906L6R_3logNtB5_8Metadata7builder:
+ 1192|  1.23k|    pub fn builder() -> MetadataBuilder<'a> {
+ 1193|  1.23k|        MetadataBuilder::new()
+ 1194|  1.23k|    }
+_RNvMsk_Cs7rqf0906L6R_3logNtB5_15MetadataBuilder3new:
+ 1238|  1.23k|    pub fn new() -> MetadataBuilder<'a> {
+ 1239|  1.23k|        MetadataBuilder {
+ 1240|  1.23k|            metadata: Metadata {
+ 1241|  1.23k|                level: Level::Info,
+ 1242|  1.23k|                target: "",
+ 1243|  1.23k|            },
+ 1244|  1.23k|        }
+ 1245|  1.23k|    }
+_RNvMsi_Cs7rqf0906L6R_3logNtB5_13RecordBuilder4line:
+ 1125|  1.23k|    pub fn line(&mut self, line: Option<u32>) -> &mut RecordBuilder<'a> {
+ 1126|  1.23k|        self.record.line = line;
+ 1127|  1.23k|        self
+ 1128|  1.23k|    }
+_RNvXsQ_Cs7rqf0906L6R_3logNtB5_8MetadataNtNtCs9piv4hBt564_4core5clone5Clone5clone:
+ 1183|  2.46k|#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
+_RNvCs7rqf0906L6R_3log6logger:
+ 1573|  1.23k|pub fn logger() -> &'static dyn Log {
+ 1574|  1.23k|    if STATE.load(Ordering::SeqCst) != INITIALIZED {
+ 1575|       |        static NOP: NopLogger = NopLogger;
+ 1576|      0|        &NOP
+ 1577|       |    } else {
+ 1578|  1.23k|        unsafe { LOGGER }
+ 1579|       |    }
+ 1580|  1.23k|}
+_RNvMsi_Cs7rqf0906L6R_3logNtB5_13RecordBuilder4args:
+ 1069|  1.23k|    pub fn args(&mut self, args: fmt::Arguments<'a>) -> &mut RecordBuilder<'a> {
+ 1070|  1.23k|        self.record.args = args;
+ 1071|  1.23k|        self
+ 1072|  1.23k|    }
+_RNvCs7rqf0906L6R_3log16set_boxed_logger:
+ 1407|    154|pub fn set_boxed_logger(logger: Box<dyn Log>) -> Result<(), SetLoggerError> {
+ 1408|    154|    set_logger_inner(|| Box::leak(logger))
+ 1409|    154|}
+
+_RNvMs2_NtCsdOFiR34Ai8L_9once_cell3impINtB5_8OnceCellNtNtCs7CJQGpJO8ET_5alloc6string6StringE14is_initializedCs8G9iWBnlMIE_22instrument_with_mutate:
+   59|    154|    pub(crate) fn is_initialized(&self) -> bool {
+   60|    154|        // An `Acquire` load is enough because that makes all the initialization
+   61|    154|        // operations visible to us, and, this being a fast path, weaker
+   62|    154|        // ordering helps with performance. This `Acquire` synchronizes with
+   63|    154|        // `SeqCst` operations on the slow path.
+   64|    154|        self.queue.load(Ordering::Acquire) == COMPLETE_PTR
+   65|    154|    }
+
+_RNvMs4_NtCsdOFiR34Ai8L_9once_cell4syncINtB5_8OnceCellNtNtCs7CJQGpJO8ET_5alloc6string6StringE3getCs8G9iWBnlMIE_22instrument_with_mutate:
+  922|    154|        pub fn get(&self) -> Option<&T> {
+  923|    154|            if self.0.is_initialized() {
+  924|       |                // Safe b/c value is initialized.
+  925|      0|                Some(unsafe { self.get_unchecked() })
+  926|       |            } else {
+  927|    154|                None
+  928|       |            }
+  929|    154|        }
+
+_RINvXs1_NtNtCsiyur9aY9aRX_4rand13distributions7integerNtB8_8StandardINtNtB8_12distribution12DistributionyE6sampleNtNtNtBa_4rngs5small8SmallRngECs8G9iWBnlMIE_22instrument_with_mutate:
+   44|    308|    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> u64 {
+   45|    308|        rng.next_u64()
+   46|    308|    }
+_RINvXs0_NtNtCsiyur9aY9aRX_4rand13distributions7integerNtB8_8StandardINtNtB8_12distribution12DistributionmE6sampleNtNtNtBa_4rngs5small8SmallRngECs8G9iWBnlMIE_22instrument_with_mutate:
+   37|    292|    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> u32 {
+   38|    292|        rng.next_u32()
+   39|    292|    }
+
+_RNvXs2_NtNtCsiyur9aY9aRX_4rand13distributions7uniformmINtB5_12SampleBorrowmE6borrowCs8G9iWBnlMIE_22instrument_with_mutate:
+  332|    616|    fn borrow(&self) -> &Borrowed {
+  333|    616|        self
+  334|    616|    }
+_RINvXsB_NtNtCsiyur9aY9aRX_4rand13distributions7uniformINtB6_10UniformIntmENtB6_14UniformSampler23sample_single_inclusiveNtNtNtBa_4rngs5small8SmallRngmmECs8G9iWBnlMIE_22instrument_with_mutate:
+  519|    154|            fn sample_single_inclusive<R: Rng + ?Sized, B1, B2>(low_b: B1, high_b: B2, rng: &mut R) -> Self::X
+  520|    154|            where
+  521|    154|                B1: SampleBorrow<Self::X> + Sized,
+  522|    154|                B2: SampleBorrow<Self::X> + Sized,
+  523|    154|            {
+  524|    154|                let low = *low_b.borrow();
+  525|    154|                let high = *high_b.borrow();
+  526|    154|                assert!(low <= high, "UniformSampler::sample_single_inclusive: low > high");
+  527|    154|                let range = high.wrapping_sub(low).wrapping_add(1) as $unsigned as $u_large;
+  528|    154|                // If the above resulted in wrap-around to 0, the range is $ty::MIN..=$ty::MAX,
+  529|    154|                // and any integer will do.
+  530|    154|                if range == 0 {
+  531|      0|                    return rng.gen();
+  532|    154|                }
+  533|       |
+  534|    154|                let zone = if ::core::$unsigned::MAX <= ::core::u16::MAX as $unsigned {
+  535|       |                    // Using a modulus is faster than the approximation for
+  536|       |                    // i8 and i16. I suppose we trade the cost of one
+  537|       |                    // modulus for near-perfect branch prediction.
+  538|      0|                    let unsigned_max: $u_large = ::core::$u_large::MAX;
+  539|      0|                    let ints_to_reject = (unsigned_max - range + 1) % range;
+  540|      0|                    unsigned_max - ints_to_reject
+  541|       |                } else {
+  542|       |                    // conservative but fast approximation. `- 1` is necessary to allow the
+  543|       |                    // same comparison without bias.
+  544|    154|                    (range << range.leading_zeros()).wrapping_sub(1)
+  545|       |                };
+  546|       |
+  547|    292|                loop {
+  548|    292|                    let v: $u_large = rng.gen();
+  549|    292|                    let (hi, lo) = v.wmul(range);
+  550|    292|                    if lo <= zone {
+  551|    154|                        return low.wrapping_add(hi as $ty);
+  552|    138|                    }
+  553|       |                }
+  554|    154|            }
+_RINvXs4_NtNtCsiyur9aY9aRX_4rand13distributions7uniformINtNtNtCs9piv4hBt564_4core3ops5range5RangemEINtB6_11SampleRangemE13sample_singleNtNtNtBa_4rngs5small8SmallRngECs8G9iWBnlMIE_22instrument_with_mutate:
+  359|    154|    fn sample_single<R: RngCore + ?Sized>(self, rng: &mut R) -> T {
+  360|    154|        T::Sampler::sample_single(self.start, self.end, rng)
+  361|    154|    }
+_RINvXsB_NtNtCsiyur9aY9aRX_4rand13distributions7uniformINtB6_10UniformIntmENtB6_14UniformSampler13sample_singleNtNtNtBa_4rngs5small8SmallRngmmECs8G9iWBnlMIE_22instrument_with_mutate:
+  507|    154|            fn sample_single<R: Rng + ?Sized, B1, B2>(low_b: B1, high_b: B2, rng: &mut R) -> Self::X
+  508|    154|            where
+  509|    154|                B1: SampleBorrow<Self::X> + Sized,
+  510|    154|                B2: SampleBorrow<Self::X> + Sized,
+  511|    154|            {
+  512|    154|                let low = *low_b.borrow();
+  513|    154|                let high = *high_b.borrow();
+  514|    154|                assert!(low < high, "UniformSampler::sample_single: low >= high");
+  515|    154|                Self::sample_single_inclusive(low, high - 1, rng)
+  516|    154|            }
+_RNvXs4_NtNtCsiyur9aY9aRX_4rand13distributions7uniformINtNtNtCs9piv4hBt564_4core3ops5range5RangemEINtB5_11SampleRangemE8is_emptyCs8G9iWBnlMIE_22instrument_with_mutate:
+  364|    154|    fn is_empty(&self) -> bool {
+  365|    154|        !(self.start < self.end)
+  366|    154|    }
+
+_RNvXs1_NtNtCsiyur9aY9aRX_4rand13distributions5utilsmNtB5_16WideningMultiply4wmul:
+   26|    292|            fn wmul(self, x: $ty) -> Self::Output {
+   27|    292|                let tmp = (self as $wide) * (x as $wide);
+   28|    292|                ((tmp >> $shift) as $ty, tmp as $ty)
+   29|    292|            }
+
+_RINvYNtNtNtCsiyur9aY9aRX_4rand4rngs5small8SmallRngNtNtB9_3rng3Rng9gen_rangemINtNtNtCs9piv4hBt564_4core3ops5range5RangemEECs8G9iWBnlMIE_22instrument_with_mutate:
+  129|    154|    fn gen_range<T, R>(&mut self, range: R) -> T
+  130|    154|    where
+  131|    154|        T: SampleUniform,
+  132|    154|        R: SampleRange<T>
+  133|    154|    {
+  134|    154|        assert!(!range.is_empty(), "cannot sample empty range");
+  135|    154|        range.sample_single(self)
+  136|    154|    }
+_RINvYNtNtNtCsiyur9aY9aRX_4rand4rngs5small8SmallRngNtNtB9_3rng3Rng3genmECs8G9iWBnlMIE_22instrument_with_mutate:
+   93|    292|    fn gen<T>(&mut self) -> T
+   94|    292|    where Standard: Distribution<T> {
+   95|    292|        Standard.sample(self)
+   96|    292|    }
+_RINvYNtNtNtCsiyur9aY9aRX_4rand4rngs5small8SmallRngNtNtB9_3rng3Rng3genyECs8G9iWBnlMIE_22instrument_with_mutate:
+   93|    308|    fn gen<T>(&mut self) -> T
+   94|    308|    where Standard: Distribution<T> {
+   95|    308|        Standard.sample(self)
+   96|    308|    }
+
+_RNvXs_NtNtCsiyur9aY9aRX_4rand4rngs5smallNtB4_8SmallRngNtCs9iLXdDN7b86_9rand_core11SeedableRng9from_seed:
+  109|    154|    fn from_seed(seed: Self::Seed) -> Self {
+  110|    154|        SmallRng(Rng::from_seed(seed))
+  111|    154|    }
+_RNvXNtNtCsiyur9aY9aRX_4rand4rngs5smallNtB2_8SmallRngNtCs9iLXdDN7b86_9rand_core7RngCore8next_u64:
+   90|    308|    fn next_u64(&mut self) -> u64 {
+   91|    308|        self.0.next_u64()
+   92|    308|    }
+_RNvXNtNtCsiyur9aY9aRX_4rand4rngs5smallNtB2_8SmallRngNtCs9iLXdDN7b86_9rand_core7RngCore8next_u32:
+   85|    292|    fn next_u32(&mut self) -> u32 {
+   86|    292|        self.0.next_u32()
+   87|    292|    }
+
+_RNCNvXNtNtCsiyur9aY9aRX_4rand4rngs18xoshiro256plusplusNtB4_18Xoshiro256PlusPlusNtCs9iLXdDN7b86_9rand_core11SeedableRng9from_seed0Cs8G9iWBnlMIE_22instrument_with_mutate:
+   35|    157|        if seed.iter().all(|&x| x == 0) {
+_RNvXs_NtNtCsiyur9aY9aRX_4rand4rngs18xoshiro256plusplusNtB4_18Xoshiro256PlusPlusNtCs9iLXdDN7b86_9rand_core7RngCore8next_u64:
+   70|    600|    fn next_u64(&mut self) -> u64 {
+   71|    600|        let result_plusplus = self.s[0]
+   72|    600|            .wrapping_add(self.s[3])
+   73|    600|            .rotate_left(23)
+   74|    600|            .wrapping_add(self.s[0]);
+   75|    600|
+   76|    600|        let t = self.s[1] << 17;
+   77|    600|
+   78|    600|        self.s[2] ^= self.s[0];
+   79|    600|        self.s[3] ^= self.s[1];
+   80|    600|        self.s[1] ^= self.s[2];
+   81|    600|        self.s[0] ^= self.s[3];
+   82|    600|
+   83|    600|        self.s[2] ^= t;
+   84|    600|
+   85|    600|        self.s[3] = self.s[3].rotate_left(45);
+   86|    600|
+   87|    600|        result_plusplus
+   88|    600|    }
+_RNvXNtNtCsiyur9aY9aRX_4rand4rngs18xoshiro256plusplusNtB2_18Xoshiro256PlusPlusNtCs9iLXdDN7b86_9rand_core11SeedableRng9from_seed:
+   34|    154|    fn from_seed(seed: [u8; 32]) -> Xoshiro256PlusPlus {
+   35|    154|        if seed.iter().all(|&x| x == 0) {
+   36|      0|            return Self::seed_from_u64(0);
+   37|    154|        }
+   38|    154|        let mut state = [0; 4];
+   39|    154|        read_u64_into(&seed, &mut state);
+   40|    154|        Xoshiro256PlusPlus { s: state }
+   41|    154|    }
+_RNvXs_NtNtCsiyur9aY9aRX_4rand4rngs18xoshiro256plusplusNtB4_18Xoshiro256PlusPlusNtCs9iLXdDN7b86_9rand_core7RngCore8next_u32:
+   63|    292|    fn next_u32(&mut self) -> u32 {
+   64|    292|        // The lowest bits have some linear dependencies, so we use the
+   65|    292|        // upper bits instead.
+   66|    292|        (self.next_u64() >> 32) as u32
+   67|    292|    }
+
+_RNvNtCs9iLXdDN7b86_9rand_core2le13read_u64_into:
+   27|    154|pub fn read_u64_into(src: &[u8], dst: &mut [u64]) {
+   28|    154|    assert!(src.len() >= 8 * dst.len());
+   29|    616|    for (out, chunk) in dst.iter_mut().zip(src.chunks_exact(8)) {
+   30|    616|        *out = u64::from_le_bytes(chunk.try_into().unwrap());
+   31|    616|    }
+   32|    154|}
+
+_RNvYNtNtNtCsiyur9aY9aRX_4rand4rngs5small8SmallRngNtCs9iLXdDN7b86_9rand_core11SeedableRng13seed_from_u64Cs8G9iWBnlMIE_22instrument_with_mutate:
+  335|    154|    fn seed_from_u64(mut state: u64) -> Self {
+  336|    154|        // We use PCG32 to generate a u32 sequence, and copy to the seed
+  337|    154|        fn pcg32(state: &mut u64) -> [u8; 4] {
+  338|    154|            const MUL: u64 = 6364136223846793005;
+  339|    154|            const INC: u64 = 11634580027462260723;
+  340|    154|
+  341|    154|            // We advance the state first (to get away from the input value,
+  342|    154|            // in case it has low Hamming Weight).
+  343|    154|            *state = state.wrapping_mul(MUL).wrapping_add(INC);
+  344|    154|            let state = *state;
+  345|    154|
+  346|    154|            // Use PCG output function with to_le to generate x:
+  347|    154|            let xorshifted = (((state >> 18) ^ state) >> 27) as u32;
+  348|    154|            let rot = (state >> 59) as u32;
+  349|    154|            let x = xorshifted.rotate_right(rot);
+  350|    154|            x.to_le_bytes()
+  351|    154|        }
+  352|    154|
+  353|    154|        let mut seed = Self::Seed::default();
+  354|    154|        let mut iter = seed.as_mut().chunks_exact_mut(4);
+  355|  1.38k|        for chunk in &mut iter {
+  356|  1.23k|            chunk.copy_from_slice(&pcg32(&mut state));
+  357|  1.23k|        }
+  358|    154|        let rem = iter.into_remainder();
+  359|    154|        if !rem.is_empty() {
+  360|      0|            rem.copy_from_slice(&pcg32(&mut state)[..rem.len()]);
+  361|    154|        }
+  362|       |
+  363|    154|        Self::from_seed(seed)
+  364|    154|    }
+_RNvNvNtCs9iLXdDN7b86_9rand_core11SeedableRng13seed_from_u645pcg32:
+  337|  1.23k|        fn pcg32(state: &mut u64) -> [u8; 4] {
+  338|  1.23k|            const MUL: u64 = 6364136223846793005;
+  339|  1.23k|            const INC: u64 = 11634580027462260723;
+  340|  1.23k|
+  341|  1.23k|            // We advance the state first (to get away from the input value,
+  342|  1.23k|            // in case it has low Hamming Weight).
+  343|  1.23k|            *state = state.wrapping_mul(MUL).wrapping_add(INC);
+  344|  1.23k|            let state = *state;
+  345|  1.23k|
+  346|  1.23k|            // Use PCG output function with to_le to generate x:
+  347|  1.23k|            let xorshifted = (((state >> 18) ^ state) >> 27) as u32;
+  348|  1.23k|            let rot = (state >> 59) as u32;
+  349|  1.23k|            let x = xorshifted.rotate_right(rot);
+  350|  1.23k|            x.to_le_bytes()
+  351|  1.23k|        }
+
+_RNvXsL_Cs9LmiYiZUOm5_9termcolorNtB5_9ColorSpecNtNtCs9piv4hBt564_4core5clone5Clone5clone:
+ 1579|  2.15k|#[derive(Clone, Debug, Eq, PartialEq)]
+_RNvXso_Cs9LmiYiZUOm5_9termcolorINtB5_7NoColorINtNtCs7CJQGpJO8ET_5alloc3vec3VechEENtB5_10WriteColor9set_colorCskWXkNGMR4J8_10env_logger:
+ 1242|  3.23k|    fn set_color(&mut self, _: &ColorSpec) -> io::Result<()> {
+ 1243|  3.23k|        Ok(())
+ 1244|  3.23k|    }
+_RNvXsk_Cs9LmiYiZUOm5_9termcolorNtB5_6BufferNtNtCsVuGcMwCl0V_3std2io5Write5write:
+ 1140|  21.2k|    fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
+ 1141|  21.2k|        match self.0 {
+ 1142|  21.2k|            BufferInner::NoColor(ref mut w) => w.write(buf),
+ 1143|      0|            BufferInner::Ansi(ref mut w) => w.write(buf),
+ 1144|       |            #[cfg(windows)]
+ 1145|       |            BufferInner::Windows(ref mut w) => w.write(buf),
+ 1146|       |        }
+ 1147|  21.2k|    }
+_RNvXso_Cs9LmiYiZUOm5_9termcolorINtB5_7NoColorINtNtCs7CJQGpJO8ET_5alloc3vec3VechEENtB5_10WriteColor5resetCskWXkNGMR4J8_10env_logger:
+ 1247|  3.23k|    fn reset(&mut self) -> io::Result<()> {
+ 1248|  3.23k|        Ok(())
+ 1249|  3.23k|    }
+_RNvXsR_Cs9LmiYiZUOm5_9termcolorNtB5_5ColorNtNtCs9piv4hBt564_4core5clone5Clone5clone:
+ 1805|  2.15k|#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+_RNvXsl_Cs9LmiYiZUOm5_9termcolorNtB5_6BufferNtB5_10WriteColor9set_color:
+ 1172|  3.23k|    fn set_color(&mut self, spec: &ColorSpec) -> io::Result<()> {
+ 1173|  3.23k|        match self.0 {
+ 1174|  3.23k|            BufferInner::NoColor(ref mut w) => w.set_color(spec),
+ 1175|      0|            BufferInner::Ansi(ref mut w) => w.set_color(spec),
+ 1176|       |            #[cfg(windows)]
+ 1177|       |            BufferInner::Windows(ref mut w) => w.set_color(spec),
+ 1178|       |        }
+ 1179|  3.23k|    }
+_RNvXsn_Cs9LmiYiZUOm5_9termcolorINtB5_7NoColorINtNtCs7CJQGpJO8ET_5alloc3vec3VechEENtNtCsVuGcMwCl0V_3std2io5Write5writeCskWXkNGMR4J8_10env_logger:
+ 1225|  21.2k|    fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
+ 1226|  21.2k|        self.0.write(buf)
+ 1227|  21.2k|    }
+_RNvXsl_Cs9LmiYiZUOm5_9termcolorNtB5_6BufferNtB5_10WriteColor5reset:
+ 1182|  3.23k|    fn reset(&mut self) -> io::Result<()> {
+ 1183|  3.23k|        match self.0 {
+ 1184|  3.23k|            BufferInner::NoColor(ref mut w) => w.reset(),
+ 1185|      0|            BufferInner::Ansi(ref mut w) => w.reset(),
+ 1186|       |            #[cfg(windows)]
+ 1187|       |            BufferInner::Windows(ref mut w) => w.reset(),
+ 1188|       |        }
+ 1189|  3.23k|    }
+_RNvMsB_Cs9LmiYiZUOm5_9termcolorINtB5_19LossyStandardStreamNtB5_16IoStandardStreamE3newB5_:
+ 2010|    154|    fn new(wtr: W) -> LossyStandardStream<W> {
+ 2011|    154|        LossyStandardStream { wtr: wtr }
+ 2012|    154|    }
+_RNvMsv_Cs9LmiYiZUOm5_9termcolorNtB5_9ColorSpec6set_fg:
+ 1618|  3.23k|    pub fn set_fg(&mut self, color: Option<Color>) -> &mut ColorSpec {
+ 1619|  3.23k|        self.fg_color = color;
+ 1620|  3.23k|        self
+ 1621|  3.23k|    }
+_RNvMs0_Cs9LmiYiZUOm5_9termcolorNtB5_11ColorChoice20should_attempt_color:
+  224|      1|    fn should_attempt_color(&self) -> bool {
+  225|      1|        match *self {
+  226|      0|            ColorChoice::Always => true,
+  227|      0|            ColorChoice::AlwaysAnsi => true,
+  228|      1|            ColorChoice::Never => false,
+  229|      0|            ColorChoice::Auto => self.env_allows_color(),
+  230|       |        }
+  231|      1|    }
+_RNvMsB_Cs9LmiYiZUOm5_9termcolorINtB5_19LossyStandardStreamNtB5_16IoStandardStreamE7get_refB5_:
+ 2031|  1.07k|    fn get_ref(&self) -> &W {
+ 2032|  1.07k|        &self.wtr
+ 2033|  1.07k|    }
+_RNvMsj_Cs9LmiYiZUOm5_9termcolorNtB5_6Buffer3new:
+ 1035|      1|    fn new(choice: ColorChoice) -> Buffer {
+ 1036|      1|        if choice.should_attempt_color() {
+ 1037|      0|            Buffer::ansi()
+ 1038|       |        } else {
+ 1039|      1|            Buffer::no_color()
+ 1040|       |        }
+ 1041|      1|    }
+_RNvMsv_Cs9LmiYiZUOm5_9termcolorNtB5_9ColorSpec3new:
+ 1608|  3.23k|    pub fn new() -> ColorSpec {
+ 1609|  3.23k|        ColorSpec::default()
+ 1610|  3.23k|    }
+_RNvMsi_Cs9LmiYiZUOm5_9termcolorNtB5_12BufferWriter6create:
+  874|    154|    fn create(sty: StandardStreamType, choice: ColorChoice) -> BufferWriter {
+  875|    154|        BufferWriter {
+  876|    154|            stream: LossyStandardStream::new(IoStandardStream::new(sty)),
+  877|    154|            printed: AtomicBool::new(false),
+  878|    154|            separator: None,
+  879|    154|            color_choice: choice,
+  880|    154|        }
+  881|    154|    }
+_RNvMs1_Cs9LmiYiZUOm5_9termcolorNtB5_16IoStandardStream4lock:
+  332|  1.07k|    fn lock(&self) -> IoStandardStreamLock<'_> {
+  333|  1.07k|        match *self {
+  334|      0|            IoStandardStream::Stdout(ref s) => {
+  335|      0|                IoStandardStreamLock::StdoutLock(s.lock())
+  336|       |            }
+  337|  1.07k|            IoStandardStream::Stderr(ref s) => {
+  338|  1.07k|                IoStandardStreamLock::StderrLock(s.lock())
+  339|       |            }
+  340|       |            IoStandardStream::StdoutBuffered(_)
+  341|       |            | IoStandardStream::StderrBuffered(_) => {
+  342|       |                // We don't permit this case to ever occur in the public API,
+  343|       |                // so it's OK to panic.
+  344|      0|                panic!("cannot lock a buffered standard stream")
+  345|       |            }
+  346|       |        }
+  347|  1.07k|    }
+_RNvMsj_Cs9LmiYiZUOm5_9termcolorNtB5_6Buffer8is_empty:
+ 1080|  1.07k|    pub fn is_empty(&self) -> bool {
+ 1081|  1.07k|        self.len() == 0
+ 1082|  1.07k|    }
+_RNvXsu_Cs9LmiYiZUOm5_9termcolorNtB5_9ColorSpecNtNtCs9piv4hBt564_4core7default7Default7default:
+ 1592|  3.23k|    fn default() -> ColorSpec {
+ 1593|  3.23k|        ColorSpec {
+ 1594|  3.23k|            fg_color: None,
+ 1595|  3.23k|            bg_color: None,
+ 1596|  3.23k|            bold: false,
+ 1597|  3.23k|            intense: false,
+ 1598|  3.23k|            underline: false,
+ 1599|  3.23k|            dimmed: false,
+ 1600|  3.23k|            italic: false,
+ 1601|  3.23k|            reset: true,
+ 1602|  3.23k|        }
+ 1603|  3.23k|    }
+_RNvMs1_Cs9LmiYiZUOm5_9termcolorNtB5_16IoStandardStream3new:
+  313|    154|    fn new(sty: StandardStreamType) -> IoStandardStream {
+  314|    154|        match sty {
+  315|       |            StandardStreamType::Stdout => {
+  316|      0|                IoStandardStream::Stdout(io::stdout())
+  317|       |            }
+  318|       |            StandardStreamType::Stderr => {
+  319|    154|                IoStandardStream::Stderr(io::stderr())
+  320|       |            }
+  321|       |            StandardStreamType::StdoutBuffered => {
+  322|      0|                let wtr = io::BufWriter::new(io::stdout());
+  323|      0|                IoStandardStream::StdoutBuffered(wtr)
+  324|       |            }
+  325|       |            StandardStreamType::StderrBuffered => {
+  326|      0|                let wtr = io::BufWriter::new(io::stderr());
+  327|      0|                IoStandardStream::StderrBuffered(wtr)
+  328|       |            }
+  329|       |        }
+  330|    154|    }
+_RNvMsi_Cs9LmiYiZUOm5_9termcolorNtB5_12BufferWriter6stderr:
+  939|    154|    pub fn stderr(choice: ColorChoice) -> BufferWriter {
+  940|    154|        BufferWriter::create(StandardStreamType::Stderr, choice)
+  941|    154|    }
+_RNvXs3_Cs9LmiYiZUOm5_9termcolorNtB5_20IoStandardStreamLockNtNtCsVuGcMwCl0V_3std2io5Write5write:
+  381|  1.07k|    fn write(&mut self, b: &[u8]) -> io::Result<usize> {
+  382|  1.07k|        match *self {
+  383|      0|            IoStandardStreamLock::StdoutLock(ref mut s) => s.write(b),
+  384|  1.07k|            IoStandardStreamLock::StderrLock(ref mut s) => s.write(b),
+  385|       |        }
+  386|  1.07k|    }
+_RNvMsB_Cs9LmiYiZUOm5_9termcolorINtB5_19LossyStandardStreamNtB5_20IoStandardStreamLockE3newB5_:
+ 2010|  1.07k|    fn new(wtr: W) -> LossyStandardStream<W> {
+ 2011|  1.07k|        LossyStandardStream { wtr: wtr }
+ 2012|  1.07k|    }
+_RNvMsj_Cs9LmiYiZUOm5_9termcolorNtB5_6Buffer8no_color:
+ 1064|      1|    pub fn no_color() -> Buffer {
+ 1065|      1|        Buffer(BufferInner::NoColor(NoColor(vec![])))
+ 1066|      1|    }
+_RNvXsD_Cs9LmiYiZUOm5_9termcolorINtB5_19LossyStandardStreamNtB5_20IoStandardStreamLockENtNtCsVuGcMwCl0V_3std2io5Write5writeB5_:
+ 2053|  1.07k|    fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
+ 2054|  1.07k|        self.wtr.write(buf)
+ 2055|  1.07k|    }
+_RNvMsj_Cs9LmiYiZUOm5_9termcolorNtB5_6Buffer5clear:
+ 1095|  1.07k|    pub fn clear(&mut self) {
+ 1096|  1.07k|        match self.0 {
+ 1097|  1.07k|            BufferInner::NoColor(ref mut b) => b.0.clear(),
+ 1098|      0|            BufferInner::Ansi(ref mut b) => b.0.clear(),
+ 1099|       |            #[cfg(windows)]
+ 1100|       |            BufferInner::Windows(ref mut b) => b.clear(),
+ 1101|       |        }
+ 1102|  1.07k|    }
+_RNvMsv_Cs9LmiYiZUOm5_9termcolorNtB5_9ColorSpec11set_intense:
+ 1741|  2.15k|    pub fn set_intense(&mut self, yes: bool) -> &mut ColorSpec {
+ 1742|  2.15k|        self.intense = yes;
+ 1743|  2.15k|        self
+ 1744|  2.15k|    }
+_RNvMsi_Cs9LmiYiZUOm5_9termcolorNtB5_12BufferWriter5print:
+  974|  1.07k|    pub fn print(&self, buf: &Buffer) -> io::Result<()> {
+  975|  1.07k|        if buf.is_empty() {
+  976|      0|            return Ok(());
+  977|  1.07k|        }
+  978|  1.07k|        let mut stream = self.stream.wrap(self.stream.get_ref().lock());
+  979|  1.07k|        if let Some(ref sep) = self.separator {
+  980|      0|            if self.printed.load(Ordering::SeqCst) {
+  981|      0|                stream.write_all(sep)?;
+  982|      0|                stream.write_all(b"\n")?;
+  983|      0|            }
+  984|  1.07k|        }
+  985|  1.07k|        match buf.0 {
+  986|  1.07k|            BufferInner::NoColor(ref b) => stream.write_all(&b.0)?,
+  987|      0|            BufferInner::Ansi(ref b) => stream.write_all(&b.0)?,
+  988|       |            #[cfg(windows)]
+  989|       |            BufferInner::Windows(ref b) => {
+  990|       |                // We guarantee by construction that we have a console here.
+  991|       |                // Namely, a BufferWriter is the only way to produce a Buffer.
+  992|       |                let console_mutex = self
+  993|       |                    .console
+  994|       |                    .as_ref()
+  995|       |                    .expect("got Windows buffer but have no Console");
+  996|       |                let mut console = console_mutex.lock().unwrap();
+  997|       |                b.print(&mut *console, &mut stream)?;
+  998|       |            }
+  999|       |        }
+ 1000|  1.07k|        self.printed.store(true, Ordering::SeqCst);
+ 1001|  1.07k|        Ok(())
+ 1002|  1.07k|    }
+_RINvMsB_Cs9LmiYiZUOm5_9termcolorINtB6_19LossyStandardStreamNtB6_16IoStandardStreamE4wrapNtB6_20IoStandardStreamLockEB6_:
+ 2022|  1.07k|    fn wrap<Q: io::Write>(&self, wtr: Q) -> LossyStandardStream<Q> {
+ 2023|  1.07k|        LossyStandardStream::new(wtr)
+ 2024|  1.07k|    }
+_RNvMsj_Cs9LmiYiZUOm5_9termcolorNtB5_6Buffer3len:
+ 1085|  1.07k|    pub fn len(&self) -> usize {
+ 1086|  1.07k|        match self.0 {
+ 1087|  1.07k|            BufferInner::NoColor(ref b) => b.0.len(),
+ 1088|      0|            BufferInner::Ansi(ref b) => b.0.len(),
+ 1089|       |            #[cfg(windows)]
+ 1090|       |            BufferInner::Windows(ref b) => b.buf.len(),
+ 1091|       |        }
+ 1092|  1.07k|    }
+_RNvMsi_Cs9LmiYiZUOm5_9termcolorNtB5_12BufferWriter6buffer:
+  956|      1|    pub fn buffer(&self) -> Buffer {
+  957|      1|        Buffer::new(self.color_choice)
+  958|      1|    }
+
+_RNvNvNvXs0_CskWXkNGMR4J8_10env_loggerNtB9_6LoggerNtCs7rqf0906L6R_3log3Log3log9FORMATTER6___init:
+  294|      1|            fn __init() -> $t { $init }
+_RNvNvNvXs0_CskWXkNGMR4J8_10env_loggerNtB9_6LoggerNtCs7rqf0906L6R_3log3Log3log9FORMATTER7___getit:
+  319|  1.07k|            unsafe fn __getit(
+  320|  1.07k|                init: $crate::option::Option<&mut $crate::option::Option<$t>>,
+  321|  1.07k|            ) -> $crate::option::Option<&'static $t> {
+  322|  1.07k|                #[cfg(all(target_family = "wasm", not(target_feature = "atomics")))]
+  323|  1.07k|                static __KEY: $crate::thread::__StaticLocalKeyInner<$t> =
+  324|  1.07k|                    $crate::thread::__StaticLocalKeyInner::new();
+  325|  1.07k|
+  326|  1.07k|                #[thread_local]
+  327|  1.07k|                #[cfg(all(
+  328|  1.07k|                    target_thread_local,
+  329|  1.07k|                    not(all(target_family = "wasm", not(target_feature = "atomics"))),
+  330|  1.07k|                ))]
+  331|  1.07k|                static __KEY: $crate::thread::__FastLocalKeyInner<$t> =
+  332|  1.07k|                    $crate::thread::__FastLocalKeyInner::new();
+  333|  1.07k|
+  334|  1.07k|                #[cfg(all(
+  335|  1.07k|                    not(target_thread_local),
+  336|  1.07k|                    not(all(target_family = "wasm", not(target_feature = "atomics"))),
+  337|  1.07k|                ))]
+  338|  1.07k|                static __KEY: $crate::thread::__OsLocalKeyInner<$t> =
+  339|  1.07k|                    $crate::thread::__OsLocalKeyInner::new();
+  340|  1.07k|
+  341|  1.07k|                // FIXME: remove the #[allow(...)] marker when macros don't
+  342|  1.07k|                // raise warning for missing/extraneous unsafe blocks anymore.
+  343|  1.07k|                // See https://github.com/rust-lang/rust/issues/74838.
+  344|  1.07k|                #[allow(unused_unsafe)]
+  345|  1.07k|                unsafe {
+  346|  1.07k|                    __KEY.get(move || {
+  347|       |                        if let $crate::option::Option::Some(init) = init {
+  348|       |                            if let $crate::option::Option::Some(value) = init.take() {
+  349|       |                                return value;
+  350|       |                            } else if $crate::cfg!(debug_assertions) {
+  351|       |                                $crate::unreachable!("missing default value");
+  352|       |                            }
+  353|       |                        }
+  354|       |                        __init()
+  355|  1.07k|                    })
+  356|  1.07k|                }
+  357|  1.07k|            }
+
+_RINvCsaEgW4Mw04GB_8fvm_fuzz15stack_mutationsNCNvNvCs8G9iWBnlMIE_22instrument_with_mutate1__3run0EBM_:
+   99|    154|pub fn stack_mutations<'a>(
+  100|    154|    bin: Vec<u8>,
+  101|    154|    raw: &mut Unstructured<'a>,
+  102|    154|    mut action: impl FnMut(Vec<u8>, u64, u32, u32),
+  103|    154|    max_stacked_mutations: u32,
+  104|    154|    max_siblings_exploration: u32,
+  105|    154|) -> Vec<u8> {
+  106|    154|    let preseed: u64 = raw.arbitrary().unwrap();
+  107|    154|    let mut rng = SmallRng::seed_from_u64(preseed);
+  108|    154|    let mut cp = bin;
+  109|    154|
+  110|    154|    log::debug!("Preseed {:?}", preseed);
+  111|    154|    let stacked_mutations: u32 = rng.gen_range(1..max_stacked_mutations);
+  112|    154|    log::debug!("stacked_mutations: {}", stacked_mutations);
+  113|       |
+  114|    308|    for i in 0..=stacked_mutations {
+  115|    308|        let seed = rng.gen();
+  116|    308|        let mut wasm_mutate = Box::<wasm_mutate::WasmMutate<'_>>::default();
+  117|    308|        wasm_mutate.seed(seed);
+  118|    308|        log::debug!("Seed: {}", seed);
+  119|    308|        wasm_mutate.preserve_semantics(true);
+  120|    308|
+  121|    308|        // TODO, set fuel as a parameter of the fuzzer, lets the fuzzer to determine if more fuel is needed
+  122|    308|        wasm_mutate.fuel(500);
+  123|    308|        let tomutate = cp.clone();
+  124|    308|        let mut_iterator = wasm_mutate.run(&tomutate);
+  125|    308|
+  126|    308|        match mut_iterator {
+  127|      0|            Ok(mut it) => {
+  128|      0|                // lateral traversing
+  129|      0|                let check_siblings: u32 = rng.gen_range(1..max_siblings_exploration);
+  130|      0|                log::debug!("check_siblings: {}", check_siblings);
+  131|      0|                for j in 0..=check_siblings {
+  132|      0|                    let mutated_bin = it.next();
+  133|       |
+  134|      0|                    if let Some(mutated_bin) = mutated_bin {
+  135|      0|                        match mutated_bin {
+  136|      0|                            Ok(mutated_bin) => {
+  137|      0|                                action(mutated_bin.clone(), seed, i, j);
+  138|      0|                                swap(&mut cp, mutated_bin);
+  139|      0|                            }
+  140|      0|                            Err(e) => {
+  141|      0|                                // Do nothing
+  142|      0|                                log::debug!("Error: {:?}", e);
+  143|       |                            }
+  144|       |                        }
+  145|      0|                    }
+  146|       |                }
+  147|       |            }
+  148|    308|            Err(e) => {
+  149|    308|                // do nothing continue
+  150|    308|                log::debug!("Error: {:?}", e);
+  151|       |            }
+  152|       |        }
+  153|       |    }
+  154|    154|    cp
+  155|    154|}
+_RNvCsaEgW4Mw04GB_8fvm_fuzz18get_random_fixture:
+  172|    154|pub fn get_random_fixture<'a>(raw: &mut Unstructured<'a>) -> AResult<(Vec<u8>, PathBuf)> {
+  173|    154|    let files = get_wasm_dir()
+  174|    154|        .read_dir()
+  175|    154|        .unwrap()
+  176|    154|        .into_iter()
+  177|    154|        .map(|r| r.unwrap())
+  178|    154|        .collect::<Vec<_>>();
+  179|       |
+  180|    154|    let idx = raw.choose_index(files.len())?;
+  181|    154|    let random_file = files[idx].path();
+  182|    154|    log::debug!("Random fixture: {:?}", random_file);
+  183|       |
+  184|    154|    let bytes = std::fs::read(&random_file)?;
+  185|       |
+  186|    154|    Ok((bytes, random_file))
+  187|    154|}
+_RNvCsaEgW4Mw04GB_8fvm_fuzz12get_wasm_dir:
+  157|    154|fn get_wasm_dir() -> PathBuf {
+  158|    154|    match env::var("OUT") {
+  159|    154|        Ok(out) => {
+  160|    154|            let path: PathBuf = out.into();
+  161|    154|            path
+  162|       |        }
+  163|      0|        Err(e) => {
+  164|      0|            log::debug!("Error {:?}", e);
+  165|       |            // gracefully exit
+  166|      0|            std::process::exit(0)
+  167|       |        }
+  168|       |    }
+  169|    154|}
+_RNCNvCsaEgW4Mw04GB_8fvm_fuzz18get_random_fixture0B3_:
+  177|  39.7k|        .map(|r| r.unwrap())
+
+_RNvXs_NtCs5Prn0F0Vo0Q_11wasm_mutate5errorNtB4_5ErrorINtNtCs9piv4hBt564_4core7convert4FromNtB4_9ErrorKindE4from:
+   46|    308|    fn from(kind: ErrorKind) -> Self {
+   47|    308|        Error {
+   48|    308|            kind: Box::new(kind),
+   49|    308|        }
+   50|    308|    }
+_RNvXs3_NtCs5Prn0F0Vo0Q_11wasm_mutate5errorNtB5_5ErrorNtNtCs9piv4hBt564_4core3fmt5Debug3fmt:
+    2|    308|#[derive(thiserror::Error, Debug)]
+_RNvXs7_NtCs5Prn0F0Vo0Q_11wasm_mutate5errorNtB5_9ErrorKindNtNtCs9piv4hBt564_4core3fmt5Debug3fmt:
+   60|    308|#[derive(thiserror::Error, Debug)]
+_RNvXs0_NtCs5Prn0F0Vo0Q_11wasm_mutate5errorNtB5_5ErrorINtNtCs9piv4hBt564_4core7convert4FromNtNtCs9uHPdChnefq_10wasmparser13binary_reader17BinaryReaderErrorE4from:
+   54|    308|    fn from(e: wasmparser::BinaryReaderError) -> Self {
+   55|    308|        ErrorKind::Parse(e).into()
+   56|    308|    }
+
+_RNvMNtCs5Prn0F0Vo0Q_11wasm_mutate4infoNtB2_10ModuleInfo3new:
+   63|    308|    pub fn new(input_wasm: &[u8]) -> Result<ModuleInfo> {
+   64|    308|        let mut parser = Parser::new(0);
+   65|    308|        let mut info = ModuleInfo::default();
+   66|    308|        let mut wasm = input_wasm;
+   67|    308|        info.input_wasm = wasm;
+   68|       |
+   69|       |        loop {
+   70|    308|            let (payload, consumed) = match parser.parse(wasm, true)? {
+   71|      0|                Chunk::NeedMoreData(hint) => {
+   72|      0|                    panic!("Invalid Wasm module {:?}", hint);
+   73|       |                }
+   74|      0|                Chunk::Parsed { consumed, payload } => (payload, consumed),
+   75|      0|            };
+   76|      0|            match payload {
+   77|       |                Payload::CodeSectionStart {
+   78|       |                    count: _,
+   79|      0|                    range,
+   80|      0|                    size: _,
+   81|      0|                } => {
+   82|      0|                    info.code = Some(info.raw_sections.len());
+   83|      0|                    info.section(SectionId::Code.into(), range.clone(), input_wasm);
+   84|      0|                    parser.skip_section();
+   85|      0|                    // update slice, bypass the section
+   86|      0|                    wasm = &input_wasm[range.end..];
+   87|      0|
+   88|      0|                    continue;
+   89|       |                }
+   90|      0|                Payload::TypeSection(mut reader) => {
+   91|      0|                    info.types = Some(info.raw_sections.len());
+   92|      0|                    info.section(SectionId::Type.into(), reader.range(), input_wasm);
+   93|      0|
+   94|      0|                    // Save function types
+   95|      0|                    for _ in 0..reader.get_count() {
+   96|      0|                        reader.read().map(|ty| {
+   97|       |                            let typeinfo = TypeInfo::try_from(ty).unwrap();
+   98|       |                            info.types_map.push(typeinfo);
+   99|      0|                        })?;
+  100|       |                    }
+  101|       |                }
+  102|      0|                Payload::ImportSection(mut reader) => {
+  103|      0|                    info.imports = Some(info.raw_sections.len());
+  104|      0|                    info.section(SectionId::Import.into(), reader.range(), input_wasm);
+  105|      0|
+  106|      0|                    for _ in 0..reader.get_count() {
+  107|      0|                        let ty = reader.read()?;
+  108|      0|                        match ty.ty {
+  109|      0|                            wasmparser::TypeRef::Func(ty) => {
+  110|      0|                                // Save imported functions
+  111|      0|                                info.function_map.push(ty);
+  112|      0|                                info.imported_functions_count += 1;
+  113|      0|                            }
+  114|      0|                            wasmparser::TypeRef::Global(ty) => {
+  115|      0|                                let ty = PrimitiveTypeInfo::try_from(ty.content_type).unwrap();
+  116|      0|                                info.global_types.push(ty);
+  117|      0|                                info.imported_globals_count += 1;
+  118|      0|                            }
+  119|      0|                            wasmparser::TypeRef::Memory(ty) => {
+  120|      0|                                info.memory_count += 1;
+  121|      0|                                info.imported_memories_count += 1;
+  122|      0|                                info.memory_types.push(ty);
+  123|      0|                            }
+  124|      0|                            wasmparser::TypeRef::Table(ty) => {
+  125|      0|                                info.table_count += 1;
+  126|      0|                                info.imported_tables_count += 1;
+  127|      0|                                info.table_elem_types.push(ty.element_type.into());
+  128|      0|                            }
+  129|      0|                            wasmparser::TypeRef::Tag(_ty) => {
+  130|      0|                                info.tag_count += 1;
+  131|      0|                                info.imported_tags_count += 1;
+  132|      0|                            }
+  133|       |                        }
+  134|       |                    }
+  135|       |                }
+  136|      0|                Payload::FunctionSection(mut reader) => {
+  137|      0|                    info.functions = Some(info.raw_sections.len());
+  138|      0|                    info.section(SectionId::Function.into(), reader.range(), input_wasm);
+  139|      0|
+  140|      0|                    for _ in 0..reader.get_count() {
+  141|      0|                        reader.read().map(|ty| {
+  142|       |                            info.function_map.push(ty);
+  143|      0|                        })?;
+  144|       |                    }
+  145|       |                }
+  146|      0|                Payload::TableSection(mut reader) => {
+  147|      0|                    info.tables = Some(info.raw_sections.len());
+  148|      0|                    info.table_count += reader.get_count();
+  149|      0|                    info.section(SectionId::Table.into(), reader.range(), input_wasm);
+  150|      0|
+  151|      0|                    for _ in 0..reader.get_count() {
+  152|      0|                        let ty = reader.read()?;
+  153|      0|                        let ty = PrimitiveTypeInfo::try_from(ty.element_type).unwrap();
+  154|      0|                        info.table_elem_types.push(ty);
+  155|       |                    }
+  156|       |                }
+  157|      0|                Payload::MemorySection(mut reader) => {
+  158|      0|                    info.memories = Some(info.raw_sections.len());
+  159|      0|                    info.memory_count += reader.get_count();
+  160|      0|                    info.section(SectionId::Memory.into(), reader.range(), input_wasm);
+  161|      0|
+  162|      0|                    for _ in 0..reader.get_count() {
+  163|      0|                        let ty = reader.read()?;
+  164|      0|                        info.memory_types.push(ty);
+  165|       |                    }
+  166|       |                }
+  167|      0|                Payload::GlobalSection(mut reader) => {
+  168|      0|                    info.globals = Some(info.raw_sections.len());
+  169|      0|                    info.section(SectionId::Global.into(), reader.range(), input_wasm);
+  170|      0|
+  171|      0|                    for _ in 0..reader.get_count() {
+  172|      0|                        let ty = reader.read()?;
+  173|       |                        // We only need the type of the global, not necessarily if is mutable or not
+  174|      0|                        let ty = PrimitiveTypeInfo::try_from(ty.ty.content_type).unwrap();
+  175|      0|                        info.global_types.push(ty);
+  176|       |                    }
+  177|       |                }
+  178|      0|                Payload::ExportSection(mut reader) => {
+  179|      0|                    info.exports = Some(info.raw_sections.len());
+  180|      0|                    info.exports_count = reader.get_count();
+  181|      0|
+  182|      0|                    for _ in 0..reader.get_count() {
+  183|      0|                        let entry = reader.read()?;
+  184|      0|                        info.export_names.insert(entry.name.into());
+  185|       |                    }
+  186|       |
+  187|      0|                    info.section(SectionId::Export.into(), reader.range(), input_wasm);
+  188|       |                }
+  189|      0|                Payload::StartSection { func, range } => {
+  190|      0|                    info.start = Some(info.raw_sections.len());
+  191|      0|                    info.start_function = Some(func);
+  192|      0|                    info.section(SectionId::Start.into(), range, input_wasm);
+  193|      0|                }
+  194|      0|                Payload::ElementSection(reader) => {
+  195|      0|                    info.elements = Some(info.raw_sections.len());
+  196|      0|                    info.elements_count = reader.get_count();
+  197|      0|                    info.section(SectionId::Element.into(), reader.range(), input_wasm);
+  198|      0|                }
+  199|      0|                Payload::DataSection(reader) => {
+  200|      0|                    info.data = Some(info.raw_sections.len());
+  201|      0|                    info.data_segments_count = reader.get_count();
+  202|      0|                    info.section(SectionId::Data.into(), reader.range(), input_wasm);
+  203|      0|                }
+  204|      0|                Payload::CustomSection(c) => {
+  205|      0|                    info.section(SectionId::Custom.into(), c.range(), input_wasm);
+  206|      0|                }
+  207|       |                Payload::UnknownSection {
+  208|      0|                    id,
+  209|      0|                    contents: _,
+  210|      0|                    range,
+  211|      0|                } => {
+  212|      0|                    info.section(id, range, input_wasm);
+  213|      0|                }
+  214|      0|                Payload::DataCountSection { count: _, range } => {
+  215|      0|                    info.data_count = Some(info.raw_sections.len());
+  216|      0|                    info.section(SectionId::DataCount.into(), range, input_wasm);
+  217|      0|                }
+  218|      0|                Payload::Version { .. } => {}
+  219|       |                Payload::End(_) => {
+  220|      0|                    break;
+  221|       |                }
+  222|      0|                _ => todo!("{:?} not implemented", payload),
+  223|       |            }
+  224|      0|            wasm = &wasm[consumed..];
+  225|       |        }
+  226|       |
+  227|      0|        Ok(info)
+  228|    308|    }
+_RNvXs_NtCs5Prn0F0Vo0Q_11wasm_mutate4infoNtB4_10ModuleInfoNtNtCs9piv4hBt564_4core7default7Default7default:
+   13|    308|#[derive(Default, Clone, Debug)]
+
+_RNvMs_Cs5Prn0F0Vo0Q_11wasm_mutateNtB4_10WasmMutate5setup:
+  325|    308|    fn setup(&mut self, input_wasm: &'wasm [u8]) -> Result<()> {
+  326|    308|        self.info = Some(ModuleInfo::new(input_wasm)?);
+  327|      0|        self.rng = Some(SmallRng::seed_from_u64(self.seed));
+  328|      0|        Ok(())
+  329|    308|    }
+_RNvMs_Cs5Prn0F0Vo0Q_11wasm_mutateNtB4_10WasmMutate3run:
+  280|    308|        self.setup(input_wasm)?;
+  281|       |
+  282|       |        // This macro just expands the logic to return an iterator form the
+  283|       |        // mutators
+  284|       |        // It simulates a circular checking of the mutators starting by a random
+  285|       |        // one, returning the first one that can provides a mutation.
+  286|       |        // All possible start indexes are calculated at compilation time, if N
+  287|       |        // is the number of mutataros, N possible starting indexes are injected
+  288|       |        // and compiled to the final code
+  289|      0|        define_mutators!(
+  290|       |            self,
+  291|       |            (
+  292|      0|                PeepholeMutator::new(2),
+  293|      0|                RemoveExportMutator,
+  294|      0|                RenameExportMutator { max_name_size: 100 },
+  295|      0|                SnipMutator,
+  296|      0|                CodemotionMutator,
+  297|      0|                FunctionBodyUnreachable,
+  298|      0|                AddTypeMutator {
+  299|      0|                    max_params: 20,
+  300|      0|                    max_results: 20,
+  301|      0|                },
+  302|      0|                AddFunctionMutator,
+  303|      0|                RemoveSection::Custom,
+  304|      0|                RemoveSection::Empty,
+  305|      0|                ConstExpressionMutator::Global,
+  306|      0|                ConstExpressionMutator::ElementOffset,
+  307|      0|                ConstExpressionMutator::ElementFunc,
+  308|      0|                RemoveItemMutator(Item::Function),
+  309|      0|                RemoveItemMutator(Item::Global),
+  310|      0|                RemoveItemMutator(Item::Memory),
+  311|      0|                RemoveItemMutator(Item::Table),
+  312|      0|                RemoveItemMutator(Item::Type),
+  313|      0|                RemoveItemMutator(Item::Data),
+  314|      0|                RemoveItemMutator(Item::Element),
+  315|      0|                RemoveItemMutator(Item::Tag),
+  316|       |                ModifyDataMutator {
+  317|      0|                    max_data_size: 10 << 20, // 10MB
+  318|       |                },
+  319|       |            )
+  320|       |        );
+  321|       |
+  322|      0|        Err(Error::no_mutations_applicable())
+  323|    308|    }
+_RNvMs_Cs5Prn0F0Vo0Q_11wasm_mutateNtB4_10WasmMutate4seed:
+  218|    308|    pub fn seed(&mut self, seed: u64) -> &mut Self {
+  219|    308|        self.seed = seed;
+  220|    308|        self
+  221|    308|    }
+_RNvMs_Cs5Prn0F0Vo0Q_11wasm_mutateNtB4_10WasmMutate18preserve_semantics:
+  225|    308|    pub fn preserve_semantics(&mut self, preserve_semantics: bool) -> &mut Self {
+  226|    308|        self.preserve_semantics = preserve_semantics;
+  227|    308|        self
+  228|    308|    }
+_RNvXCs5Prn0F0Vo0Q_11wasm_mutateNtB2_10WasmMutateNtNtCs9piv4hBt564_4core7default7Default7default:
+  199|    308|    fn default() -> Self {
+  200|    308|        let seed = 3;
+  201|    308|        WasmMutate {
+  202|    308|            seed,
+  203|    308|            preserve_semantics: false,
+  204|    308|            reduce: false,
+  205|    308|            raw_mutate_func: None,
+  206|    308|            fuel: u64::MAX,
+  207|    308|            rng: None,
+  208|    308|            info: None,
+  209|    308|        }
+  210|    308|    }
+_RNvMs_Cs5Prn0F0Vo0Q_11wasm_mutateNtB4_10WasmMutate4fuel:
+  231|    308|    pub fn fuel(&mut self, fuel: u64) -> &mut Self {
+  232|    308|        self.fuel = fuel;
+  233|    308|        self
+  234|    308|    }
+
+_RNvMs1_NtCs9uHPdChnefq_10wasmparser13binary_readerNtB5_12BinaryReader15new_with_offset:
+  135|    308|    pub fn new_with_offset(data: &[u8], original_offset: usize) -> BinaryReader {
+  136|    308|        BinaryReader {
+  137|    308|            buffer: data,
+  138|    308|            position: 0,
+  139|    308|            original_offset,
+  140|    308|            allow_memarg64: false,
+  141|    308|        }
+  142|    308|    }
+_RNvMs1_NtCs9uHPdChnefq_10wasmparser13binary_readerNtB5_12BinaryReader10read_bytes:
+  972|    308|        self.ensure_has_bytes(size)?;
+  973|    158|        let start = self.position;
+  974|    158|        self.position += size;
+  975|    158|        Ok(&self.buffer[start..self.position])
+  976|    308|    }
+_RNvXs7_NtCs9uHPdChnefq_10wasmparser13binary_readerNtB5_17BinaryReaderErrorNtNtCs9piv4hBt564_4core3fmt5Debug3fmt:
+   34|    308|#[derive(Debug, Clone)]
+_RNvMs1_NtCs9uHPdChnefq_10wasmparser13binary_readerNtB5_12BinaryReader16ensure_has_bytes:
+  175|    308|    pub(crate) fn ensure_has_bytes(&self, len: usize) -> Result<()> {
+  176|    308|        if self.position + len <= self.buffer.len() {
+  177|    158|            Ok(())
+  178|       |        } else {
+  179|    150|            let hint = self.position + len - self.buffer.len();
+  180|    150|            Err(BinaryReaderError::eof(self.original_position(), hint))
+  181|       |        }
+  182|    308|    }
+_RINvMs0_NtCs9uHPdChnefq_10wasmparser13binary_readerNtB6_17BinaryReaderError3newReEB8_:
+   66|    158|    pub(crate) fn new(message: impl Into<String>, offset: usize) -> Self {
+   67|    158|        let message = message.into();
+   68|    158|        BinaryReaderError {
+   69|    158|            inner: Box::new(BinaryReaderErrorInner {
+   70|    158|                message,
+   71|    158|                offset,
+   72|    158|                needed_hint: None,
+   73|    158|            }),
+   74|    158|        }
+   75|    158|    }
+_RNvMs1_NtCs9uHPdChnefq_10wasmparser13binary_readerNtB5_12BinaryReader17original_position:
+  146|    616|    pub fn original_position(&self) -> usize {
+  147|    616|        self.original_offset + self.position
+  148|    616|    }
+_RNvMs1_NtCs9uHPdChnefq_10wasmparser13binary_readerNtB5_12BinaryReader19read_header_version:
+ 2139|    308|    pub(crate) fn read_header_version(&mut self) -> Result<u32> {
+ 2140|    308|        let magic_number = self.read_bytes(4)?;
+ 2141|    158|        if magic_number != WASM_MAGIC_NUMBER {
+ 2142|    158|            return Err(BinaryReaderError::new(
+ 2143|    158|                "magic header not detected: bad magic number",
+ 2144|    158|                self.original_position() - 4,
+ 2145|    158|            ));
+ 2146|      0|        }
+ 2147|      0|        self.read_u32()
+ 2148|    308|    }
+_RNvXs9_NtCs9uHPdChnefq_10wasmparser13binary_readerNtB5_22BinaryReaderErrorInnerNtNtCs9piv4hBt564_4core3fmt5Debug3fmt:
+   42|    308|#[derive(Debug, Clone)]
+_RNvMs0_NtCs9uHPdChnefq_10wasmparser13binary_readerNtB5_17BinaryReaderError3eof:
+   83|    150|    pub(crate) fn eof(offset: usize, needed_hint: usize) -> Self {
+   84|    150|        BinaryReaderError {
+   85|    150|            inner: Box::new(BinaryReaderErrorInner {
+   86|    150|                message: "unexpected end-of-file".to_string(),
+   87|    150|                offset,
+   88|    150|                needed_hint: Some(needed_hint),
+   89|    150|            }),
+   90|    150|        }
+   91|    150|    }
+
+_RNvNtCs9uHPdChnefq_10wasmparser6parser12usize_to_u64:
+  875|    308|fn usize_to_u64(a: usize) -> u64 {
+  876|    308|    a.try_into().unwrap()
+  877|    308|}
+_RNvMNtCs9uHPdChnefq_10wasmparser6parserNtB2_6Parser5parse:
+  467|    308|    pub fn parse<'a>(&mut self, data: &'a [u8], eof: bool) -> Result<Chunk<'a>> {
+  468|    308|        let (data, eof) = if usize_to_u64(data.len()) > self.max_size {
+  469|      0|            (&data[..(self.max_size as usize)], true)
+  470|       |        } else {
+  471|    308|            (data, eof)
+  472|       |        };
+  473|       |        // TODO: thread through `offset: u64` to `BinaryReader`, remove
+  474|       |        // the cast here.
+  475|    308|        let mut reader = BinaryReader::new_with_offset(data, self.offset as usize);
+  476|    308|        match self.parse_reader(&mut reader, eof) {
+  477|      0|            Ok(payload) => {
+  478|      0|                // Be sure to update our offset with how far we got in the
+  479|      0|                // reader
+  480|      0|                self.offset += usize_to_u64(reader.position);
+  481|      0|                self.max_size -= usize_to_u64(reader.position);
+  482|      0|                Ok(Chunk::Parsed {
+  483|      0|                    consumed: reader.position,
+  484|      0|                    payload,
+  485|      0|                })
+  486|       |            }
+  487|    308|            Err(e) => {
+  488|    308|                // If we're at EOF then there's no way we can recover from any
+  489|    308|                // error, so continue to propagate it.
+  490|    308|                if eof {
+  491|    308|                    return Err(e);
+  492|      0|                }
+  493|      0|
+  494|      0|                // If our error doesn't look like it can be resolved with more
+  495|      0|                // data being pulled down, then propagate it, otherwise switch
+  496|      0|                // the error to "feed me please"
+  497|      0|                match e.inner.needed_hint {
+  498|      0|                    Some(hint) => Ok(Chunk::NeedMoreData(usize_to_u64(hint))),
+  499|      0|                    None => Err(e),
+  500|       |                }
+  501|       |            }
+  502|       |        }
+  503|    308|    }
+_RNvMNtCs9uHPdChnefq_10wasmparser6parserNtB2_6Parser3new:
+  316|    308|    pub fn new(offset: u64) -> Parser {
+  317|    308|        Parser {
+  318|    308|            state: State::Header,
+  319|    308|            offset,
+  320|    308|            max_size: u64::MAX,
+  321|    308|            // Assume the encoding is a module until we know otherwise
+  322|    308|            encoding: Encoding::Module,
+  323|    308|        }
+  324|    308|    }
+_RNvMNtCs9uHPdChnefq_10wasmparser6parserNtB2_6Parser12parse_reader:
+  505|    308|    fn parse_reader<'a>(
+  506|    308|        &mut self,
+  507|    308|        reader: &mut BinaryReader<'a>,
+  508|    308|        eof: bool,
+  509|    308|    ) -> Result<Payload<'a>> {
+  510|    308|        use Payload::*;
+  511|    308|
+  512|    308|        match self.state {
+  513|       |            State::Header => {
+  514|    308|                let start = reader.original_position();
+  515|    308|                let num = reader.read_header_version()?;
+  516|      0|                self.encoding = match num {
+  517|      0|                    WASM_EXPERIMENTAL_VERSION | WASM_MODULE_VERSION => Encoding::Module,
+  518|      0|                    WASM_COMPONENT_VERSION => Encoding::Component,
+  519|       |                    _ => {
+  520|      0|                        return Err(BinaryReaderError::new(
+  521|      0|                            "unknown binary version",
+  522|      0|                            reader.original_position() - 4,
+  523|      0|                        ))
+  524|       |                    }
+  525|       |                };
+  526|      0|                self.state = State::SectionStart;
+  527|      0|                Ok(Version {
+  528|      0|                    num,
+  529|      0|                    encoding: self.encoding,
+  530|      0|                    range: start..reader.original_position(),
+  531|      0|                })
+  532|       |            }
+  533|       |            State::SectionStart => {
+  534|       |                // If we're at eof and there are no bytes in our buffer, then
+  535|       |                // that means we reached the end of the data since it's
+  536|       |                // just a bunch of sections concatenated after the header.
+  537|      0|                if eof && reader.bytes_remaining() == 0 {
+  538|      0|                    return Ok(Payload::End(reader.original_position()));
+  539|      0|                }
+  540|      0|
+  541|      0|                let id_pos = reader.position;
+  542|      0|                let id = reader.read_u8()?;
+  543|      0|                if id & 0x80 != 0 {
+  544|      0|                    return Err(BinaryReaderError::new("malformed section id", id_pos));
+  545|      0|                }
+  546|      0|                let len_pos = reader.position;
+  547|      0|                let mut len = reader.read_var_u32()?;
+  548|       |
+  549|       |                // Test to make sure that this section actually fits within
+  550|       |                // `Parser::max_size`. This doesn't matter for top-level modules
+  551|       |                // but it is required for nested modules/components to correctly ensure
+  552|       |                // that all sections live entirely within their section of the
+  553|       |                // file.
+  554|      0|                let section_overflow = self
+  555|      0|                    .max_size
+  556|      0|                    .checked_sub(usize_to_u64(reader.position))
+  557|      0|                    .and_then(|s| s.checked_sub(len.into()))
+  558|      0|                    .is_none();
+  559|      0|                if section_overflow {
+  560|      0|                    return Err(BinaryReaderError::new("section too large", len_pos));
+  561|      0|                }
+  562|      0|
+  563|      0|                // Check for custom sections (supported by all encodings)
+  564|      0|                if id == 0 {}
+  565|       |
+  566|      0|                match (self.encoding, id) {
+  567|       |                    // Sections for both modules and components.
+  568|      0|                    (_, 0) => section(reader, len, CustomSectionReader::new, CustomSection),
+  569|       |
+  570|       |                    // Module sections
+  571|       |                    (Encoding::Module, TYPE_SECTION) => {
+  572|      0|                        section(reader, len, TypeSectionReader::new, TypeSection)
+  573|       |                    }
+  574|       |                    (Encoding::Module, IMPORT_SECTION) => {
+  575|      0|                        section(reader, len, ImportSectionReader::new, ImportSection)
+  576|       |                    }
+  577|       |                    (Encoding::Module, FUNCTION_SECTION) => {
+  578|      0|                        section(reader, len, FunctionSectionReader::new, FunctionSection)
+  579|       |                    }
+  580|       |                    (Encoding::Module, TABLE_SECTION) => {
+  581|      0|                        section(reader, len, TableSectionReader::new, TableSection)
+  582|       |                    }
+  583|       |                    (Encoding::Module, MEMORY_SECTION) => {
+  584|      0|                        section(reader, len, MemorySectionReader::new, MemorySection)
+  585|       |                    }
+  586|       |                    (Encoding::Module, GLOBAL_SECTION) => {
+  587|      0|                        section(reader, len, GlobalSectionReader::new, GlobalSection)
+  588|       |                    }
+  589|       |                    (Encoding::Module, EXPORT_SECTION) => {
+  590|      0|                        section(reader, len, ExportSectionReader::new, ExportSection)
+  591|       |                    }
+  592|       |                    (Encoding::Module, START_SECTION) => {
+  593|      0|                        let (func, range) = single_u32(reader, len, "start")?;
+  594|      0|                        Ok(StartSection { func, range })
+  595|       |                    }
+  596|       |                    (Encoding::Module, ELEMENT_SECTION) => {
+  597|      0|                        section(reader, len, ElementSectionReader::new, ElementSection)
+  598|       |                    }
+  599|       |                    (Encoding::Module, CODE_SECTION) => {
+  600|      0|                        let start = reader.original_position();
+  601|      0|                        let count = delimited(reader, &mut len, |r| r.read_var_u32())?;
+  602|      0|                        let range = start..reader.original_position() + len as usize;
+  603|      0|                        self.state = State::FunctionBody {
+  604|      0|                            remaining: count,
+  605|      0|                            len,
+  606|      0|                        };
+  607|      0|                        Ok(CodeSectionStart {
+  608|      0|                            count,
+  609|      0|                            range,
+  610|      0|                            size: len,
+  611|      0|                        })
+  612|       |                    }
+  613|       |                    (Encoding::Module, DATA_SECTION) => {
+  614|      0|                        section(reader, len, DataSectionReader::new, DataSection)
+  615|       |                    }
+  616|       |                    (Encoding::Module, DATA_COUNT_SECTION) => {
+  617|      0|                        let (count, range) = single_u32(reader, len, "data count")?;
+  618|      0|                        Ok(DataCountSection { count, range })
+  619|       |                    }
+  620|       |                    (Encoding::Module, TAG_SECTION) => {
+  621|      0|                        section(reader, len, TagSectionReader::new, TagSection)
+  622|       |                    }
+  623|       |
+  624|       |                    // Component sections
+  625|       |                    (Encoding::Component, COMPONENT_MODULE_SECTION)
+  626|       |                    | (Encoding::Component, COMPONENT_SECTION) => {
+  627|      0|                        if len as usize > MAX_WASM_MODULE_SIZE {
+  628|      0|                            bail!(
+  629|      0|                                len_pos,
+  630|      0|                                "{} section is too large",
+  631|      0|                                if id == 1 { "module" } else { "component " }
+  632|       |                            );
+  633|      0|                        }
+  634|      0|
+  635|      0|                        let range =
+  636|      0|                            reader.original_position()..reader.original_position() + len as usize;
+  637|      0|                        self.max_size -= u64::from(len);
+  638|      0|                        self.offset += u64::from(len);
+  639|      0|                        let mut parser = Parser::new(usize_to_u64(reader.original_position()));
+  640|      0|                        parser.max_size = len.into();
+  641|      0|
+  642|      0|                        Ok(match id {
+  643|      0|                            1 => ModuleSection { parser, range },
+  644|      0|                            4 => ComponentSection { parser, range },
+  645|      0|                            _ => unreachable!(),
+  646|       |                        })
+  647|       |                    }
+  648|       |                    (Encoding::Component, COMPONENT_CORE_INSTANCE_SECTION) => {
+  649|      0|                        section(reader, len, InstanceSectionReader::new, InstanceSection)
+  650|       |                    }
+  651|       |                    (Encoding::Component, COMPONENT_CORE_TYPE_SECTION) => {
+  652|      0|                        section(reader, len, CoreTypeSectionReader::new, CoreTypeSection)
+  653|       |                    }
+  654|      0|                    (Encoding::Component, COMPONENT_INSTANCE_SECTION) => section(
+  655|      0|                        reader,
+  656|      0|                        len,
+  657|      0|                        ComponentInstanceSectionReader::new,
+  658|      0|                        ComponentInstanceSection,
+  659|      0|                    ),
+  660|      0|                    (Encoding::Component, COMPONENT_ALIAS_SECTION) => section(
+  661|      0|                        reader,
+  662|      0|                        len,
+  663|      0|                        ComponentAliasSectionReader::new,
+  664|      0|                        ComponentAliasSection,
+  665|      0|                    ),
+  666|      0|                    (Encoding::Component, COMPONENT_TYPE_SECTION) => section(
+  667|      0|                        reader,
+  668|      0|                        len,
+  669|      0|                        ComponentTypeSectionReader::new,
+  670|      0|                        ComponentTypeSection,
+  671|      0|                    ),
+  672|      0|                    (Encoding::Component, COMPONENT_CANONICAL_SECTION) => section(
+  673|      0|                        reader,
+  674|      0|                        len,
+  675|      0|                        ComponentCanonicalSectionReader::new,
+  676|      0|                        ComponentCanonicalSection,
+  677|      0|                    ),
+  678|      0|                    (Encoding::Component, COMPONENT_START_SECTION) => section(
+  679|      0|                        reader,
+  680|      0|                        len,
+  681|      0|                        ComponentStartSectionReader::new,
+  682|      0|                        ComponentStartSection,
+  683|      0|                    ),
+  684|      0|                    (Encoding::Component, COMPONENT_IMPORT_SECTION) => section(
+  685|      0|                        reader,
+  686|      0|                        len,
+  687|      0|                        ComponentImportSectionReader::new,
+  688|      0|                        ComponentImportSection,
+  689|      0|                    ),
+  690|      0|                    (Encoding::Component, COMPONENT_EXPORT_SECTION) => section(
+  691|      0|                        reader,
+  692|      0|                        len,
+  693|      0|                        ComponentExportSectionReader::new,
+  694|      0|                        ComponentExportSection,
+  695|      0|                    ),
+  696|      0|                    (_, id) => {
+  697|      0|                        let offset = reader.original_position();
+  698|      0|                        let contents = reader.read_bytes(len as usize)?;
+  699|      0|                        let range = offset..offset + len as usize;
+  700|      0|                        Ok(UnknownSection {
+  701|      0|                            id,
+  702|      0|                            contents,
+  703|      0|                            range,
+  704|      0|                        })
+  705|       |                    }
+  706|       |                }
+  707|       |            }
+  708|       |
+  709|       |            // Once we hit 0 remaining incrementally parsed items, with 0
+  710|       |            // remaining bytes in each section, we're done and can switch back
+  711|       |            // to parsing sections.
+  712|       |            State::FunctionBody {
+  713|       |                remaining: 0,
+  714|       |                len: 0,
+  715|       |            } => {
+  716|      0|                self.state = State::SectionStart;
+  717|      0|                self.parse_reader(reader, eof)
+  718|       |            }
+  719|       |
+  720|       |            // ... otherwise trailing bytes with no remaining entries in these
+  721|       |            // sections indicates an error.
+  722|      0|            State::FunctionBody { remaining: 0, len } => {
+  723|      0|                debug_assert!(len > 0);
+  724|      0|                let offset = reader.original_position();
+  725|      0|                Err(BinaryReaderError::new(
+  726|      0|                    "trailing bytes at end of section",
+  727|      0|                    offset,
+  728|      0|                ))
+  729|       |            }
+  730|       |
+  731|       |            // Functions are relatively easy to parse when we know there's at
+  732|       |            // least one remaining and at least one byte available to read
+  733|       |            // things.
+  734|       |            //
+  735|       |            // We use the remaining length try to read a u32 size of the
+  736|       |            // function, and using that size we require the entire function be
+  737|       |            // resident in memory. This means that we're reading whole chunks of
+  738|       |            // functions at a time.
+  739|       |            //
+  740|       |            // Limiting via `Parser::max_size` (nested parsing) happens above in
+  741|       |            // `fn parse`, and limiting by our section size happens via
+  742|       |            // `delimited`. Actual parsing of the function body is delegated to
+  743|       |            // the caller to iterate over the `FunctionBody` structure.
+  744|      0|            State::FunctionBody { remaining, mut len } => {
+  745|      0|                let body = delimited(reader, &mut len, |r| {
+  746|       |                    let size = r.read_var_u32()?;
+  747|       |                    let offset = r.original_position();
+  748|       |                    Ok(FunctionBody::new(offset, r.read_bytes(size as usize)?))
+  749|      0|                })?;
+  750|      0|                self.state = State::FunctionBody {
+  751|      0|                    remaining: remaining - 1,
+  752|      0|                    len,
+  753|      0|                };
+  754|      0|                Ok(CodeSectionEntry(body))
+  755|       |            }
+  756|       |        }
+  757|    308|    }
 
