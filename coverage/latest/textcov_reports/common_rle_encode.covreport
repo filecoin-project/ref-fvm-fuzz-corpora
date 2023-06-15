@@ -1,318 +1,532 @@
-_RNvXsI_Cs3icS8w06onj_9arbitraryyNtB5_9Arbitrary9size_hintCsjWEWO8Era7H_10rle_encode:
-  320|  1.19k|                fn size_hint(_depth: usize) -> (usize, Option<usize>) {
-  321|  1.19k|                    let n = mem::size_of::<$ty>();
-  322|  1.19k|                    (n, Some(n))
-  323|  1.19k|                }
-_RNvXsH_Cs3icS8w06onj_9arbitrarymNtB5_9Arbitrary9size_hintCsjWEWO8Era7H_10rle_encode:
-  320|    596|                fn size_hint(_depth: usize) -> (usize, Option<usize>) {
-  321|    596|                    let n = mem::size_of::<$ty>();
-  322|    596|                    (n, Some(n))
-  323|    596|                }
-_RNvXsa_Cs3icS8w06onj_9arbitraryINtNtCsbEQaeqvpCHy_5alloc3vec3VecNtCsjWEWO8Era7H_10rle_encode9OperationENtB5_9Arbitrary19arbitrary_take_restB12_:
-  683|    596|        u.arbitrary_take_rest_iter()?.collect()
-  684|    596|    }
-_RNvXsa_Cs3icS8w06onj_9arbitraryINtNtCsbEQaeqvpCHy_5alloc3vec3VecNtCsjWEWO8Era7H_10rle_encode9OperationENtB5_9Arbitrary9size_hintB12_:
-  687|    597|    fn size_hint(_depth: usize) -> (usize, Option<usize>) {
-  688|    597|        (0, None)
-  689|    597|    }
-_RNvYyNtCs3icS8w06onj_9arbitrary9Arbitrary19arbitrary_take_restCsjWEWO8Era7H_10rle_encode:
-  189|    493|    fn arbitrary_take_rest(mut u: Unstructured<'a>) -> Result<Self> {
-  190|    493|        Self::arbitrary(&mut u)
-  191|    493|    }
-_RNvXs1m_Cs3icS8w06onj_9arbitraryTNtCsh8aFm9YGVF5_17fvm_ipld_bitfield8BitFieldINtNtCsbEQaeqvpCHy_5alloc3vec3VecNtCsjWEWO8Era7H_10rle_encode9OperationEENtB6_9Arbitrary19arbitrary_take_restB1M_:
-  579|    596|            fn arbitrary_take_rest(mut u: Unstructured<'a>) -> Result<Self> {
-  580|    596|                $(let $xs = $xs::arbitrary(&mut u)?;)*
-  581|    596|                let $last = $last::arbitrary_take_rest(u)?;
-  582|    596|                Ok(($($xs,)* $last,))
-  583|    596|            }
-_RNvXs1m_Cs3icS8w06onj_9arbitraryTNtCsh8aFm9YGVF5_17fvm_ipld_bitfield8BitFieldINtNtCsbEQaeqvpCHy_5alloc3vec3VecNtCsjWEWO8Era7H_10rle_encode9OperationEENtB6_9Arbitrary9size_hintB1M_:
-  586|    597|            fn size_hint(depth: usize) -> (usize, Option<usize>) {
-  587|    597|                crate::size_hint::and_all(&[
-  588|    597|                    <$last as Arbitrary>::size_hint(depth),
-  589|    597|                    $( <$xs as Arbitrary>::size_hint(depth) ),*
-  590|    597|                ])
-  591|    597|            }
-_RNvXsK_Cs3icS8w06onj_9arbitraryjNtB5_9Arbitrary9size_hintCsh8aFm9YGVF5_17fvm_ipld_bitfield:
-  320|    597|                fn size_hint(_depth: usize) -> (usize, Option<usize>) {
-  321|    597|                    let n = mem::size_of::<$ty>();
-  322|    597|                    (n, Some(n))
-  323|    597|                }
-_RNvXsI_Cs3icS8w06onj_9arbitraryyNtB5_9Arbitrary9size_hintCsh8aFm9YGVF5_17fvm_ipld_bitfield:
-  320|    596|                fn size_hint(_depth: usize) -> (usize, Option<usize>) {
-  321|    596|                    let n = mem::size_of::<$ty>();
-  322|    596|                    (n, Some(n))
-  323|    596|                }
-_RNvXsF_Cs3icS8w06onj_9arbitraryhNtB5_9Arbitrary9size_hintCsh8aFm9YGVF5_17fvm_ipld_bitfield:
-  320|    596|                fn size_hint(_depth: usize) -> (usize, Option<usize>) {
-  321|    596|                    let n = mem::size_of::<$ty>();
-  322|    596|                    (n, Some(n))
-  323|    596|                }
-_RNvXs1m_Cs3icS8w06onj_9arbitraryTyhENtB6_9Arbitrary9size_hintCsh8aFm9YGVF5_17fvm_ipld_bitfield:
-  586|    596|            fn size_hint(depth: usize) -> (usize, Option<usize>) {
-  587|    596|                crate::size_hint::and_all(&[
-  588|    596|                    <$last as Arbitrary>::size_hint(depth),
-  589|    596|                    $( <$xs as Arbitrary>::size_hint(depth) ),*
-  590|    596|                ])
-  591|    596|            }
-_RNvXsF_Cs3icS8w06onj_9arbitraryhNtB5_9Arbitrary9arbitrary:
-  309|    596|                fn arbitrary(u: &mut Unstructured<'a>) -> Result<Self> {
-  310|    596|                    let mut buf = [0; mem::size_of::<$ty>()];
-  311|    596|                    u.fill_buffer(&mut buf)?;
-  312|    596|                    let mut x: $unsigned = 0;
-  313|    596|                    for i in 0..mem::size_of::<$ty>() {
-  314|    596|                        x |= buf[i] as $unsigned << (i * 8);
-  315|    596|                    }
-  316|    596|                    Ok(x as $ty)
-  317|    596|                }
-_RNvXsI_Cs3icS8w06onj_9arbitraryyNtB5_9Arbitrary9arbitrary:
-  309|  38.1k|                fn arbitrary(u: &mut Unstructured<'a>) -> Result<Self> {
-  310|  38.1k|                    let mut buf = [0; mem::size_of::<$ty>()];
-  311|  38.1k|                    u.fill_buffer(&mut buf)?;
-  312|  38.1k|                    let mut x: $unsigned = 0;
-  313|   305k|                    for i in 0..mem::size_of::<$ty>() {
-  314|   305k|                        x |= buf[i] as $unsigned << (i * 8);
-  315|   305k|                    }
-  316|  38.1k|                    Ok(x as $ty)
-  317|  38.1k|                }
-_RNvXs_Cs3icS8w06onj_9arbitrarybNtB4_9Arbitrary9arbitrary:
-  295|    596|    fn arbitrary(u: &mut Unstructured<'a>) -> Result<Self> {
-  296|    596|        Ok(<u8 as Arbitrary<'a>>::arbitrary(u)? & 1 == 1)
-  297|    596|    }
-_RNvXsH_Cs3icS8w06onj_9arbitrarymNtB5_9Arbitrary9arbitrary:
-  309|  32.4k|                fn arbitrary(u: &mut Unstructured<'a>) -> Result<Self> {
-  310|  32.4k|                    let mut buf = [0; mem::size_of::<$ty>()];
-  311|  32.4k|                    u.fill_buffer(&mut buf)?;
-  312|  32.4k|                    let mut x: $unsigned = 0;
-  313|   129k|                    for i in 0..mem::size_of::<$ty>() {
-  314|   129k|                        x |= buf[i] as $unsigned << (i * 8);
-  315|   129k|                    }
-  316|  32.4k|                    Ok(x as $ty)
-  317|  32.4k|                }
+_RNvXsa_Cs4pEnrXScJOo_9arbitraryINtNtCseushfdLQbjT_5alloc3vec3VecNtCsgPXPhOXZSKT_10rle_encode9OperationENtB5_9Arbitrary9size_hintB12_:
+  687|    574|    fn size_hint(_depth: usize) -> (usize, Option<usize>) {
+  688|    574|        (0, None)
+  689|    574|    }
+_RNvXsI_Cs4pEnrXScJOo_9arbitraryyNtB5_9Arbitrary9size_hintCsgPXPhOXZSKT_10rle_encode:
+  320|  1.14k|                fn size_hint(_depth: usize) -> (usize, Option<usize>) {
+  321|  1.14k|                    let n = mem::size_of::<$ty>();
+  322|  1.14k|                    (n, Some(n))
+  323|  1.14k|                }
+_RNvXsH_Cs4pEnrXScJOo_9arbitrarymNtB5_9Arbitrary9size_hintCsgPXPhOXZSKT_10rle_encode:
+  320|    573|                fn size_hint(_depth: usize) -> (usize, Option<usize>) {
+  321|    573|                    let n = mem::size_of::<$ty>();
+  322|    573|                    (n, Some(n))
+  323|    573|                }
+_RNvYyNtCs4pEnrXScJOo_9arbitrary9Arbitrary19arbitrary_take_restCsgPXPhOXZSKT_10rle_encode:
+  189|    470|    fn arbitrary_take_rest(mut u: Unstructured<'a>) -> Result<Self> {
+  190|    470|        Self::arbitrary(&mut u)
+  191|    470|    }
+_RNvXs1m_Cs4pEnrXScJOo_9arbitraryTNtCsiXw2KPZVxgk_17fvm_ipld_bitfield8BitFieldINtNtCseushfdLQbjT_5alloc3vec3VecNtCsgPXPhOXZSKT_10rle_encode9OperationEENtB6_9Arbitrary19arbitrary_take_restB1M_:
+  579|    573|            fn arbitrary_take_rest(mut u: Unstructured<'a>) -> Result<Self> {
+  580|    573|                $(let $xs = $xs::arbitrary(&mut u)?;)*
+  581|    573|                let $last = $last::arbitrary_take_rest(u)?;
+  582|    573|                Ok(($($xs,)* $last,))
+  583|    573|            }
+_RNvXsa_Cs4pEnrXScJOo_9arbitraryINtNtCseushfdLQbjT_5alloc3vec3VecNtCsgPXPhOXZSKT_10rle_encode9OperationENtB5_9Arbitrary19arbitrary_take_restB12_:
+  683|    573|        u.arbitrary_take_rest_iter()?.collect()
+  684|    573|    }
+_RNvXs1m_Cs4pEnrXScJOo_9arbitraryTNtCsiXw2KPZVxgk_17fvm_ipld_bitfield8BitFieldINtNtCseushfdLQbjT_5alloc3vec3VecNtCsgPXPhOXZSKT_10rle_encode9OperationEENtB6_9Arbitrary9size_hintB1M_:
+  586|    574|            fn size_hint(depth: usize) -> (usize, Option<usize>) {
+  587|    574|                crate::size_hint::and_all(&[
+  588|    574|                    <$last as Arbitrary>::size_hint(depth),
+  589|    574|                    $( <$xs as Arbitrary>::size_hint(depth) ),*
+  590|    574|                ])
+  591|    574|            }
+_RNvXsK_Cs4pEnrXScJOo_9arbitraryjNtB5_9Arbitrary9size_hintCsiXw2KPZVxgk_17fvm_ipld_bitfield:
+  320|    574|                fn size_hint(_depth: usize) -> (usize, Option<usize>) {
+  321|    574|                    let n = mem::size_of::<$ty>();
+  322|    574|                    (n, Some(n))
+  323|    574|                }
+_RNvXs1m_Cs4pEnrXScJOo_9arbitraryTyhENtB6_9Arbitrary9size_hintCsiXw2KPZVxgk_17fvm_ipld_bitfield:
+  586|    573|            fn size_hint(depth: usize) -> (usize, Option<usize>) {
+  587|    573|                crate::size_hint::and_all(&[
+  588|    573|                    <$last as Arbitrary>::size_hint(depth),
+  589|    573|                    $( <$xs as Arbitrary>::size_hint(depth) ),*
+  590|    573|                ])
+  591|    573|            }
+_RNvXsF_Cs4pEnrXScJOo_9arbitraryhNtB5_9Arbitrary9size_hintCsiXw2KPZVxgk_17fvm_ipld_bitfield:
+  320|    573|                fn size_hint(_depth: usize) -> (usize, Option<usize>) {
+  321|    573|                    let n = mem::size_of::<$ty>();
+  322|    573|                    (n, Some(n))
+  323|    573|                }
+_RNvXsI_Cs4pEnrXScJOo_9arbitraryyNtB5_9Arbitrary9size_hintCsiXw2KPZVxgk_17fvm_ipld_bitfield:
+  320|    573|                fn size_hint(_depth: usize) -> (usize, Option<usize>) {
+  321|    573|                    let n = mem::size_of::<$ty>();
+  322|    573|                    (n, Some(n))
+  323|    573|                }
+_RNvXs_Cs4pEnrXScJOo_9arbitrarybNtB4_9Arbitrary9arbitrary:
+  295|    573|    fn arbitrary(u: &mut Unstructured<'a>) -> Result<Self> {
+  296|    573|        Ok(<u8 as Arbitrary<'a>>::arbitrary(u)? & 1 == 1)
+  297|    573|    }
+_RNvXsH_Cs4pEnrXScJOo_9arbitrarymNtB5_9Arbitrary9arbitrary:
+  309|  29.7k|                fn arbitrary(u: &mut Unstructured<'a>) -> Result<Self> {
+  310|  29.7k|                    let mut buf = [0; mem::size_of::<$ty>()];
+  311|  29.7k|                    u.fill_buffer(&mut buf)?;
+  312|  29.7k|                    let mut x: $unsigned = 0;
+  313|   118k|                    for i in 0..mem::size_of::<$ty>() {
+  314|   118k|                        x |= buf[i] as $unsigned << (i * 8);
+  315|   118k|                    }
+  316|  29.7k|                    Ok(x as $ty)
+  317|  29.7k|                }
+_RNvXsF_Cs4pEnrXScJOo_9arbitraryhNtB5_9Arbitrary9arbitrary:
+  309|    573|                fn arbitrary(u: &mut Unstructured<'a>) -> Result<Self> {
+  310|    573|                    let mut buf = [0; mem::size_of::<$ty>()];
+  311|    573|                    u.fill_buffer(&mut buf)?;
+  312|    573|                    let mut x: $unsigned = 0;
+  313|    573|                    for i in 0..mem::size_of::<$ty>() {
+  314|    573|                        x |= buf[i] as $unsigned << (i * 8);
+  315|    573|                    }
+  316|    573|                    Ok(x as $ty)
+  317|    573|                }
+_RNvXsI_Cs4pEnrXScJOo_9arbitraryyNtB5_9Arbitrary9arbitrary:
+  309|  35.3k|                fn arbitrary(u: &mut Unstructured<'a>) -> Result<Self> {
+  310|  35.3k|                    let mut buf = [0; mem::size_of::<$ty>()];
+  311|  35.3k|                    u.fill_buffer(&mut buf)?;
+  312|  35.3k|                    let mut x: $unsigned = 0;
+  313|   282k|                    for i in 0..mem::size_of::<$ty>() {
+  314|   282k|                        x |= buf[i] as $unsigned << (i * 8);
+  315|   282k|                    }
+  316|  35.3k|                    Ok(x as $ty)
+  317|  35.3k|                }
 
-_RNCNCNvNtCs3icS8w06onj_9arbitrary9size_hint2or00CsjWEWO8Era7H_10rle_encode:
-   48|    596|        .and_then(|lhs| rhs.1.map(|rhs| std::cmp::max(lhs, rhs)));
-_RNCNvNtCs3icS8w06onj_9arbitrary9size_hint2or0CsjWEWO8Era7H_10rle_encode:
-   48|    596|        .and_then(|lhs| rhs.1.map(|rhs| std::cmp::max(lhs, rhs)));
-_RNvNtCs3icS8w06onj_9arbitrary9size_hint2orCsjWEWO8Era7H_10rle_encode:
-   44|    596|pub fn or(lhs: (usize, Option<usize>), rhs: (usize, Option<usize>)) -> (usize, Option<usize>) {
-   45|    596|    let lower = std::cmp::min(lhs.0, rhs.0);
-   46|    596|    let upper = lhs
-   47|    596|        .1
-   48|    596|        .and_then(|lhs| rhs.1.map(|rhs| std::cmp::max(lhs, rhs)));
-   49|    596|    (lower, upper)
-   50|    596|}
-_RNvNtCs3icS8w06onj_9arbitrary9size_hint6or_allCsjWEWO8Era7H_10rle_encode:
-   58|    596|    if let Some(head) = hints.first().copied() {
-   59|    596|        hints[1..].iter().copied().fold(head, or)
+_RNCNCNvNtCs4pEnrXScJOo_9arbitrary9size_hint3and00CsgPXPhOXZSKT_10rle_encode:
+   28|  1.71k|    let upper = lhs.1.and_then(|lhs| rhs.1.map(|rhs| lhs + rhs));
+_RNvNtCs4pEnrXScJOo_9arbitrary9size_hint2orCsgPXPhOXZSKT_10rle_encode:
+   44|    573|pub fn or(lhs: (usize, Option<usize>), rhs: (usize, Option<usize>)) -> (usize, Option<usize>) {
+   45|    573|    let lower = std::cmp::min(lhs.0, rhs.0);
+   46|    573|    let upper = lhs
+   47|    573|        .1
+   48|    573|        .and_then(|lhs| rhs.1.map(|rhs| std::cmp::max(lhs, rhs)));
+   49|    573|    (lower, upper)
+   50|    573|}
+_RNvNtCs4pEnrXScJOo_9arbitrary9size_hint6or_allCsgPXPhOXZSKT_10rle_encode:
+   58|    573|    if let Some(head) = hints.first().copied() {
+   59|    573|        hints[1..].iter().copied().fold(head, or)
    60|       |    } else {
    61|      0|        (0, Some(0))
    62|       |    }
-   63|    596|}
-_RNvNtCs3icS8w06onj_9arbitrary9size_hint7and_allCsjWEWO8Era7H_10rle_encode:
-   37|  1.78k|pub fn and_all(hints: &[(usize, Option<usize>)]) -> (usize, Option<usize>) {
-   38|  1.78k|    hints.iter().copied().fold((0, Some(0)), and)
-   39|  1.78k|}
-_RINvNtCs3icS8w06onj_9arbitrary9size_hint15recursion_guardNCNvXNvCsjWEWO8Era7H_10rle_encode1__NtB10_9OperationNtB4_9Arbitrary9size_hint0EB10_:
-   12|    596|pub fn recursion_guard(
-   13|    596|    depth: usize,
-   14|    596|    f: impl FnOnce(usize) -> (usize, Option<usize>),
-   15|    596|) -> (usize, Option<usize>) {
-   16|    596|    const MAX_DEPTH: usize = 20;
-   17|    596|    if depth > MAX_DEPTH {
+   63|    573|}
+_RNvNtCs4pEnrXScJOo_9arbitrary9size_hint7and_allCsgPXPhOXZSKT_10rle_encode:
+   37|  1.72k|pub fn and_all(hints: &[(usize, Option<usize>)]) -> (usize, Option<usize>) {
+   38|  1.72k|    hints.iter().copied().fold((0, Some(0)), and)
+   39|  1.72k|}
+_RNCNvNtCs4pEnrXScJOo_9arbitrary9size_hint2or0CsgPXPhOXZSKT_10rle_encode:
+   48|    573|        .and_then(|lhs| rhs.1.map(|rhs| std::cmp::max(lhs, rhs)));
+_RINvNtCs4pEnrXScJOo_9arbitrary9size_hint15recursion_guardNCNvXNvCsgPXPhOXZSKT_10rle_encode1__NtB10_9OperationNtB4_9Arbitrary9size_hint0EB10_:
+   12|    573|pub fn recursion_guard(
+   13|    573|    depth: usize,
+   14|    573|    f: impl FnOnce(usize) -> (usize, Option<usize>),
+   15|    573|) -> (usize, Option<usize>) {
+   16|    573|    const MAX_DEPTH: usize = 20;
+   17|    573|    if depth > MAX_DEPTH {
    18|      0|        (0, None)
    19|       |    } else {
-   20|    596|        f(depth + 1)
+   20|    573|        f(depth + 1)
    21|       |    }
-   22|    596|}
-_RNvNtCs3icS8w06onj_9arbitrary9size_hint3andCsjWEWO8Era7H_10rle_encode:
-   26|  2.98k|pub fn and(lhs: (usize, Option<usize>), rhs: (usize, Option<usize>)) -> (usize, Option<usize>) {
-   27|  2.98k|    let lower = lhs.0 + rhs.0;
-   28|  2.98k|    let upper = lhs.1.and_then(|lhs| rhs.1.map(|rhs| lhs + rhs));
-   29|  2.98k|    (lower, upper)
-   30|  2.98k|}
-_RNCNCNvNtCs3icS8w06onj_9arbitrary9size_hint3and00CsjWEWO8Era7H_10rle_encode:
-   28|  1.78k|    let upper = lhs.1.and_then(|lhs| rhs.1.map(|rhs| lhs + rhs));
-_RNCNvNtCs3icS8w06onj_9arbitrary9size_hint3and0CsjWEWO8Era7H_10rle_encode:
-   28|  2.38k|    let upper = lhs.1.and_then(|lhs| rhs.1.map(|rhs| lhs + rhs));
-_RNCNCNvNtCs3icS8w06onj_9arbitrary9size_hint3and00Csh8aFm9YGVF5_17fvm_ipld_bitfield:
-   28|  1.19k|    let upper = lhs.1.and_then(|lhs| rhs.1.map(|rhs| lhs + rhs));
-_RNvNtCs3icS8w06onj_9arbitrary9size_hint7and_allCsh8aFm9YGVF5_17fvm_ipld_bitfield:
-   37|    596|pub fn and_all(hints: &[(usize, Option<usize>)]) -> (usize, Option<usize>) {
-   38|    596|    hints.iter().copied().fold((0, Some(0)), and)
-   39|    596|}
-_RNvNtCs3icS8w06onj_9arbitrary9size_hint3andCsh8aFm9YGVF5_17fvm_ipld_bitfield:
-   26|  1.78k|pub fn and(lhs: (usize, Option<usize>), rhs: (usize, Option<usize>)) -> (usize, Option<usize>) {
-   27|  1.78k|    let lower = lhs.0 + rhs.0;
-   28|  1.78k|    let upper = lhs.1.and_then(|lhs| rhs.1.map(|rhs| lhs + rhs));
-   29|  1.78k|    (lower, upper)
-   30|  1.78k|}
-_RNCNvNtCs3icS8w06onj_9arbitrary9size_hint3and0Csh8aFm9YGVF5_17fvm_ipld_bitfield:
-   28|  1.78k|    let upper = lhs.1.and_then(|lhs| rhs.1.map(|rhs| lhs + rhs));
+   22|    573|}
+_RNvNtCs4pEnrXScJOo_9arbitrary9size_hint3andCsgPXPhOXZSKT_10rle_encode:
+   26|  2.86k|pub fn and(lhs: (usize, Option<usize>), rhs: (usize, Option<usize>)) -> (usize, Option<usize>) {
+   27|  2.86k|    let lower = lhs.0 + rhs.0;
+   28|  2.86k|    let upper = lhs.1.and_then(|lhs| rhs.1.map(|rhs| lhs + rhs));
+   29|  2.86k|    (lower, upper)
+   30|  2.86k|}
+_RNCNCNvNtCs4pEnrXScJOo_9arbitrary9size_hint2or00CsgPXPhOXZSKT_10rle_encode:
+   48|    573|        .and_then(|lhs| rhs.1.map(|rhs| std::cmp::max(lhs, rhs)));
+_RNCNvNtCs4pEnrXScJOo_9arbitrary9size_hint3and0CsgPXPhOXZSKT_10rle_encode:
+   28|  2.29k|    let upper = lhs.1.and_then(|lhs| rhs.1.map(|rhs| lhs + rhs));
+_RNvNtCs4pEnrXScJOo_9arbitrary9size_hint7and_allCsiXw2KPZVxgk_17fvm_ipld_bitfield:
+   37|    573|pub fn and_all(hints: &[(usize, Option<usize>)]) -> (usize, Option<usize>) {
+   38|    573|    hints.iter().copied().fold((0, Some(0)), and)
+   39|    573|}
+_RNCNvNtCs4pEnrXScJOo_9arbitrary9size_hint3and0CsiXw2KPZVxgk_17fvm_ipld_bitfield:
+   28|  1.72k|    let upper = lhs.1.and_then(|lhs| rhs.1.map(|rhs| lhs + rhs));
+_RNCNCNvNtCs4pEnrXScJOo_9arbitrary9size_hint3and00CsiXw2KPZVxgk_17fvm_ipld_bitfield:
+   28|  1.14k|    let upper = lhs.1.and_then(|lhs| rhs.1.map(|rhs| lhs + rhs));
+_RNvNtCs4pEnrXScJOo_9arbitrary9size_hint3andCsiXw2KPZVxgk_17fvm_ipld_bitfield:
+   26|  1.72k|pub fn and(lhs: (usize, Option<usize>), rhs: (usize, Option<usize>)) -> (usize, Option<usize>) {
+   27|  1.72k|    let lower = lhs.0 + rhs.0;
+   28|  1.72k|    let upper = lhs.1.and_then(|lhs| rhs.1.map(|rhs| lhs + rhs));
+   29|  1.72k|    (lower, upper)
+   30|  1.72k|}
 
-_RNvMNtCs3icS8w06onj_9arbitrary12unstructuredNtB2_12Unstructured8is_emptyCsjWEWO8Era7H_10rle_encode:
-  132|  32.4k|    pub fn is_empty(&self) -> bool {
-  133|  32.4k|        self.len() == 0
-  134|  32.4k|    }
-_RNvMNtCs3icS8w06onj_9arbitrary12unstructuredNtB2_12Unstructured3lenCsjWEWO8Era7H_10rle_encode:
-  108|  33.0k|    pub fn len(&self) -> usize {
-  109|  33.0k|        self.data.len()
-  110|  33.0k|    }
-_RNvXs0_NtCs3icS8w06onj_9arbitrary12unstructuredINtB5_21ArbitraryTakeRestIterNtCsjWEWO8Era7H_10rle_encode9OperationENtNtNtNtCsaSlaN8YLTo0_4core4iter6traits8iterator8Iterator4nextB1e_:
-  746|  33.0k|        if let Some(mut u) = self.u.take() {
-  747|  32.5k|            if self.size == 1 {
-  748|    493|                Some(Arbitrary::arbitrary_take_rest(u))
-  749|  32.0k|            } else if self.size == 0 {
+_RNvMNtCs4pEnrXScJOo_9arbitrary12unstructuredNtB2_12Unstructured3lenCsgPXPhOXZSKT_10rle_encode:
+  108|  30.3k|    pub fn len(&self) -> usize {
+  109|  30.3k|        self.data.len()
+  110|  30.3k|    }
+_RNvMNtCs4pEnrXScJOo_9arbitrary12unstructuredNtB2_12Unstructured8is_emptyCsgPXPhOXZSKT_10rle_encode:
+  132|  29.7k|    pub fn is_empty(&self) -> bool {
+  133|  29.7k|        self.len() == 0
+  134|  29.7k|    }
+_RNvXs0_NtCs4pEnrXScJOo_9arbitrary12unstructuredINtB5_21ArbitraryTakeRestIterNtCsgPXPhOXZSKT_10rle_encode9OperationENtNtNtNtCsgY1nmJpWYPT_4core4iter6traits8iterator8Iterator4nextB1e_:
+  746|  30.3k|        if let Some(mut u) = self.u.take() {
+  747|  29.8k|            if self.size == 1 {
+  748|    470|                Some(Arbitrary::arbitrary_take_rest(u))
+  749|  29.3k|            } else if self.size == 0 {
   750|    103|                None
   751|       |            } else {
-  752|  31.9k|                self.size -= 1;
-  753|  31.9k|                let ret = Arbitrary::arbitrary(&mut u);
-  754|  31.9k|                self.u = Some(u);
-  755|  31.9k|                Some(ret)
+  752|  29.2k|                self.size -= 1;
+  753|  29.2k|                let ret = Arbitrary::arbitrary(&mut u);
+  754|  29.2k|                self.u = Some(u);
+  755|  29.2k|                Some(ret)
   756|       |            }
   757|       |        } else {
-  758|    493|            None
+  758|    470|            None
   759|       |        }
-  760|  33.0k|    }
-_RINvMNtCs3icS8w06onj_9arbitrary12unstructuredNtB3_12Unstructured24arbitrary_take_rest_iterNtCsjWEWO8Era7H_10rle_encode9OperationEB1s_:
-  620|    596|    pub fn arbitrary_take_rest_iter<ElementType: Arbitrary<'a>>(
-  621|    596|        self,
-  622|    596|    ) -> Result<ArbitraryTakeRestIter<'a, ElementType>> {
-  623|    596|        let (lower, upper) = ElementType::size_hint(0);
-  624|    596|
-  625|    596|        let elem_size = upper.unwrap_or(lower * 2);
-  626|    596|        let elem_size = std::cmp::max(1, elem_size);
-  627|    596|        let size = self.len() / elem_size;
-  628|    596|        Ok(ArbitraryTakeRestIter {
-  629|    596|            size,
-  630|    596|            u: Some(self),
-  631|    596|            _marker: PhantomData,
-  632|    596|        })
-  633|    596|    }
-_RINvMNtCs3icS8w06onj_9arbitrary12unstructuredNtB3_12Unstructured12int_in_rangelECsh8aFm9YGVF5_17fvm_ipld_bitfield:
-  293|  5.77k|    pub fn int_in_range<T>(&mut self, range: ops::RangeInclusive<T>) -> Result<T>
-  294|  5.77k|    where
-  295|  5.77k|        T: Int,
-  296|  5.77k|    {
-  297|  5.77k|        let (result, bytes_consumed) = Self::int_in_range_impl(range, self.data.iter().cloned())?;
-  298|  5.77k|        self.data = &self.data[bytes_consumed..];
-  299|  5.77k|        Ok(result)
-  300|  5.77k|    }
-_RINvMNtCs3icS8w06onj_9arbitrary12unstructuredNtB3_12Unstructured13arbitrary_lenTyhEECsh8aFm9YGVF5_17fvm_ipld_bitfield:
-  213|    596|    pub fn arbitrary_len<ElementType>(&mut self) -> Result<usize>
-  214|    596|    where
-  215|    596|        ElementType: Arbitrary<'a>,
-  216|    596|    {
-  217|    596|        let byte_size = self.arbitrary_byte_size()?;
-  218|    596|        let (lower, upper) = <ElementType as Arbitrary>::size_hint(0);
-  219|    596|        let elem_size = upper.unwrap_or(lower * 2);
-  220|    596|        let elem_size = std::cmp::max(1, elem_size);
-  221|    596|        Ok(byte_size / elem_size)
-  222|    596|    }
-_RINvMNtCs3icS8w06onj_9arbitrary12unstructuredNtB3_12Unstructured17int_in_range_impllINtNtNtNtCsaSlaN8YLTo0_4core4iter8adapters6cloned6ClonedINtNtNtB1t_5slice4iter4IterhEEECsh8aFm9YGVF5_17fvm_ipld_bitfield:
-  302|  5.77k|    fn int_in_range_impl<T>(
-  303|  5.77k|        range: ops::RangeInclusive<T>,
-  304|  5.77k|        mut bytes: impl Iterator<Item = u8>,
-  305|  5.77k|    ) -> Result<(T, usize)>
-  306|  5.77k|    where
-  307|  5.77k|        T: Int,
-  308|  5.77k|    {
-  309|  5.77k|        let start = *range.start();
-  310|  5.77k|        let end = *range.end();
-  311|  5.77k|        assert!(
-  312|  5.77k|            start <= end,
-  313|  5.77k|            "`arbitrary::Unstructured::int_in_range` requires a non-empty range"
-  314|  5.77k|        );
+  760|  30.3k|    }
+_RINvMNtCs4pEnrXScJOo_9arbitrary12unstructuredNtB3_12Unstructured24arbitrary_take_rest_iterNtCsgPXPhOXZSKT_10rle_encode9OperationEB1s_:
+  620|    573|    pub fn arbitrary_take_rest_iter<ElementType: Arbitrary<'a>>(
+  621|    573|        self,
+  622|    573|    ) -> Result<ArbitraryTakeRestIter<'a, ElementType>> {
+  623|    573|        let (lower, upper) = ElementType::size_hint(0);
+  624|    573|
+  625|    573|        let elem_size = upper.unwrap_or(lower * 2);
+  626|    573|        let elem_size = std::cmp::max(1, elem_size);
+  627|    573|        let size = self.len() / elem_size;
+  628|    573|        Ok(ArbitraryTakeRestIter {
+  629|    573|            size,
+  630|    573|            u: Some(self),
+  631|    573|            _marker: PhantomData,
+  632|    573|        })
+  633|    573|    }
+_RINvMNtCs4pEnrXScJOo_9arbitrary12unstructuredNtB3_12Unstructured17int_in_range_impllINtNtNtNtCsgY1nmJpWYPT_4core4iter8adapters6cloned6ClonedINtNtNtB1t_5slice4iter4IterhEEECsiXw2KPZVxgk_17fvm_ipld_bitfield:
+  302|  5.62k|    fn int_in_range_impl<T>(
+  303|  5.62k|        range: ops::RangeInclusive<T>,
+  304|  5.62k|        mut bytes: impl Iterator<Item = u8>,
+  305|  5.62k|    ) -> Result<(T, usize)>
+  306|  5.62k|    where
+  307|  5.62k|        T: Int,
+  308|  5.62k|    {
+  309|  5.62k|        let start = *range.start();
+  310|  5.62k|        let end = *range.end();
+  311|  5.62k|        assert!(
+  312|  5.62k|            start <= end,
+  313|  5.62k|            "`arbitrary::Unstructured::int_in_range` requires a non-empty range"
+  314|  5.62k|        );
   315|       |
   316|       |        // When there is only one possible choice, don't waste any entropy from
   317|       |        // the underlying data.
-  318|  5.77k|        if start == end {
+  318|  5.62k|        if start == end {
   319|      0|            return Ok((start, 0));
-  320|  5.77k|        }
-  321|  5.77k|
-  322|  5.77k|        // From here on out we work with the unsigned representation. All of the
-  323|  5.77k|        // operations performed below work out just as well whether or not `T`
-  324|  5.77k|        // is a signed or unsigned integer.
-  325|  5.77k|        let start = start.to_unsigned();
-  326|  5.77k|        let end = end.to_unsigned();
-  327|  5.77k|
-  328|  5.77k|        let delta = end.wrapping_sub(start);
-  329|  5.77k|        debug_assert_ne!(delta, T::Unsigned::ZERO);
+  320|  5.62k|        }
+  321|  5.62k|
+  322|  5.62k|        // From here on out we work with the unsigned representation. All of the
+  323|  5.62k|        // operations performed below work out just as well whether or not `T`
+  324|  5.62k|        // is a signed or unsigned integer.
+  325|  5.62k|        let start = start.to_unsigned();
+  326|  5.62k|        let end = end.to_unsigned();
+  327|  5.62k|
+  328|  5.62k|        let delta = end.wrapping_sub(start);
+  329|  5.62k|        debug_assert_ne!(delta, T::Unsigned::ZERO);
   330|       |
   331|       |        // Compute an arbitrary integer offset from the start of the range. We
   332|       |        // do this by consuming `size_of(T)` bytes from the input to create an
   333|       |        // arbitrary integer and then clamping that int into our range bounds
   334|       |        // with a modulo operation.
-  335|  5.77k|        let mut arbitrary_int = T::Unsigned::ZERO;
-  336|  5.77k|        let mut bytes_consumed: usize = 0;
+  335|  5.62k|        let mut arbitrary_int = T::Unsigned::ZERO;
+  336|  5.62k|        let mut bytes_consumed: usize = 0;
   337|       |
-  338|  11.5k|        while (bytes_consumed < mem::size_of::<T>())
-  339|  11.5k|            && (delta >> T::Unsigned::from_usize(bytes_consumed * 8)) > T::Unsigned::ZERO
+  338|  11.2k|        while (bytes_consumed < mem::size_of::<T>())
+  339|  11.2k|            && (delta >> T::Unsigned::from_usize(bytes_consumed * 8)) > T::Unsigned::ZERO
   340|       |        {
-  341|  5.77k|            let byte = match bytes.next() {
+  341|  5.62k|            let byte = match bytes.next() {
   342|      0|                None => break,
-  343|  5.77k|                Some(b) => b,
-  344|  5.77k|            };
-  345|  5.77k|            bytes_consumed += 1;
-  346|  5.77k|
-  347|  5.77k|            // Combine this byte into our arbitrary integer, but avoid
-  348|  5.77k|            // overflowing the shift for `u8` and `i8`.
-  349|  5.77k|            arbitrary_int = if mem::size_of::<T>() == 1 {
+  343|  5.62k|                Some(b) => b,
+  344|  5.62k|            };
+  345|  5.62k|            bytes_consumed += 1;
+  346|  5.62k|
+  347|  5.62k|            // Combine this byte into our arbitrary integer, but avoid
+  348|  5.62k|            // overflowing the shift for `u8` and `i8`.
+  349|  5.62k|            arbitrary_int = if mem::size_of::<T>() == 1 {
   350|      0|                T::Unsigned::from_u8(byte)
   351|       |            } else {
-  352|  5.77k|                (arbitrary_int << 8) | T::Unsigned::from_u8(byte)
+  352|  5.62k|                (arbitrary_int << 8) | T::Unsigned::from_u8(byte)
   353|       |            };
   354|       |        }
   355|       |
-  356|  5.77k|        let offset = if delta == T::Unsigned::MAX {
+  356|  5.62k|        let offset = if delta == T::Unsigned::MAX {
   357|      0|            arbitrary_int
   358|       |        } else {
-  359|  5.77k|            arbitrary_int % (delta.checked_add(T::Unsigned::ONE).unwrap())
+  359|  5.62k|            arbitrary_int % (delta.checked_add(T::Unsigned::ONE).unwrap())
   360|       |        };
   361|       |
   362|       |        // Finally, we add `start` to our offset from `start` to get the result
   363|       |        // actual value within the range.
-  364|  5.77k|        let result = start.wrapping_add(offset);
-  365|  5.77k|
-  366|  5.77k|        // And convert back to our maybe-signed representation.
-  367|  5.77k|        let result = T::from_unsigned(result);
-  368|  5.77k|        debug_assert!(*range.start() <= result);
-  369|  5.77k|        debug_assert!(result <= *range.end());
+  364|  5.62k|        let result = start.wrapping_add(offset);
+  365|  5.62k|
+  366|  5.62k|        // And convert back to our maybe-signed representation.
+  367|  5.62k|        let result = T::from_unsigned(result);
+  368|  5.62k|        debug_assert!(*range.start() <= result);
+  369|  5.62k|        debug_assert!(result <= *range.end());
   370|       |
-  371|  5.77k|        Ok((result, bytes_consumed))
-  372|  5.77k|    }
-_RNvXs3_NtCs3icS8w06onj_9arbitrary12unstructuredmNtB5_3Int12wrapping_add:
-  848|  5.77k|                fn wrapping_add(self, rhs: Self) -> Self {
-  849|  5.77k|                    <$ty>::wrapping_add(self, rhs)
-  850|  5.77k|                }
-_RNvMNtCs3icS8w06onj_9arbitrary12unstructuredNtB2_12Unstructured3new:
-   85|    596|    pub fn new(data: &'a [u8]) -> Self {
-   86|    596|        Unstructured { data }
-   87|    596|    }
-_RNvXs1_NtCs3icS8w06onj_9arbitrary12unstructuredhNtB5_3Int10from_usize:
-  840|    284|                fn from_usize(u: usize) -> Self {
-  841|    284|                    u as Self
-  842|    284|                }
-_RNvXs9_NtCs3icS8w06onj_9arbitrary12unstructuredlNtB5_3Int13from_unsigned:
-  860|  5.77k|                fn from_unsigned(unsigned: $unsigned_ty) -> Self {
-  861|  5.77k|                    unsigned as Self
-  862|  5.77k|                }
-_RNvXs1_NtCs3icS8w06onj_9arbitrary12unstructuredhNtB5_3Int11to_unsigned:
-  856|    568|                fn to_unsigned(self) -> Self::Unsigned {
-  857|    568|                    self as $unsigned_ty
-  858|    568|                }
-_RNvXs1_NtCs3icS8w06onj_9arbitrary12unstructuredhNtB5_3Int13from_unsigned:
-  860|    284|                fn from_unsigned(unsigned: $unsigned_ty) -> Self {
-  861|    284|                    unsigned as Self
-  862|    284|                }
-_RNvXs1_NtCs3icS8w06onj_9arbitrary12unstructuredhNtB5_3Int12wrapping_sub:
-  852|    284|                fn wrapping_sub(self, rhs: Self) -> Self {
-  853|    284|                    <$ty>::wrapping_sub(self, rhs)
-  854|    284|                }
-_RNvMNtCs3icS8w06onj_9arbitrary12unstructuredNtB2_12Unstructured19arbitrary_byte_size:
-  224|    596|    fn arbitrary_byte_size(&mut self) -> Result<usize> {
-  225|    596|        if self.data.is_empty() {
+  371|  5.62k|        Ok((result, bytes_consumed))
+  372|  5.62k|    }
+_RINvMNtCs4pEnrXScJOo_9arbitrary12unstructuredNtB3_12Unstructured12int_in_rangelECsiXw2KPZVxgk_17fvm_ipld_bitfield:
+  293|  5.62k|    pub fn int_in_range<T>(&mut self, range: ops::RangeInclusive<T>) -> Result<T>
+  294|  5.62k|    where
+  295|  5.62k|        T: Int,
+  296|  5.62k|    {
+  297|  5.62k|        let (result, bytes_consumed) = Self::int_in_range_impl(range, self.data.iter().cloned())?;
+  298|  5.62k|        self.data = &self.data[bytes_consumed..];
+  299|  5.62k|        Ok(result)
+  300|  5.62k|    }
+_RINvMNtCs4pEnrXScJOo_9arbitrary12unstructuredNtB3_12Unstructured13arbitrary_lenTyhEECsiXw2KPZVxgk_17fvm_ipld_bitfield:
+  213|    573|    pub fn arbitrary_len<ElementType>(&mut self) -> Result<usize>
+  214|    573|    where
+  215|    573|        ElementType: Arbitrary<'a>,
+  216|    573|    {
+  217|    573|        let byte_size = self.arbitrary_byte_size()?;
+  218|    573|        let (lower, upper) = <ElementType as Arbitrary>::size_hint(0);
+  219|    573|        let elem_size = upper.unwrap_or(lower * 2);
+  220|    573|        let elem_size = std::cmp::max(1, elem_size);
+  221|    573|        Ok(byte_size / elem_size)
+  222|    573|    }
+_RNvXs1_NtCs4pEnrXScJOo_9arbitrary12unstructuredhNtB5_3Int11to_unsigned:
+  856|    566|                fn to_unsigned(self) -> Self::Unsigned {
+  857|    566|                    self as $unsigned_ty
+  858|    566|                }
+_RNvXs1_NtCs4pEnrXScJOo_9arbitrary12unstructuredhNtB5_3Int12wrapping_sub:
+  852|    283|                fn wrapping_sub(self, rhs: Self) -> Self {
+  853|    283|                    <$ty>::wrapping_sub(self, rhs)
+  854|    283|                }
+_RNvMNtCs4pEnrXScJOo_9arbitrary12unstructuredNtB2_12Unstructured11fill_buffer:
+  521|  65.6k|    pub fn fill_buffer(&mut self, buffer: &mut [u8]) -> Result<()> {
+  522|  65.6k|        let n = std::cmp::min(buffer.len(), self.data.len());
+  523|  65.6k|        buffer[..n].copy_from_slice(&self.data[..n]);
+  524|  65.6k|        for byte in buffer[n..].iter_mut() {
+  525|      0|            *byte = 0;
+  526|      0|        }
+  527|  65.6k|        self.data = &self.data[n..];
+  528|  65.6k|        Ok(())
+  529|  65.6k|    }
+_RNvXs2_NtCs4pEnrXScJOo_9arbitrary12unstructuredtNtB5_3Int12wrapping_sub:
+  852|    290|                fn wrapping_sub(self, rhs: Self) -> Self {
+  853|    290|                    <$ty>::wrapping_sub(self, rhs)
+  854|    290|                }
+_RNvXs3_NtCs4pEnrXScJOo_9arbitrary12unstructuredmNtB5_3Int12wrapping_add:
+  848|  5.62k|                fn wrapping_add(self, rhs: Self) -> Self {
+  849|  5.62k|                    <$ty>::wrapping_add(self, rhs)
+  850|  5.62k|                }
+_RNvXs9_NtCs4pEnrXScJOo_9arbitrary12unstructuredlNtB5_3Int13from_unsigned:
+  860|  5.62k|                fn from_unsigned(unsigned: $unsigned_ty) -> Self {
+  861|  5.62k|                    unsigned as Self
+  862|  5.62k|                }
+_RNvXs9_NtCs4pEnrXScJOo_9arbitrary12unstructuredlNtB5_3Int11to_unsigned:
+  856|  11.2k|                fn to_unsigned(self) -> Self::Unsigned {
+  857|  11.2k|                    self as $unsigned_ty
+  858|  11.2k|                }
+_RNvXs3_NtCs4pEnrXScJOo_9arbitrary12unstructuredmNtB5_3Int10from_usize:
+  840|  11.2k|                fn from_usize(u: usize) -> Self {
+  841|  11.2k|                    u as Self
+  842|  11.2k|                }
+_RNvXs1_NtCs4pEnrXScJOo_9arbitrary12unstructuredhNtB5_3Int7from_u8:
+  836|    283|                fn from_u8(b: u8) -> Self {
+  837|    283|                    b as Self
+  838|    283|                }
+_RNvXs1_NtCs4pEnrXScJOo_9arbitrary12unstructuredhNtB5_3Int13from_unsigned:
+  860|    283|                fn from_unsigned(unsigned: $unsigned_ty) -> Self {
+  861|    283|                    unsigned as Self
+  862|    283|                }
+_RNvXs3_NtCs4pEnrXScJOo_9arbitrary12unstructuredmNtB5_3Int7from_u8:
+  836|  5.62k|                fn from_u8(b: u8) -> Self {
+  837|  5.62k|                    b as Self
+  838|  5.62k|                }
+_RNvXs2_NtCs4pEnrXScJOo_9arbitrary12unstructuredtNtB5_3Int12wrapping_add:
+  848|    290|                fn wrapping_add(self, rhs: Self) -> Self {
+  849|    290|                    <$ty>::wrapping_add(self, rhs)
+  850|    290|                }
+_RNvXs2_NtCs4pEnrXScJOo_9arbitrary12unstructuredtNtB5_3Int11checked_add:
+  844|    290|                fn checked_add(self, rhs: Self) -> Option<Self> {
+  845|    290|                    <$ty>::checked_add(self, rhs)
+  846|    290|                }
+_RINvMNtCs4pEnrXScJOo_9arbitrary12unstructuredNtB3_12Unstructured17int_in_range_implhINtNtNtNtCsgY1nmJpWYPT_4core4iter8adapters6copied6CopiedINtNtNtB1t_5slice4iter4IterhEEEB5_:
+  302|    283|    fn int_in_range_impl<T>(
+  303|    283|        range: ops::RangeInclusive<T>,
+  304|    283|        mut bytes: impl Iterator<Item = u8>,
+  305|    283|    ) -> Result<(T, usize)>
+  306|    283|    where
+  307|    283|        T: Int,
+  308|    283|    {
+  309|    283|        let start = *range.start();
+  310|    283|        let end = *range.end();
+  311|    283|        assert!(
+  312|    283|            start <= end,
+  313|    283|            "`arbitrary::Unstructured::int_in_range` requires a non-empty range"
+  314|    283|        );
+  315|       |
+  316|       |        // When there is only one possible choice, don't waste any entropy from
+  317|       |        // the underlying data.
+  318|    283|        if start == end {
+  319|      0|            return Ok((start, 0));
+  320|    283|        }
+  321|    283|
+  322|    283|        // From here on out we work with the unsigned representation. All of the
+  323|    283|        // operations performed below work out just as well whether or not `T`
+  324|    283|        // is a signed or unsigned integer.
+  325|    283|        let start = start.to_unsigned();
+  326|    283|        let end = end.to_unsigned();
+  327|    283|
+  328|    283|        let delta = end.wrapping_sub(start);
+  329|    283|        debug_assert_ne!(delta, T::Unsigned::ZERO);
+  330|       |
+  331|       |        // Compute an arbitrary integer offset from the start of the range. We
+  332|       |        // do this by consuming `size_of(T)` bytes from the input to create an
+  333|       |        // arbitrary integer and then clamping that int into our range bounds
+  334|       |        // with a modulo operation.
+  335|    283|        let mut arbitrary_int = T::Unsigned::ZERO;
+  336|    283|        let mut bytes_consumed: usize = 0;
+  337|       |
+  338|    566|        while (bytes_consumed < mem::size_of::<T>())
+  339|    283|            && (delta >> T::Unsigned::from_usize(bytes_consumed * 8)) > T::Unsigned::ZERO
+  340|       |        {
+  341|    283|            let byte = match bytes.next() {
+  342|      0|                None => break,
+  343|    283|                Some(b) => b,
+  344|    283|            };
+  345|    283|            bytes_consumed += 1;
+  346|    283|
+  347|    283|            // Combine this byte into our arbitrary integer, but avoid
+  348|    283|            // overflowing the shift for `u8` and `i8`.
+  349|    283|            arbitrary_int = if mem::size_of::<T>() == 1 {
+  350|    283|                T::Unsigned::from_u8(byte)
+  351|       |            } else {
+  352|      0|                (arbitrary_int << 8) | T::Unsigned::from_u8(byte)
+  353|       |            };
+  354|       |        }
+  355|       |
+  356|    283|        let offset = if delta == T::Unsigned::MAX {
+  357|      1|            arbitrary_int
+  358|       |        } else {
+  359|    282|            arbitrary_int % (delta.checked_add(T::Unsigned::ONE).unwrap())
+  360|       |        };
+  361|       |
+  362|       |        // Finally, we add `start` to our offset from `start` to get the result
+  363|       |        // actual value within the range.
+  364|    283|        let result = start.wrapping_add(offset);
+  365|    283|
+  366|    283|        // And convert back to our maybe-signed representation.
+  367|    283|        let result = T::from_unsigned(result);
+  368|    283|        debug_assert!(*range.start() <= result);
+  369|    283|        debug_assert!(result <= *range.end());
+  370|       |
+  371|    283|        Ok((result, bytes_consumed))
+  372|    283|    }
+_RINvMNtCs4pEnrXScJOo_9arbitrary12unstructuredNtB3_12Unstructured17int_in_range_impltINtNtNtNtCsgY1nmJpWYPT_4core4iter8adapters6copied6CopiedINtNtNtB1t_5slice4iter4IterhEEEB5_:
+  302|    290|    fn int_in_range_impl<T>(
+  303|    290|        range: ops::RangeInclusive<T>,
+  304|    290|        mut bytes: impl Iterator<Item = u8>,
+  305|    290|    ) -> Result<(T, usize)>
+  306|    290|    where
+  307|    290|        T: Int,
+  308|    290|    {
+  309|    290|        let start = *range.start();
+  310|    290|        let end = *range.end();
+  311|    290|        assert!(
+  312|    290|            start <= end,
+  313|    290|            "`arbitrary::Unstructured::int_in_range` requires a non-empty range"
+  314|    290|        );
+  315|       |
+  316|       |        // When there is only one possible choice, don't waste any entropy from
+  317|       |        // the underlying data.
+  318|    290|        if start == end {
+  319|      0|            return Ok((start, 0));
+  320|    290|        }
+  321|    290|
+  322|    290|        // From here on out we work with the unsigned representation. All of the
+  323|    290|        // operations performed below work out just as well whether or not `T`
+  324|    290|        // is a signed or unsigned integer.
+  325|    290|        let start = start.to_unsigned();
+  326|    290|        let end = end.to_unsigned();
+  327|    290|
+  328|    290|        let delta = end.wrapping_sub(start);
+  329|    290|        debug_assert_ne!(delta, T::Unsigned::ZERO);
+  330|       |
+  331|       |        // Compute an arbitrary integer offset from the start of the range. We
+  332|       |        // do this by consuming `size_of(T)` bytes from the input to create an
+  333|       |        // arbitrary integer and then clamping that int into our range bounds
+  334|       |        // with a modulo operation.
+  335|    290|        let mut arbitrary_int = T::Unsigned::ZERO;
+  336|    290|        let mut bytes_consumed: usize = 0;
+  337|       |
+  338|    869|        while (bytes_consumed < mem::size_of::<T>())
+  339|    580|            && (delta >> T::Unsigned::from_usize(bytes_consumed * 8)) > T::Unsigned::ZERO
+  340|       |        {
+  341|    579|            let byte = match bytes.next() {
+  342|      0|                None => break,
+  343|    579|                Some(b) => b,
+  344|    579|            };
+  345|    579|            bytes_consumed += 1;
+  346|    579|
+  347|    579|            // Combine this byte into our arbitrary integer, but avoid
+  348|    579|            // overflowing the shift for `u8` and `i8`.
+  349|    579|            arbitrary_int = if mem::size_of::<T>() == 1 {
+  350|      0|                T::Unsigned::from_u8(byte)
+  351|       |            } else {
+  352|    579|                (arbitrary_int << 8) | T::Unsigned::from_u8(byte)
+  353|       |            };
+  354|       |        }
+  355|       |
+  356|    290|        let offset = if delta == T::Unsigned::MAX {
+  357|      0|            arbitrary_int
+  358|       |        } else {
+  359|    290|            arbitrary_int % (delta.checked_add(T::Unsigned::ONE).unwrap())
+  360|       |        };
+  361|       |
+  362|       |        // Finally, we add `start` to our offset from `start` to get the result
+  363|       |        // actual value within the range.
+  364|    290|        let result = start.wrapping_add(offset);
+  365|    290|
+  366|    290|        // And convert back to our maybe-signed representation.
+  367|    290|        let result = T::from_unsigned(result);
+  368|    290|        debug_assert!(*range.start() <= result);
+  369|    290|        debug_assert!(result <= *range.end());
+  370|       |
+  371|    290|        Ok((result, bytes_consumed))
+  372|    290|    }
+_RNvMNtCs4pEnrXScJOo_9arbitrary12unstructuredNtB2_12Unstructured3new:
+   85|    573|    pub fn new(data: &'a [u8]) -> Self {
+   86|    573|        Unstructured { data }
+   87|    573|    }
+_RNvXs3_NtCs4pEnrXScJOo_9arbitrary12unstructuredmNtB5_3Int12wrapping_sub:
+  852|  5.62k|                fn wrapping_sub(self, rhs: Self) -> Self {
+  853|  5.62k|                    <$ty>::wrapping_sub(self, rhs)
+  854|  5.62k|                }
+_RNvXs2_NtCs4pEnrXScJOo_9arbitrary12unstructuredtNtB5_3Int10from_usize:
+  840|    580|                fn from_usize(u: usize) -> Self {
+  841|    580|                    u as Self
+  842|    580|                }
+_RNvXs2_NtCs4pEnrXScJOo_9arbitrary12unstructuredtNtB5_3Int7from_u8:
+  836|    579|                fn from_u8(b: u8) -> Self {
+  837|    579|                    b as Self
+  838|    579|                }
+_RNvXs2_NtCs4pEnrXScJOo_9arbitrary12unstructuredtNtB5_3Int13from_unsigned:
+  860|    290|                fn from_unsigned(unsigned: $unsigned_ty) -> Self {
+  861|    290|                    unsigned as Self
+  862|    290|                }
+_RNvXs2_NtCs4pEnrXScJOo_9arbitrary12unstructuredtNtB5_3Int11to_unsigned:
+  856|    580|                fn to_unsigned(self) -> Self::Unsigned {
+  857|    580|                    self as $unsigned_ty
+  858|    580|                }
+_RNvXs1_NtCs4pEnrXScJOo_9arbitrary12unstructuredhNtB5_3Int12wrapping_add:
+  848|    283|                fn wrapping_add(self, rhs: Self) -> Self {
+  849|    283|                    <$ty>::wrapping_add(self, rhs)
+  850|    283|                }
+_RNvXs1_NtCs4pEnrXScJOo_9arbitrary12unstructuredhNtB5_3Int11checked_add:
+  844|    282|                fn checked_add(self, rhs: Self) -> Option<Self> {
+  845|    282|                    <$ty>::checked_add(self, rhs)
+  846|    282|                }
+_RNvXs3_NtCs4pEnrXScJOo_9arbitrary12unstructuredmNtB5_3Int11checked_add:
+  844|  5.62k|                fn checked_add(self, rhs: Self) -> Option<Self> {
+  845|  5.62k|                    <$ty>::checked_add(self, rhs)
+  846|  5.62k|                }
+_RNvXs1_NtCs4pEnrXScJOo_9arbitrary12unstructuredhNtB5_3Int10from_usize:
+  840|    283|                fn from_usize(u: usize) -> Self {
+  841|    283|                    u as Self
+  842|    283|                }
+_RNvMNtCs4pEnrXScJOo_9arbitrary12unstructuredNtB2_12Unstructured19arbitrary_byte_size:
+  224|    573|    fn arbitrary_byte_size(&mut self) -> Result<usize> {
+  225|    573|        if self.data.is_empty() {
   226|      0|            Ok(0)
-  227|    596|        } else if self.data.len() == 1 {
+  227|    573|        } else if self.data.len() == 1 {
   228|      0|            self.data = &[];
   229|      0|            Ok(0)
   230|       |        } else {
@@ -325,18 +539,18 @@ _RNvMNtCs3icS8w06onj_9arbitrary12unstructuredNtB2_12Unstructured19arbitrary_byte
   237|       |            // We only consume as many bytes as necessary to cover the entire
   238|       |            // range of the byte string.
   239|       |            // Note: We cast to u64 so we don't overflow when checking std::u32::MAX + 4 on 32-bit archs
-  240|    596|            let len = if self.data.len() as u64 <= std::u8::MAX as u64 + 1 {
-  241|    284|                let bytes = 1;
-  242|    284|                let max_size = self.data.len() - bytes;
-  243|    284|                let (rest, for_size) = self.data.split_at(max_size);
-  244|    284|                self.data = rest;
-  245|    284|                Self::int_in_range_impl(0..=max_size as u8, for_size.iter().copied())?.0 as usize
-  246|    312|            } else if self.data.len() as u64 <= std::u16::MAX as u64 + 2 {
-  247|    312|                let bytes = 2;
-  248|    312|                let max_size = self.data.len() - bytes;
-  249|    312|                let (rest, for_size) = self.data.split_at(max_size);
-  250|    312|                self.data = rest;
-  251|    312|                Self::int_in_range_impl(0..=max_size as u16, for_size.iter().copied())?.0 as usize
+  240|    573|            let len = if self.data.len() as u64 <= std::u8::MAX as u64 + 1 {
+  241|    283|                let bytes = 1;
+  242|    283|                let max_size = self.data.len() - bytes;
+  243|    283|                let (rest, for_size) = self.data.split_at(max_size);
+  244|    283|                self.data = rest;
+  245|    283|                Self::int_in_range_impl(0..=max_size as u8, for_size.iter().copied())?.0 as usize
+  246|    290|            } else if self.data.len() as u64 <= std::u16::MAX as u64 + 2 {
+  247|    290|                let bytes = 2;
+  248|    290|                let max_size = self.data.len() - bytes;
+  249|    290|                let (rest, for_size) = self.data.split_at(max_size);
+  250|    290|                self.data = rest;
+  251|    290|                Self::int_in_range_impl(0..=max_size as u16, for_size.iter().copied())?.0 as usize
   252|      0|            } else if self.data.len() as u64 <= std::u32::MAX as u64 + 4 {
   253|      0|                let bytes = 4;
   254|      0|                let max_size = self.data.len() - bytes;
@@ -351,247 +565,33 @@ _RNvMNtCs3icS8w06onj_9arbitrary12unstructuredNtB2_12Unstructured19arbitrary_byte
   263|      0|                Self::int_in_range_impl(0..=max_size as u64, for_size.iter().copied())?.0 as usize
   264|       |            };
   265|       |
-  266|    596|            Ok(len)
+  266|    573|            Ok(len)
   267|       |        }
-  268|    596|    }
-_RNvXs2_NtCs3icS8w06onj_9arbitrary12unstructuredtNtB5_3Int12wrapping_add:
-  848|    312|                fn wrapping_add(self, rhs: Self) -> Self {
-  849|    312|                    <$ty>::wrapping_add(self, rhs)
-  850|    312|                }
-_RNvXs2_NtCs3icS8w06onj_9arbitrary12unstructuredtNtB5_3Int12wrapping_sub:
-  852|    312|                fn wrapping_sub(self, rhs: Self) -> Self {
-  853|    312|                    <$ty>::wrapping_sub(self, rhs)
-  854|    312|                }
-_RNvXs2_NtCs3icS8w06onj_9arbitrary12unstructuredtNtB5_3Int11checked_add:
-  844|    312|                fn checked_add(self, rhs: Self) -> Option<Self> {
-  845|    312|                    <$ty>::checked_add(self, rhs)
-  846|    312|                }
-_RNvXs9_NtCs3icS8w06onj_9arbitrary12unstructuredlNtB5_3Int11to_unsigned:
-  856|  11.5k|                fn to_unsigned(self) -> Self::Unsigned {
-  857|  11.5k|                    self as $unsigned_ty
-  858|  11.5k|                }
-_RNvXs3_NtCs3icS8w06onj_9arbitrary12unstructuredmNtB5_3Int10from_usize:
-  840|  11.5k|                fn from_usize(u: usize) -> Self {
-  841|  11.5k|                    u as Self
-  842|  11.5k|                }
-_RNvXs1_NtCs3icS8w06onj_9arbitrary12unstructuredhNtB5_3Int7from_u8:
-  836|    284|                fn from_u8(b: u8) -> Self {
-  837|    284|                    b as Self
-  838|    284|                }
-_RNvXs3_NtCs3icS8w06onj_9arbitrary12unstructuredmNtB5_3Int7from_u8:
-  836|  5.77k|                fn from_u8(b: u8) -> Self {
-  837|  5.77k|                    b as Self
-  838|  5.77k|                }
-_RINvMNtCs3icS8w06onj_9arbitrary12unstructuredNtB3_12Unstructured17int_in_range_impltINtNtNtNtCsaSlaN8YLTo0_4core4iter8adapters6copied6CopiedINtNtNtB1t_5slice4iter4IterhEEEB5_:
-  302|    312|    fn int_in_range_impl<T>(
-  303|    312|        range: ops::RangeInclusive<T>,
-  304|    312|        mut bytes: impl Iterator<Item = u8>,
-  305|    312|    ) -> Result<(T, usize)>
-  306|    312|    where
-  307|    312|        T: Int,
-  308|    312|    {
-  309|    312|        let start = *range.start();
-  310|    312|        let end = *range.end();
-  311|    312|        assert!(
-  312|    312|            start <= end,
-  313|    312|            "`arbitrary::Unstructured::int_in_range` requires a non-empty range"
-  314|    312|        );
-  315|       |
-  316|       |        // When there is only one possible choice, don't waste any entropy from
-  317|       |        // the underlying data.
-  318|    312|        if start == end {
-  319|      0|            return Ok((start, 0));
-  320|    312|        }
-  321|    312|
-  322|    312|        // From here on out we work with the unsigned representation. All of the
-  323|    312|        // operations performed below work out just as well whether or not `T`
-  324|    312|        // is a signed or unsigned integer.
-  325|    312|        let start = start.to_unsigned();
-  326|    312|        let end = end.to_unsigned();
-  327|    312|
-  328|    312|        let delta = end.wrapping_sub(start);
-  329|    312|        debug_assert_ne!(delta, T::Unsigned::ZERO);
-  330|       |
-  331|       |        // Compute an arbitrary integer offset from the start of the range. We
-  332|       |        // do this by consuming `size_of(T)` bytes from the input to create an
-  333|       |        // arbitrary integer and then clamping that int into our range bounds
-  334|       |        // with a modulo operation.
-  335|    312|        let mut arbitrary_int = T::Unsigned::ZERO;
-  336|    312|        let mut bytes_consumed: usize = 0;
-  337|       |
-  338|    935|        while (bytes_consumed < mem::size_of::<T>())
-  339|    624|            && (delta >> T::Unsigned::from_usize(bytes_consumed * 8)) > T::Unsigned::ZERO
-  340|       |        {
-  341|    623|            let byte = match bytes.next() {
-  342|      0|                None => break,
-  343|    623|                Some(b) => b,
-  344|    623|            };
-  345|    623|            bytes_consumed += 1;
-  346|    623|
-  347|    623|            // Combine this byte into our arbitrary integer, but avoid
-  348|    623|            // overflowing the shift for `u8` and `i8`.
-  349|    623|            arbitrary_int = if mem::size_of::<T>() == 1 {
-  350|      0|                T::Unsigned::from_u8(byte)
-  351|       |            } else {
-  352|    623|                (arbitrary_int << 8) | T::Unsigned::from_u8(byte)
-  353|       |            };
-  354|       |        }
-  355|       |
-  356|    312|        let offset = if delta == T::Unsigned::MAX {
-  357|      0|            arbitrary_int
-  358|       |        } else {
-  359|    312|            arbitrary_int % (delta.checked_add(T::Unsigned::ONE).unwrap())
-  360|       |        };
-  361|       |
-  362|       |        // Finally, we add `start` to our offset from `start` to get the result
-  363|       |        // actual value within the range.
-  364|    312|        let result = start.wrapping_add(offset);
-  365|    312|
-  366|    312|        // And convert back to our maybe-signed representation.
-  367|    312|        let result = T::from_unsigned(result);
-  368|    312|        debug_assert!(*range.start() <= result);
-  369|    312|        debug_assert!(result <= *range.end());
-  370|       |
-  371|    312|        Ok((result, bytes_consumed))
-  372|    312|    }
-_RNvXs2_NtCs3icS8w06onj_9arbitrary12unstructuredtNtB5_3Int13from_unsigned:
-  860|    312|                fn from_unsigned(unsigned: $unsigned_ty) -> Self {
-  861|    312|                    unsigned as Self
-  862|    312|                }
-_RNvMNtCs3icS8w06onj_9arbitrary12unstructuredNtB2_12Unstructured11fill_buffer:
-  521|  71.1k|    pub fn fill_buffer(&mut self, buffer: &mut [u8]) -> Result<()> {
-  522|  71.1k|        let n = std::cmp::min(buffer.len(), self.data.len());
-  523|  71.1k|        buffer[..n].copy_from_slice(&self.data[..n]);
-  524|  71.1k|        for byte in buffer[n..].iter_mut() {
-  525|      0|            *byte = 0;
-  526|      0|        }
-  527|  71.1k|        self.data = &self.data[n..];
-  528|  71.1k|        Ok(())
-  529|  71.1k|    }
-_RNvXs1_NtCs3icS8w06onj_9arbitrary12unstructuredhNtB5_3Int12wrapping_add:
-  848|    284|                fn wrapping_add(self, rhs: Self) -> Self {
-  849|    284|                    <$ty>::wrapping_add(self, rhs)
-  850|    284|                }
-_RNvXs3_NtCs3icS8w06onj_9arbitrary12unstructuredmNtB5_3Int12wrapping_sub:
-  852|  5.77k|                fn wrapping_sub(self, rhs: Self) -> Self {
-  853|  5.77k|                    <$ty>::wrapping_sub(self, rhs)
-  854|  5.77k|                }
-_RNvXs1_NtCs3icS8w06onj_9arbitrary12unstructuredhNtB5_3Int11checked_add:
-  844|    283|                fn checked_add(self, rhs: Self) -> Option<Self> {
-  845|    283|                    <$ty>::checked_add(self, rhs)
-  846|    283|                }
-_RNvXs3_NtCs3icS8w06onj_9arbitrary12unstructuredmNtB5_3Int11checked_add:
-  844|  5.77k|                fn checked_add(self, rhs: Self) -> Option<Self> {
-  845|  5.77k|                    <$ty>::checked_add(self, rhs)
-  846|  5.77k|                }
-_RNvXs2_NtCs3icS8w06onj_9arbitrary12unstructuredtNtB5_3Int10from_usize:
-  840|    624|                fn from_usize(u: usize) -> Self {
-  841|    624|                    u as Self
-  842|    624|                }
-_RNvXs2_NtCs3icS8w06onj_9arbitrary12unstructuredtNtB5_3Int7from_u8:
-  836|    623|                fn from_u8(b: u8) -> Self {
-  837|    623|                    b as Self
-  838|    623|                }
-_RNvXs2_NtCs3icS8w06onj_9arbitrary12unstructuredtNtB5_3Int11to_unsigned:
-  856|    624|                fn to_unsigned(self) -> Self::Unsigned {
-  857|    624|                    self as $unsigned_ty
-  858|    624|                }
-_RINvMNtCs3icS8w06onj_9arbitrary12unstructuredNtB3_12Unstructured17int_in_range_implhINtNtNtNtCsaSlaN8YLTo0_4core4iter8adapters6copied6CopiedINtNtNtB1t_5slice4iter4IterhEEEB5_:
-  302|    284|    fn int_in_range_impl<T>(
-  303|    284|        range: ops::RangeInclusive<T>,
-  304|    284|        mut bytes: impl Iterator<Item = u8>,
-  305|    284|    ) -> Result<(T, usize)>
-  306|    284|    where
-  307|    284|        T: Int,
-  308|    284|    {
-  309|    284|        let start = *range.start();
-  310|    284|        let end = *range.end();
-  311|    284|        assert!(
-  312|    284|            start <= end,
-  313|    284|            "`arbitrary::Unstructured::int_in_range` requires a non-empty range"
-  314|    284|        );
-  315|       |
-  316|       |        // When there is only one possible choice, don't waste any entropy from
-  317|       |        // the underlying data.
-  318|    284|        if start == end {
-  319|      0|            return Ok((start, 0));
-  320|    284|        }
-  321|    284|
-  322|    284|        // From here on out we work with the unsigned representation. All of the
-  323|    284|        // operations performed below work out just as well whether or not `T`
-  324|    284|        // is a signed or unsigned integer.
-  325|    284|        let start = start.to_unsigned();
-  326|    284|        let end = end.to_unsigned();
-  327|    284|
-  328|    284|        let delta = end.wrapping_sub(start);
-  329|    284|        debug_assert_ne!(delta, T::Unsigned::ZERO);
-  330|       |
-  331|       |        // Compute an arbitrary integer offset from the start of the range. We
-  332|       |        // do this by consuming `size_of(T)` bytes from the input to create an
-  333|       |        // arbitrary integer and then clamping that int into our range bounds
-  334|       |        // with a modulo operation.
-  335|    284|        let mut arbitrary_int = T::Unsigned::ZERO;
-  336|    284|        let mut bytes_consumed: usize = 0;
-  337|       |
-  338|    568|        while (bytes_consumed < mem::size_of::<T>())
-  339|    284|            && (delta >> T::Unsigned::from_usize(bytes_consumed * 8)) > T::Unsigned::ZERO
-  340|       |        {
-  341|    284|            let byte = match bytes.next() {
-  342|      0|                None => break,
-  343|    284|                Some(b) => b,
-  344|    284|            };
-  345|    284|            bytes_consumed += 1;
-  346|    284|
-  347|    284|            // Combine this byte into our arbitrary integer, but avoid
-  348|    284|            // overflowing the shift for `u8` and `i8`.
-  349|    284|            arbitrary_int = if mem::size_of::<T>() == 1 {
-  350|    284|                T::Unsigned::from_u8(byte)
-  351|       |            } else {
-  352|      0|                (arbitrary_int << 8) | T::Unsigned::from_u8(byte)
-  353|       |            };
-  354|       |        }
-  355|       |
-  356|    284|        let offset = if delta == T::Unsigned::MAX {
-  357|      1|            arbitrary_int
-  358|       |        } else {
-  359|    283|            arbitrary_int % (delta.checked_add(T::Unsigned::ONE).unwrap())
-  360|       |        };
-  361|       |
-  362|       |        // Finally, we add `start` to our offset from `start` to get the result
-  363|       |        // actual value within the range.
-  364|    284|        let result = start.wrapping_add(offset);
-  365|    284|
-  366|    284|        // And convert back to our maybe-signed representation.
-  367|    284|        let result = T::from_unsigned(result);
-  368|    284|        debug_assert!(*range.start() <= result);
-  369|    284|        debug_assert!(result <= *range.end());
-  370|       |
-  371|    284|        Ok((result, bytes_consumed))
-  372|    284|    }
+  268|    573|    }
 
 rust_fuzzer_test_input:
-  259|    597|            pub extern "C" fn rust_fuzzer_test_input(bytes: &[u8]) -> i32 {
-  260|    597|                use $crate::arbitrary::{Arbitrary, Unstructured};
-  261|    597|
-  262|    597|                // Early exit if we don't have enough bytes for the `Arbitrary`
-  263|    597|                // implementation. This helps the fuzzer avoid exploring all the
-  264|    597|                // different not-enough-input-bytes paths inside the `Arbitrary`
-  265|    597|                // implementation. Additionally, it exits faster, letting the fuzzer
-  266|    597|                // get to longer inputs that actually lead to interesting executions
-  267|    597|                // quicker.
-  268|    597|                if bytes.len() < <$dty as Arbitrary>::size_hint(0).0 {
+  259|    574|            pub extern "C" fn rust_fuzzer_test_input(bytes: &[u8]) -> i32 {
+  260|    574|                use $crate::arbitrary::{Arbitrary, Unstructured};
+  261|    574|
+  262|    574|                // Early exit if we don't have enough bytes for the `Arbitrary`
+  263|    574|                // implementation. This helps the fuzzer avoid exploring all the
+  264|    574|                // different not-enough-input-bytes paths inside the `Arbitrary`
+  265|    574|                // implementation. Additionally, it exits faster, letting the fuzzer
+  266|    574|                // get to longer inputs that actually lead to interesting executions
+  267|    574|                // quicker.
+  268|    574|                if bytes.len() < <$dty as Arbitrary>::size_hint(0).0 {
   269|      1|                    return -1;
-  270|    596|                }
-  271|    596|
-  272|    596|                let mut u = Unstructured::new(bytes);
-  273|    596|                let data = <$dty as Arbitrary>::arbitrary_take_rest(u);
+  270|    573|                }
+  271|    573|
+  272|    573|                let mut u = Unstructured::new(bytes);
+  273|    573|                let data = <$dty as Arbitrary>::arbitrary_take_rest(u);
   274|       |
   275|       |                // When `RUST_LIBFUZZER_DEBUG_PATH` is set, write the debug
   276|       |                // formatting of the input to that file. This is only intended for
   277|       |                // `cargo fuzz`'s use!
   278|       |
   279|       |                // `RUST_LIBFUZZER_DEBUG_PATH` is set in initialization.
-  280|    596|                if let Some(path) = $crate::RUST_LIBFUZZER_DEBUG_PATH.get() {
+  280|    573|                if let Some(path) = $crate::RUST_LIBFUZZER_DEBUG_PATH.get() {
   281|       |                    use std::io::Write;
   282|      0|                    let mut file = std::fs::File::create(path)
   283|      0|                        .expect("failed to create `RUST_LIBFUZZER_DEBUG_PATH` file");
@@ -601,52 +601,52 @@ rust_fuzzer_test_input:
   287|       |                    })
   288|      0|                    .expect("failed to write to `RUST_LIBFUZZER_DEBUG_PATH` file");
   289|      0|                    return -1;
-  290|    596|                }
+  290|    573|                }
   291|       |
-  292|    596|                let data = match data {
-  293|    596|                    Ok(d) => d,
+  292|    573|                let data = match data {
+  293|    573|                    Ok(d) => d,
   294|      0|                    Err(_) => return -1,
   295|       |                };
   296|       |
-  297|    596|                let result = ::libfuzzer_sys::Corpus::from(__libfuzzer_sys_run(data));
-  298|    596|                result.to_libfuzzer_code()
-  299|    597|            }
-_RNvNvCsjWEWO8Era7H_10rle_encodes_1__19___libfuzzer_sys_run:
-  303|    596|            fn __libfuzzer_sys_run($data: $dty) -> $rty {
-  304|    596|                $body
-  305|    596|            }
-_RNvXCs7mW4r0pmIyg_13libfuzzer_sysNtB2_6CorpusINtNtCsaSlaN8YLTo0_4core7convert4FromuE4from:
-   30|    596|    fn from(_: ()) -> Self {
-   31|    596|        Self::Keep
-   32|    596|    }
+  297|    573|                let result = ::libfuzzer_sys::Corpus::from(__libfuzzer_sys_run(data));
+  298|    573|                result.to_libfuzzer_code()
+  299|    574|            }
+_RNvNvCsgPXPhOXZSKT_10rle_encodes_1__19___libfuzzer_sys_run:
+  303|    573|            fn __libfuzzer_sys_run($data: $dty) -> $rty {
+  304|    573|                $body
+  305|    573|            }
+_RNvXCsxfcFEjljEs_13libfuzzer_sysNtB2_6CorpusINtNtCsgY1nmJpWYPT_4core7convert4FromuE4from:
+   30|    573|    fn from(_: ()) -> Self {
+   31|    573|        Self::Keep
+   32|    573|    }
 LLVMFuzzerTestOneInput:
-   58|    597|pub fn test_input_wrap(data: *const u8, size: usize) -> i32 {
-   59|    597|    let test_input = ::std::panic::catch_unwind(|| unsafe {
+   58|    574|pub fn test_input_wrap(data: *const u8, size: usize) -> i32 {
+   59|    574|    let test_input = ::std::panic::catch_unwind(|| unsafe {
    60|       |        let data_slice = ::std::slice::from_raw_parts(data, size);
    61|       |        rust_fuzzer_test_input(data_slice)
-   62|    597|    });
-   63|    597|
-   64|    597|    match test_input {
-   65|    597|        Ok(i) => i,
+   62|    574|    });
+   63|    574|
+   64|    574|    match test_input {
+   65|    574|        Ok(i) => i,
    66|       |        Err(_) => {
    67|       |            // hopefully the custom panic hook will be called before and abort the
    68|       |            // process before the stack frames are unwinded.
    69|      0|            ::std::process::abort();
    70|       |        }
    71|       |    }
-   72|    597|}
-_RNvMs_Cs7mW4r0pmIyg_13libfuzzer_sysNtB4_6Corpus17to_libfuzzer_code:
-   40|    596|    pub fn to_libfuzzer_code(self) -> i32 {
-   41|    596|        match self {
-   42|    596|            Corpus::Keep => 0,
+   72|    574|}
+_RNCNvCsxfcFEjljEs_13libfuzzer_sys15test_input_wrap0B3_:
+   59|    574|    let test_input = ::std::panic::catch_unwind(|| unsafe {
+   60|    574|        let data_slice = ::std::slice::from_raw_parts(data, size);
+   61|    574|        rust_fuzzer_test_input(data_slice)
+   62|    574|    });
+_RNvMs_CsxfcFEjljEs_13libfuzzer_sysNtB4_6Corpus17to_libfuzzer_code:
+   40|    573|    pub fn to_libfuzzer_code(self) -> i32 {
+   41|    573|        match self {
+   42|    573|            Corpus::Keep => 0,
    43|      0|            Corpus::Reject => -1,
    44|       |        }
-   45|    596|    }
-_RNCNvCs7mW4r0pmIyg_13libfuzzer_sys15test_input_wrap0B3_:
-   59|    597|    let test_input = ::std::panic::catch_unwind(|| unsafe {
-   60|    597|        let data_slice = ::std::slice::from_raw_parts(data, size);
-   61|    597|        rust_fuzzer_test_input(data_slice)
-   62|    597|    });
+   45|    573|    }
 LLVMFuzzerInitialize:
    79|      2|pub fn initialize(_argc: *const isize, _argv: *const *const *const u8) -> isize {
    80|      2|    // Registers a panic hook that aborts the process before unwinding.
@@ -673,334 +673,356 @@ LLVMFuzzerInitialize:
   101|      2|    0
   102|      2|}
 
-_RNvMs2_NtCslMlMEofEpDG_9once_cell3impINtB5_8OnceCellNtNtCsbEQaeqvpCHy_5alloc6string6StringE14is_initializedCsjWEWO8Era7H_10rle_encode:
-   49|    596|    pub(crate) fn is_initialized(&self) -> bool {
-   50|    596|        // An `Acquire` load is enough because that makes all the initialization
-   51|    596|        // operations visible to us, and, this being a fast path, weaker
-   52|    596|        // ordering helps with performance. This `Acquire` synchronizes with
-   53|    596|        // `SeqCst` operations on the slow path.
-   54|    596|        self.queue.load(Ordering::Acquire) == COMPLETE_PTR
-   55|    596|    }
+_RNvMs2_NtCseSK2XYafZlw_9once_cell3impINtB5_8OnceCellNtNtCseushfdLQbjT_5alloc6string6StringE14is_initializedCsgPXPhOXZSKT_10rle_encode:
+   49|    573|    pub(crate) fn is_initialized(&self) -> bool {
+   50|    573|        // An `Acquire` load is enough because that makes all the initialization
+   51|    573|        // operations visible to us, and, this being a fast path, weaker
+   52|    573|        // ordering helps with performance. This `Acquire` synchronizes with
+   53|    573|        // `SeqCst` operations on the slow path.
+   54|    573|        self.queue.load(Ordering::Acquire) == COMPLETE_PTR
+   55|    573|    }
 
-_RNvMs4_NtCslMlMEofEpDG_9once_cell4syncINtB5_8OnceCellNtNtCsbEQaeqvpCHy_5alloc6string6StringE3getCsjWEWO8Era7H_10rle_encode:
-  965|    596|        pub fn get(&self) -> Option<&T> {
-  966|    596|            if self.0.is_initialized() {
+_RNvMs4_NtCseSK2XYafZlw_9once_cell4syncINtB5_8OnceCellNtNtCseushfdLQbjT_5alloc6string6StringE3getCsgPXPhOXZSKT_10rle_encode:
+  965|    573|        pub fn get(&self) -> Option<&T> {
+  966|    573|            if self.0.is_initialized() {
   967|       |                // Safe b/c value is initialized.
   968|      0|                Some(unsafe { self.get_unchecked() })
   969|       |            } else {
-  970|    596|                None
+  970|    573|                None
   971|       |            }
-  972|    596|        }
+  972|    573|        }
 
-_RNvNtCs5D4xthaCstY_15unsigned_varint6encode3u64Csh8aFm9YGVF5_17fvm_ipld_bitfield:
-   69|  37.4k|pub fn u64(number: u64, buf: &mut [u8; U64_LEN]) -> &[u8] {
-   70|  37.4k|    encode!(number, buf)
-   71|  37.4k|}
-_RNvNtCs5D4xthaCstY_15unsigned_varint6encode10u64_bufferCsh8aFm9YGVF5_17fvm_ipld_bitfield:
-  119|  37.4k|pub fn u64_buffer() -> [u8; U64_LEN] {
-  120|  37.4k|    [0; U64_LEN]
-  121|  37.4k|}
+_RNvNtCs5ZipKmZdVhl_15unsigned_varint6encode3u64CsiXw2KPZVxgk_17fvm_ipld_bitfield:
+   69|  35.6k|pub fn u64(number: u64, buf: &mut [u8; U64_LEN]) -> &[u8] {
+   70|  35.6k|    encode!(number, buf)
+   71|  35.6k|}
+_RNvNtCs5ZipKmZdVhl_15unsigned_varint6encode10u64_bufferCsiXw2KPZVxgk_17fvm_ipld_bitfield:
+  119|  35.6k|pub fn u64_buffer() -> [u8; U64_LEN] {
+  120|  35.6k|    [0; U64_LEN]
+  121|  35.6k|}
 
-_RNCNvXs9_NtNtCsh8aFm9YGVF5_17fvm_ipld_bitfield4iter7combineINtB7_8__CombineINtB7_7CombineINtB9_6RangesINtNtNtNtCsaSlaN8YLTo0_4core4iter8adapters6cloned6ClonedINtNtNtB1L_5slice4iter4IterINtNtNtB1L_3ops5range5RangeyEEEEIB1q_INtNtNtB1J_7sources7from_fn6FromFnNCINvB9_16ranges_from_bitsINtNtB1H_6copied6CopiedINtNtNtNtCsbEQaeqvpCHy_5alloc11collections5btree3set4IteryEEE0EENtB7_5UnionEB3t_NtB7_10DifferenceENtNtNtB1J_6traits8iterator8Iterator4nexts_0Bb_:
-  390|  92.3k|        iter::from_fn(|| self.next_range()).find(|range| !range.is_empty())
-_RNvXs0_NtNtCsh8aFm9YGVF5_17fvm_ipld_bitfield4iter7combineNtB5_10DifferenceNtB5_10Combinator11advance_rhs:
-  164|  20.5k|    fn advance_rhs(&mut self, lhs: &mut Range<u64>, rhs: Range<u64>) -> Range<u64> {
-  165|  20.5k|        // since we're advancing the rhs, we need to potentially shorten the lhs
-  166|  20.5k|        // to avoid it from returning invalid bits in the next iteration
-  167|  20.5k|        //
-  168|  20.5k|        // e.g. `--xxxx`, `xxxx--` should first produce
-  169|  20.5k|        // `------` and then `----xx`, not
-  170|  20.5k|        // `------` and then `--xxxx`
-  171|  20.5k|        //
-  172|  20.5k|        // lhs:      ----xx      --xxxx      xxxxxx
-  173|  20.5k|        // rhs:      xx----  or  xxxx--  or  --xx--
-  174|  20.5k|        // output:   ------      ------      xx----
-  175|  20.5k|        // new lhs:  ----xx      ----xx      ----xx
-  176|  20.5k|
-  177|  20.5k|        let difference = lhs.start..cmp::min(lhs.end, rhs.start);
-  178|  20.5k|        lhs.start = cmp::max(lhs.start, rhs.end);
-  179|  20.5k|        difference
-  180|  20.5k|    }
-_RNvMs5_NtNtCsh8aFm9YGVF5_17fvm_ipld_bitfield4iter7combineINtB5_7CombineINtB7_6RangesINtNtNtNtCsaSlaN8YLTo0_4core4iter8adapters6cloned6ClonedINtNtNtB1t_5slice4iter4IterINtNtNtB1t_3ops5range5RangeyEEEEIB18_INtNtNtB1r_7sources7from_fn6FromFnNCINvB7_16ranges_from_bitsINtNtB1p_6copied6CopiedINtNtNtNtCsbEQaeqvpCHy_5alloc11collections5btree3set4IteryEEE0EENtB5_5UnionE3newB9_:
-  298|  2.38k|    pub fn new(a: A, b: B) -> Self {
-  299|  2.38k|        Self(Merge::new(_Combine::new(a, b)))
-  300|  2.38k|    }
-_RNCNvXs9_NtNtCsh8aFm9YGVF5_17fvm_ipld_bitfield4iter7combineINtB7_8__CombineINtB7_7CombineINtB9_6RangesINtNtNtNtCsaSlaN8YLTo0_4core4iter8adapters6cloned6ClonedINtNtNtB1L_5slice4iter4IterINtNtNtB1L_3ops5range5RangeyEEEEIB1q_INtNtNtB1J_7sources7from_fn6FromFnNCINvB9_16ranges_from_bitsINtNtB1H_6copied6CopiedINtNtNtNtCsbEQaeqvpCHy_5alloc11collections5btree3set4IteryEEE0EENtB7_5UnionEB3t_NtB7_10DifferenceENtNtNtB1J_6traits8iterator8Iterator4next0Bb_:
-  390|  94.7k|        iter::from_fn(|| self.next_range()).find(|range| !range.is_empty())
-_RNvMs8_NtNtCsh8aFm9YGVF5_17fvm_ipld_bitfield4iter7combineINtB5_8__CombineINtB5_7CombineINtB7_6RangesINtNtNtNtCsaSlaN8YLTo0_4core4iter8adapters6cloned6ClonedINtNtNtB1J_5slice4iter4IterINtNtNtB1J_3ops5range5RangeyEEEEIB1o_INtNtNtB1H_7sources7from_fn6FromFnNCINvB7_16ranges_from_bitsINtNtB1F_6copied6CopiedINtNtNtNtCsbEQaeqvpCHy_5alloc11collections5btree3set4IteryEEE0EENtB5_5UnionEB3r_NtB5_10DifferenceE10next_rangeB9_:
-  354|  94.7k|    fn next_range(&mut self) -> Option<Range<u64>> {
-  355|  94.7k|        let (range, advance_lhs) = match (self.lhs.peek(), self.rhs.peek()) {
-  356|  60.4k|            (Some(lhs), Some(rhs)) => {
-  357|  60.4k|                // if both iterators are non-empty, we advance the one whichever's
-  358|  60.4k|                // corresponding range has a smaller upper bound
-  359|  60.4k|                if lhs.end <= rhs.end {
-  360|  39.9k|                    (Some(self.combinator.advance_lhs(lhs.clone(), rhs)), true)
+_RNvMsd_NtNtCsiXw2KPZVxgk_17fvm_ipld_bitfield4iter7combineINtB5_9LookaheadINtB5_7CombineINtB7_6RangesINtNtNtNtCsgY1nmJpWYPT_4core4iter8adapters6cloned6ClonedINtNtNtB1J_5slice4iter4IterINtNtNtB1J_3ops5range5RangeyEEEEIB1o_INtNtNtB1H_7sources7from_fn6FromFnNCINvB7_16ranges_from_bitsINtNtB1F_6copied6CopiedINtNtNtNtCseushfdLQbjT_5alloc11collections5btree3set4IteryEEE0EENtB5_5UnionEE4peekB9_:
+  473|  88.4k|    fn peek(&mut self) -> Option<&mut I::Item> {
+  474|  88.4k|        self.next.as_mut()
+  475|  88.4k|    }
+_RNvXNtNtCsiXw2KPZVxgk_17fvm_ipld_bitfield4iter7combineNtB2_5UnionNtB2_10Combinator11advance_rhs:
+  106|  9.34k|    fn advance_rhs(&mut self, lhs: &mut Range<u64>, rhs: Range<u64>) -> Range<u64> {
+  107|  9.34k|        cmp::min(lhs.start, rhs.start)..rhs.end
+  108|  9.34k|    }
+_RNvXNtNtCsiXw2KPZVxgk_17fvm_ipld_bitfield4iter7combineNtB2_5UnionNtB2_10Combinator11advance_lhs:
+   91|  3.22k|    fn advance_lhs(&mut self, lhs: Range<u64>, rhs: &mut Range<u64>) -> Range<u64> {
+   92|  3.22k|        // the returned range needs to start from the minimum lower bound of the two ranges,
+   93|  3.22k|        // to ensure that the lower bounds are monotonically increasing
+   94|  3.22k|        //
+   95|  3.22k|        // e.g. `--xx--`, `xxxxxx` should first produce
+   96|  3.22k|        // `xxxx--` and then `xxxxxx`, not
+   97|  3.22k|        // `--xx--` and then `xxxxxx`
+   98|  3.22k|        //
+   99|  3.22k|        // lhs:     xx----      xxxx--      --xx--
+  100|  3.22k|        // rhs:     ----xx  or  --xxxx  or  xxxxxx
+  101|  3.22k|        // output:  xx----      xxxx--      xxxx--
+  102|  3.22k|
+  103|  3.22k|        cmp::min(lhs.start, rhs.start)..lhs.end
+  104|  3.22k|    }
+_RNCNvXs9_NtNtCsiXw2KPZVxgk_17fvm_ipld_bitfield4iter7combineINtB7_8__CombineINtB9_6RangesINtNtNtNtCsgY1nmJpWYPT_4core4iter8adapters6cloned6ClonedINtNtNtB1x_5slice4iter4IterINtNtNtB1x_3ops5range5RangeyEEEEIB1c_INtNtNtB1v_7sources7from_fn6FromFnNCINvB9_16ranges_from_bitsINtNtB1t_6copied6CopiedINtNtNtNtCseushfdLQbjT_5alloc11collections5btree3set4IteryEEE0EENtB7_5UnionENtNtNtB1v_6traits8iterator8Iterator4nexts_0Bb_:
+  390|  74.1k|        iter::from_fn(|| self.next_range()).find(|range| !range.is_empty())
+_RNvMsd_NtNtCsiXw2KPZVxgk_17fvm_ipld_bitfield4iter7combineINtB5_9LookaheadINtB5_7CombineINtB7_6RangesINtNtNtNtCsgY1nmJpWYPT_4core4iter8adapters6cloned6ClonedINtNtNtB1J_5slice4iter4IterINtNtNtB1J_3ops5range5RangeyEEEEIB1o_INtNtNtB1H_7sources7from_fn6FromFnNCINvB7_16ranges_from_bitsINtNtB1F_6copied6CopiedINtNtNtNtCseushfdLQbjT_5alloc11collections5btree3set4IteryEEE0EENtB5_5UnionEE3newB9_:
+  468|  2.29k|    fn new(mut iter: I) -> Self {
+  469|  2.29k|        let next = iter.next();
+  470|  2.29k|        Self { iter, next }
+  471|  2.29k|    }
+_RNvXse_NtNtCsiXw2KPZVxgk_17fvm_ipld_bitfield4iter7combineINtB5_9LookaheadINtB5_8__CombineINtB7_6RangesINtNtNtNtCsgY1nmJpWYPT_4core4iter8adapters6cloned6ClonedINtNtNtB1L_5slice4iter4IterINtNtNtB1L_3ops5range5RangeyEEEEIB1q_INtNtNtB1J_7sources7from_fn6FromFnNCINvB7_16ranges_from_bitsINtNtB1H_6copied6CopiedINtNtNtNtCseushfdLQbjT_5alloc11collections5btree3set4IteryEEE0EENtB5_5UnionEENtNtNtB1J_6traits8iterator8Iterator4nextB9_:
+  481|  76.4k|    fn next(&mut self) -> Option<Self::Item> {
+  482|       |        // `self.next` always stores the next element, so if it is `None`, the iterator is empty
+  483|  76.4k|        let next = self.next.take()?;
+  484|  74.1k|        self.next = self.iter.next();
+  485|  74.1k|        Some(next)
+  486|  76.4k|    }
+_RNvXNtNtCsiXw2KPZVxgk_17fvm_ipld_bitfield4iter7combineNtB2_5UnionNtB2_10Combinator16advance_rhs_tail:
+  115|  38.9k|    fn advance_rhs_tail(&mut self, rhs: Range<u64>) -> Option<Range<u64>> {
+  116|  38.9k|        Some(rhs)
+  117|  38.9k|    }
+_RNvMs8_NtNtCsiXw2KPZVxgk_17fvm_ipld_bitfield4iter7combineINtB5_8__CombineINtB5_7CombineINtB7_6RangesINtNtNtNtCsgY1nmJpWYPT_4core4iter8adapters6cloned6ClonedINtNtNtB1J_5slice4iter4IterINtNtNtB1J_3ops5range5RangeyEEEEIB1o_INtNtNtB1H_7sources7from_fn6FromFnNCINvB7_16ranges_from_bitsINtNtB1F_6copied6CopiedINtNtNtNtCseushfdLQbjT_5alloc11collections5btree3set4IteryEEE0EENtB5_5UnionEB3r_NtB5_10DifferenceE10next_rangeB9_:
+  354|  88.4k|    fn next_range(&mut self) -> Option<Range<u64>> {
+  355|  88.4k|        let (range, advance_lhs) = match (self.lhs.peek(), self.rhs.peek()) {
+  356|  55.3k|            (Some(lhs), Some(rhs)) => {
+  357|  55.3k|                // if both iterators are non-empty, we advance the one whichever's
+  358|  55.3k|                // corresponding range has a smaller upper bound
+  359|  55.3k|                if lhs.end <= rhs.end {
+  360|  37.2k|                    (Some(self.combinator.advance_lhs(lhs.clone(), rhs)), true)
   361|       |                } else {
-  362|  20.5k|                    (Some(self.combinator.advance_rhs(lhs, rhs.clone())), false)
+  362|  18.0k|                    (Some(self.combinator.advance_rhs(lhs, rhs.clone())), false)
   363|       |                }
   364|       |            }
-  365|  31.8k|            (Some(lhs), None) => (self.combinator.advance_lhs_tail(lhs.clone()), true),
-  366|    396|            (None, Some(rhs)) => (self.combinator.advance_rhs_tail(rhs.clone()), false),
-  367|  1.98k|            (None, None) => return None,
+  365|  30.8k|            (Some(lhs), None) => (self.combinator.advance_lhs_tail(lhs.clone()), true),
+  366|    363|            (None, Some(rhs)) => (self.combinator.advance_rhs_tail(rhs.clone()), false),
+  367|  1.92k|            (None, None) => return None,
   368|       |        };
   369|       |
-  370|  92.7k|        if advance_lhs {
-  371|  71.8k|            self.lhs.next();
-  372|  71.8k|        } else {
-  373|  20.9k|            self.rhs.next();
-  374|  20.9k|        }
+  370|  86.5k|        if advance_lhs {
+  371|  68.1k|            self.lhs.next();
+  372|  68.1k|        } else {
+  373|  18.4k|            self.rhs.next();
+  374|  18.4k|        }
   375|       |
-  376|  92.7k|        range
-  377|  94.7k|    }
-_RNvMsd_NtNtCsh8aFm9YGVF5_17fvm_ipld_bitfield4iter7combineINtB5_9LookaheadINtB5_8__CombineINtB7_6RangesINtNtNtNtCsaSlaN8YLTo0_4core4iter8adapters6cloned6ClonedINtNtNtB1L_5slice4iter4IterINtNtNtB1L_3ops5range5RangeyEEEEIB1q_INtNtNtB1J_7sources7from_fn6FromFnNCINvB7_16ranges_from_bitsINtNtB1H_6copied6CopiedINtNtNtNtCsbEQaeqvpCHy_5alloc11collections5btree3set4IteryEEE0EENtB5_5UnionEE3newB9_:
-  468|  2.38k|    fn new(mut iter: I) -> Self {
-  469|  2.38k|        let next = iter.next();
-  470|  2.38k|        Self { iter, next }
-  471|  2.38k|    }
-_RNvXse_NtNtCsh8aFm9YGVF5_17fvm_ipld_bitfield4iter7combineINtB5_9LookaheadINtB7_6RangesINtNtNtNtCsaSlaN8YLTo0_4core4iter7sources7from_fn6FromFnNCINvB7_16ranges_from_bitsINtNtNtB1t_8adapters6copied6CopiedINtNtNtNtCsbEQaeqvpCHy_5alloc11collections5btree3set4IteryEEE0EEENtNtNtB1t_6traits8iterator8Iterator4nextB9_:
-  481|  72.2k|    fn next(&mut self) -> Option<Self::Item> {
-  482|       |        // `self.next` always stores the next element, so if it is `None`, the iterator is empty
-  483|  72.2k|        let next = self.next.take()?;
-  484|  72.2k|        self.next = self.iter.next();
-  485|  72.2k|        Some(next)
-  486|  72.2k|    }
-_RNvXse_NtNtCsh8aFm9YGVF5_17fvm_ipld_bitfield4iter7combineINtB5_9LookaheadINtB5_7CombineINtB7_6RangesINtNtNtNtCsaSlaN8YLTo0_4core4iter8adapters6cloned6ClonedINtNtNtB1J_5slice4iter4IterINtNtNtB1J_3ops5range5RangeyEEEEIB1o_INtNtNtB1H_7sources7from_fn6FromFnNCINvB7_16ranges_from_bitsINtNtB1F_6copied6CopiedINtNtNtNtCsbEQaeqvpCHy_5alloc11collections5btree3set4IteryEEE0EENtB5_5UnionEENtNtNtB1H_6traits8iterator8Iterator4nextB9_:
-  481|  71.8k|    fn next(&mut self) -> Option<Self::Item> {
-  482|       |        // `self.next` always stores the next element, so if it is `None`, the iterator is empty
-  483|  71.8k|        let next = self.next.take()?;
-  484|  71.8k|        self.next = self.iter.next();
-  485|  71.8k|        Some(next)
-  486|  71.8k|    }
-_RNvXNtNtCsh8aFm9YGVF5_17fvm_ipld_bitfield4iter7combineNtB2_5UnionNtB2_10Combinator11advance_lhs:
-   91|  3.30k|    fn advance_lhs(&mut self, lhs: Range<u64>, rhs: &mut Range<u64>) -> Range<u64> {
-   92|  3.30k|        // the returned range needs to start from the minimum lower bound of the two ranges,
-   93|  3.30k|        // to ensure that the lower bounds are monotonically increasing
-   94|  3.30k|        //
-   95|  3.30k|        // e.g. `--xx--`, `xxxxxx` should first produce
-   96|  3.30k|        // `xxxx--` and then `xxxxxx`, not
-   97|  3.30k|        // `--xx--` and then `xxxxxx`
-   98|  3.30k|        //
-   99|  3.30k|        // lhs:     xx----      xxxx--      --xx--
-  100|  3.30k|        // rhs:     ----xx  or  --xxxx  or  xxxxxx
-  101|  3.30k|        // output:  xx----      xxxx--      xxxx--
-  102|  3.30k|
-  103|  3.30k|        cmp::min(lhs.start, rhs.start)..lhs.end
-  104|  3.30k|    }
-_RNvMs8_NtNtCsh8aFm9YGVF5_17fvm_ipld_bitfield4iter7combineINtB5_8__CombineINtB5_7CombineINtB7_6RangesINtNtNtNtCsaSlaN8YLTo0_4core4iter8adapters6cloned6ClonedINtNtNtB1J_5slice4iter4IterINtNtNtB1J_3ops5range5RangeyEEEEIB1o_INtNtNtB1H_7sources7from_fn6FromFnNCINvB7_16ranges_from_bitsINtNtB1F_6copied6CopiedINtNtNtNtCsbEQaeqvpCHy_5alloc11collections5btree3set4IteryEEE0EENtB5_5UnionEB3r_NtB5_10DifferenceE3newB9_:
-  343|  2.38k|    fn new(lhs: A, rhs: B) -> Self {
-  344|  2.38k|        Self {
-  345|  2.38k|            lhs: Lookahead::new(lhs),
-  346|  2.38k|            rhs: Lookahead::new(rhs),
-  347|  2.38k|            combinator: Default::default(),
-  348|  2.38k|        }
-  349|  2.38k|    }
-_RNvMsd_NtNtCsh8aFm9YGVF5_17fvm_ipld_bitfield4iter7combineINtB5_9LookaheadINtB5_8__CombineINtB5_7CombineINtB7_6RangesINtNtNtNtCsaSlaN8YLTo0_4core4iter8adapters6cloned6ClonedINtNtNtB1Z_5slice4iter4IterINtNtNtB1Z_3ops5range5RangeyEEEEIB1E_INtNtNtB1X_7sources7from_fn6FromFnNCINvB7_16ranges_from_bitsINtNtB1V_6copied6CopiedINtNtNtNtCsbEQaeqvpCHy_5alloc11collections5btree3set4IteryEEE0EENtB5_5UnionEB3H_NtB5_10DifferenceEE3newB9_:
-  468|  2.38k|    fn new(mut iter: I) -> Self {
-  469|  2.38k|        let next = iter.next();
-  470|  2.38k|        Self { iter, next }
-  471|  2.38k|    }
-_RNvXsf_NtNtCsh8aFm9YGVF5_17fvm_ipld_bitfield4iter7combineNtB5_5UnionNtNtCsaSlaN8YLTo0_4core7default7Default7defaultB9_:
-   87|  2.38k|#[derive(Default)]
-_RNvXNtNtCsh8aFm9YGVF5_17fvm_ipld_bitfield4iter7combineNtB2_5UnionNtB2_10Combinator16advance_rhs_tail:
-  115|  41.1k|    fn advance_rhs_tail(&mut self, rhs: Range<u64>) -> Option<Range<u64>> {
-  116|  41.1k|        Some(rhs)
-  117|  41.1k|    }
-_RNvXs9_NtNtCsh8aFm9YGVF5_17fvm_ipld_bitfield4iter7combineINtB5_8__CombineINtB5_7CombineINtB7_6RangesINtNtNtNtCsaSlaN8YLTo0_4core4iter8adapters6cloned6ClonedINtNtNtB1J_5slice4iter4IterINtNtNtB1J_3ops5range5RangeyEEEEIB1o_INtNtNtB1H_7sources7from_fn6FromFnNCINvB7_16ranges_from_bitsINtNtB1F_6copied6CopiedINtNtNtNtCsbEQaeqvpCHy_5alloc11collections5btree3set4IteryEEE0EENtB5_5UnionEB3r_NtB5_10DifferenceENtNtNtB1H_6traits8iterator8Iterator4nextB9_:
-  388|  75.5k|    fn next(&mut self) -> Option<Self::Item> {
-  389|  75.5k|        // we repeatedly compute the next range until we find one that is non-empty
-  390|  75.5k|        iter::from_fn(|| self.next_range()).find(|range| !range.is_empty())
-  391|  75.5k|    }
-_RNvMsd_NtNtCsh8aFm9YGVF5_17fvm_ipld_bitfield4iter7combineINtB5_9LookaheadINtB7_6RangesINtNtNtNtCsaSlaN8YLTo0_4core4iter8adapters6cloned6ClonedINtNtNtB1v_5slice4iter4IterINtNtNtB1v_3ops5range5RangeyEEEEE4peekB9_:
-  473|  80.8k|    fn peek(&mut self) -> Option<&mut I::Item> {
-  474|  80.8k|        self.next.as_mut()
-  475|  80.8k|    }
-_RNvMsa_NtNtCsh8aFm9YGVF5_17fvm_ipld_bitfield4iter7combineINtB5_5MergeINtB5_8__CombineINtB7_6RangesINtNtNtNtCsaSlaN8YLTo0_4core4iter8adapters6cloned6ClonedINtNtNtB1H_5slice4iter4IterINtNtNtB1H_3ops5range5RangeyEEEEIB1m_INtNtNtB1F_7sources7from_fn6FromFnNCINvB7_16ranges_from_bitsINtNtB1D_6copied6CopiedINtNtNtNtCsbEQaeqvpCHy_5alloc11collections5btree3set4IteryEEE0EENtB5_5UnionEE3newB9_:
-  425|  2.38k|    pub fn new(iter: I) -> Self {
-  426|  2.38k|        Self {
-  427|  2.38k|            iter: Lookahead::new(iter),
-  428|  2.38k|        }
-  429|  2.38k|    }
-_RNvXs0_NtNtCsh8aFm9YGVF5_17fvm_ipld_bitfield4iter7combineNtB5_10DifferenceNtB5_10Combinator11advance_lhs:
-  156|  39.9k|    fn advance_lhs(&mut self, lhs: Range<u64>, rhs: &mut Range<u64>) -> Range<u64> {
-  157|  39.9k|        // lhs:     xx----      xxxx--      --xx--
-  158|  39.9k|        // rhs:     ----xx  or  --xxxx  or  xxxxxx
-  159|  39.9k|        // output:  xx----      xx----      ------
-  160|  39.9k|
-  161|  39.9k|        lhs.start..cmp::min(lhs.end, rhs.start)
-  162|  39.9k|    }
-_RNvMsd_NtNtCsh8aFm9YGVF5_17fvm_ipld_bitfield4iter7combineINtB5_9LookaheadINtB5_7CombineINtB7_6RangesINtNtNtNtCsaSlaN8YLTo0_4core4iter8adapters6cloned6ClonedINtNtNtB1J_5slice4iter4IterINtNtNtB1J_3ops5range5RangeyEEEEIB1o_INtNtNtB1H_7sources7from_fn6FromFnNCINvB7_16ranges_from_bitsINtNtB1F_6copied6CopiedINtNtNtNtCsbEQaeqvpCHy_5alloc11collections5btree3set4IteryEEE0EENtB5_5UnionEE4peekB9_:
-  473|  94.7k|    fn peek(&mut self) -> Option<&mut I::Item> {
-  474|  94.7k|        self.next.as_mut()
-  475|  94.7k|    }
-_RNvXs9_NtNtCsh8aFm9YGVF5_17fvm_ipld_bitfield4iter7combineINtB5_8__CombineINtB7_6RangesINtNtNtNtCsaSlaN8YLTo0_4core4iter8adapters6cloned6ClonedINtNtNtB1v_5slice4iter4IterINtNtNtB1v_3ops5range5RangeyEEEEIB1a_INtNtNtB1t_7sources7from_fn6FromFnNCINvB7_16ranges_from_bitsINtNtB1r_6copied6CopiedINtNtNtNtCsbEQaeqvpCHy_5alloc11collections5btree3set4IteryEEE0EENtB5_5UnionENtNtNtB1t_6traits8iterator8Iterator4nextB9_:
-  388|  80.8k|    fn next(&mut self) -> Option<Self::Item> {
-  389|  80.8k|        // we repeatedly compute the next range until we find one that is non-empty
-  390|  80.8k|        iter::from_fn(|| self.next_range()).find(|range| !range.is_empty())
-  391|  80.8k|    }
-_RNvXs0_NtNtCsh8aFm9YGVF5_17fvm_ipld_bitfield4iter7combineNtB5_10DifferenceNtB5_10Combinator16advance_rhs_tail:
-  187|    396|    fn advance_rhs_tail(&mut self, _rhs: Range<u64>) -> Option<Range<u64>> {
-  188|    396|        // the difference between an empty range and a range is an empty range
-  189|    396|        None
-  190|    396|    }
-_RNvMs8_NtNtCsh8aFm9YGVF5_17fvm_ipld_bitfield4iter7combineINtB5_8__CombineINtB7_6RangesINtNtNtNtCsaSlaN8YLTo0_4core4iter8adapters6cloned6ClonedINtNtNtB1v_5slice4iter4IterINtNtNtB1v_3ops5range5RangeyEEEEIB1a_INtNtNtB1t_7sources7from_fn6FromFnNCINvB7_16ranges_from_bitsINtNtB1r_6copied6CopiedINtNtNtNtCsbEQaeqvpCHy_5alloc11collections5btree3set4IteryEEE0EENtB5_5UnionE3newB9_:
-  343|  2.38k|    fn new(lhs: A, rhs: B) -> Self {
-  344|  2.38k|        Self {
-  345|  2.38k|            lhs: Lookahead::new(lhs),
-  346|  2.38k|            rhs: Lookahead::new(rhs),
-  347|  2.38k|            combinator: Default::default(),
-  348|  2.38k|        }
-  349|  2.38k|    }
-_RNvXsb_NtNtCsh8aFm9YGVF5_17fvm_ipld_bitfield4iter7combineINtB5_5MergeINtB5_8__CombineINtB5_7CombineINtB7_6RangesINtNtNtNtCsaSlaN8YLTo0_4core4iter8adapters6cloned6ClonedINtNtNtB1V_5slice4iter4IterINtNtNtB1V_3ops5range5RangeyEEEEIB1A_INtNtNtB1T_7sources7from_fn6FromFnNCINvB7_16ranges_from_bitsINtNtB1R_6copied6CopiedINtNtNtNtCsbEQaeqvpCHy_5alloc11collections5btree3set4IteryEEE0EENtB5_5UnionEB3D_NtB5_10DifferenceEENtNtNtB1T_6traits8iterator8Iterator4nextB9_:
-  438|  75.5k|    fn next(&mut self) -> Option<Self::Item> {
-  439|  75.5k|        let mut range = self.iter.next()?;
+  376|  86.5k|        range
+  377|  88.4k|    }
+_RNvMs8_NtNtCsiXw2KPZVxgk_17fvm_ipld_bitfield4iter7combineINtB5_8__CombineINtB7_6RangesINtNtNtNtCsgY1nmJpWYPT_4core4iter8adapters6cloned6ClonedINtNtNtB1v_5slice4iter4IterINtNtNtB1v_3ops5range5RangeyEEEEIB1a_INtNtNtB1t_7sources7from_fn6FromFnNCINvB7_16ranges_from_bitsINtNtB1r_6copied6CopiedINtNtNtNtCseushfdLQbjT_5alloc11collections5btree3set4IteryEEE0EENtB5_5UnionE10next_rangeB9_:
+  354|  76.4k|    fn next_range(&mut self) -> Option<Range<u64>> {
+  355|  76.4k|        let (range, advance_lhs) = match (self.lhs.peek(), self.rhs.peek()) {
+  356|  12.5k|            (Some(lhs), Some(rhs)) => {
+  357|  12.5k|                // if both iterators are non-empty, we advance the one whichever's
+  358|  12.5k|                // corresponding range has a smaller upper bound
+  359|  12.5k|                if lhs.end <= rhs.end {
+  360|  3.22k|                    (Some(self.combinator.advance_lhs(lhs.clone(), rhs)), true)
+  361|       |                } else {
+  362|  9.34k|                    (Some(self.combinator.advance_rhs(lhs, rhs.clone())), false)
+  363|       |                }
+  364|       |            }
+  365|  22.6k|            (Some(lhs), None) => (self.combinator.advance_lhs_tail(lhs.clone()), true),
+  366|  38.9k|            (None, Some(rhs)) => (self.combinator.advance_rhs_tail(rhs.clone()), false),
+  367|  2.29k|            (None, None) => return None,
+  368|       |        };
+  369|       |
+  370|  74.1k|        if advance_lhs {
+  371|  25.8k|            self.lhs.next();
+  372|  48.2k|        } else {
+  373|  48.2k|            self.rhs.next();
+  374|  48.2k|        }
+  375|       |
+  376|  74.1k|        range
+  377|  76.4k|    }
+_RNvMs5_NtNtCsiXw2KPZVxgk_17fvm_ipld_bitfield4iter7combineINtB5_7CombineINtB7_6RangesINtNtNtNtCsgY1nmJpWYPT_4core4iter8adapters6cloned6ClonedINtNtNtB1t_5slice4iter4IterINtNtNtB1t_3ops5range5RangeyEEEEIB18_INtNtNtB1r_7sources7from_fn6FromFnNCINvB7_16ranges_from_bitsINtNtB1p_6copied6CopiedINtNtNtNtCseushfdLQbjT_5alloc11collections5btree3set4IteryEEE0EENtB5_5UnionE3newB9_:
+  298|  2.29k|    pub fn new(a: A, b: B) -> Self {
+  299|  2.29k|        Self(Merge::new(_Combine::new(a, b)))
+  300|  2.29k|    }
+_RNvXsb_NtNtCsiXw2KPZVxgk_17fvm_ipld_bitfield4iter7combineINtB5_5MergeINtB5_8__CombineINtB7_6RangesINtNtNtNtCsgY1nmJpWYPT_4core4iter8adapters6cloned6ClonedINtNtNtB1H_5slice4iter4IterINtNtNtB1H_3ops5range5RangeyEEEEIB1m_INtNtNtB1F_7sources7from_fn6FromFnNCINvB7_16ranges_from_bitsINtNtB1D_6copied6CopiedINtNtNtNtCseushfdLQbjT_5alloc11collections5btree3set4IteryEEE0EENtB5_5UnionEENtNtNtB1F_6traits8iterator8Iterator4nextB9_:
+  438|  70.3k|    fn next(&mut self) -> Option<Self::Item> {
+  439|  70.3k|        let mut range = self.iter.next()?;
   440|       |
   441|       |        // as long as the next range overlaps with (or touches) current range,
   442|       |        // we merge it into the current range
-  443|  73.1k|        while let Some(next) = self.iter.peek() {
-  444|  70.9k|            if next.start > range.end {
-  445|  70.9k|                break;
+  443|  74.1k|        while let Some(next) = self.iter.peek() {
+  444|  72.0k|            if next.start > range.end {
+  445|  65.9k|                break;
+  446|  6.09k|            }
+  447|  6.09k|
+  448|  6.09k|            range.end = cmp::max(range.end, next.end);
+  449|  6.09k|            self.iter.next();
+  450|       |        }
+  451|       |
+  452|  68.1k|        Some(range)
+  453|  70.3k|    }
+_RNvXs6_NtNtCsiXw2KPZVxgk_17fvm_ipld_bitfield4iter7combineINtB5_7CombineINtB7_6RangesINtNtNtNtCsgY1nmJpWYPT_4core4iter8adapters6cloned6ClonedINtNtNtB1t_5slice4iter4IterINtNtNtB1t_3ops5range5RangeyEEEEIB18_INtNtNtB1r_7sources7from_fn6FromFnNCINvB7_16ranges_from_bitsINtNtB1p_6copied6CopiedINtNtNtNtCseushfdLQbjT_5alloc11collections5btree3set4IteryEEE0EENtB5_5UnionENtNtNtB1r_6traits8iterator8Iterator4nextB9_:
+  311|  70.3k|    fn next(&mut self) -> Option<Self::Item> {
+  312|  70.3k|        self.0.next()
+  313|  70.3k|    }
+_RNvXs9_NtNtCsiXw2KPZVxgk_17fvm_ipld_bitfield4iter7combineINtB5_8__CombineINtB5_7CombineINtB7_6RangesINtNtNtNtCsgY1nmJpWYPT_4core4iter8adapters6cloned6ClonedINtNtNtB1J_5slice4iter4IterINtNtNtB1J_3ops5range5RangeyEEEEIB1o_INtNtNtB1H_7sources7from_fn6FromFnNCINvB7_16ranges_from_bitsINtNtB1F_6copied6CopiedINtNtNtNtCseushfdLQbjT_5alloc11collections5btree3set4IteryEEE0EENtB5_5UnionEB3r_NtB5_10DifferenceENtNtNtB1H_6traits8iterator8Iterator4nextB9_:
+  388|  71.5k|    fn next(&mut self) -> Option<Self::Item> {
+  389|  71.5k|        // we repeatedly compute the next range until we find one that is non-empty
+  390|  71.5k|        iter::from_fn(|| self.next_range()).find(|range| !range.is_empty())
+  391|  71.5k|    }
+_RNCNvXs9_NtNtCsiXw2KPZVxgk_17fvm_ipld_bitfield4iter7combineINtB7_8__CombineINtB9_6RangesINtNtNtNtCsgY1nmJpWYPT_4core4iter8adapters6cloned6ClonedINtNtNtB1x_5slice4iter4IterINtNtNtB1x_3ops5range5RangeyEEEEIB1c_INtNtNtB1v_7sources7from_fn6FromFnNCINvB9_16ranges_from_bitsINtNtB1t_6copied6CopiedINtNtNtNtCseushfdLQbjT_5alloc11collections5btree3set4IteryEEE0EENtB7_5UnionENtNtNtB1v_6traits8iterator8Iterator4next0Bb_:
+  390|  76.4k|        iter::from_fn(|| self.next_range()).find(|range| !range.is_empty())
+_RNvMsd_NtNtCsiXw2KPZVxgk_17fvm_ipld_bitfield4iter7combineINtB5_9LookaheadINtB7_6RangesINtNtNtNtCsgY1nmJpWYPT_4core4iter8adapters6cloned6ClonedINtNtNtB1v_5slice4iter4IterINtNtNtB1v_3ops5range5RangeyEEEEE4peekB9_:
+  473|  76.4k|    fn peek(&mut self) -> Option<&mut I::Item> {
+  474|  76.4k|        self.next.as_mut()
+  475|  76.4k|    }
+_RNvXsf_NtNtCsiXw2KPZVxgk_17fvm_ipld_bitfield4iter7combineNtB5_5UnionNtNtCsgY1nmJpWYPT_4core7default7Default7defaultB9_:
+   87|  2.29k|#[derive(Default)]
+_RNvXse_NtNtCsiXw2KPZVxgk_17fvm_ipld_bitfield4iter7combineINtB5_9LookaheadINtB7_6RangesINtNtNtNtCsgY1nmJpWYPT_4core4iter8adapters6cloned6ClonedINtNtNtB1v_5slice4iter4IterINtNtNtB1v_3ops5range5RangeyEEEEENtNtNtB1t_6traits8iterator8Iterator4nextB9_:
+  481|  25.8k|    fn next(&mut self) -> Option<Self::Item> {
+  482|       |        // `self.next` always stores the next element, so if it is `None`, the iterator is empty
+  483|  25.8k|        let next = self.next.take()?;
+  484|  25.8k|        self.next = self.iter.next();
+  485|  25.8k|        Some(next)
+  486|  25.8k|    }
+_RNvXs0_NtNtCsiXw2KPZVxgk_17fvm_ipld_bitfield4iter7combineNtB5_10DifferenceNtB5_10Combinator11advance_lhs:
+  156|  37.2k|    fn advance_lhs(&mut self, lhs: Range<u64>, rhs: &mut Range<u64>) -> Range<u64> {
+  157|  37.2k|        // lhs:     xx----      xxxx--      --xx--
+  158|  37.2k|        // rhs:     ----xx  or  --xxxx  or  xxxxxx
+  159|  37.2k|        // output:  xx----      xx----      ------
+  160|  37.2k|
+  161|  37.2k|        lhs.start..cmp::min(lhs.end, rhs.start)
+  162|  37.2k|    }
+_RNvMsd_NtNtCsiXw2KPZVxgk_17fvm_ipld_bitfield4iter7combineINtB5_9LookaheadINtB5_8__CombineINtB5_7CombineINtB7_6RangesINtNtNtNtCsgY1nmJpWYPT_4core4iter8adapters6cloned6ClonedINtNtNtB1Z_5slice4iter4IterINtNtNtB1Z_3ops5range5RangeyEEEEIB1E_INtNtNtB1X_7sources7from_fn6FromFnNCINvB7_16ranges_from_bitsINtNtB1V_6copied6CopiedINtNtNtNtCseushfdLQbjT_5alloc11collections5btree3set4IteryEEE0EENtB5_5UnionEB3H_NtB5_10DifferenceEE3newB9_:
+  468|  2.29k|    fn new(mut iter: I) -> Self {
+  469|  2.29k|        let next = iter.next();
+  470|  2.29k|        Self { iter, next }
+  471|  2.29k|    }
+_RNvMsd_NtNtCsiXw2KPZVxgk_17fvm_ipld_bitfield4iter7combineINtB5_9LookaheadINtB7_6RangesINtNtNtNtCsgY1nmJpWYPT_4core4iter7sources7from_fn6FromFnNCINvB7_16ranges_from_bitsINtNtNtB1t_8adapters6copied6CopiedINtNtNtNtCseushfdLQbjT_5alloc11collections5btree3set4IteryEEE0EEE3newB9_:
+  468|  4.58k|    fn new(mut iter: I) -> Self {
+  469|  4.58k|        let next = iter.next();
+  470|  4.58k|        Self { iter, next }
+  471|  4.58k|    }
+_RNvMs5_NtNtCsiXw2KPZVxgk_17fvm_ipld_bitfield4iter7combineINtB5_7CombineIBU_INtB7_6RangesINtNtNtNtCsgY1nmJpWYPT_4core4iter8adapters6cloned6ClonedINtNtNtB1x_5slice4iter4IterINtNtNtB1x_3ops5range5RangeyEEEEIB1c_INtNtNtB1v_7sources7from_fn6FromFnNCINvB7_16ranges_from_bitsINtNtB1t_6copied6CopiedINtNtNtNtCseushfdLQbjT_5alloc11collections5btree3set4IteryEEE0EENtB5_5UnionEB3f_NtB5_10DifferenceE3newB9_:
+  298|  2.29k|    pub fn new(a: A, b: B) -> Self {
+  299|  2.29k|        Self(Merge::new(_Combine::new(a, b)))
+  300|  2.29k|    }
+_RNvXse_NtNtCsiXw2KPZVxgk_17fvm_ipld_bitfield4iter7combineINtB5_9LookaheadINtB7_6RangesINtNtNtNtCsgY1nmJpWYPT_4core4iter7sources7from_fn6FromFnNCINvB7_16ranges_from_bitsINtNtNtB1t_8adapters6copied6CopiedINtNtNtNtCseushfdLQbjT_5alloc11collections5btree3set4IteryEEE0EEENtNtNtB1t_6traits8iterator8Iterator4nextB9_:
+  481|  66.7k|    fn next(&mut self) -> Option<Self::Item> {
+  482|       |        // `self.next` always stores the next element, so if it is `None`, the iterator is empty
+  483|  66.7k|        let next = self.next.take()?;
+  484|  66.7k|        self.next = self.iter.next();
+  485|  66.7k|        Some(next)
+  486|  66.7k|    }
+_RNvMsd_NtNtCsiXw2KPZVxgk_17fvm_ipld_bitfield4iter7combineINtB5_9LookaheadINtB5_8__CombineINtB7_6RangesINtNtNtNtCsgY1nmJpWYPT_4core4iter8adapters6cloned6ClonedINtNtNtB1L_5slice4iter4IterINtNtNtB1L_3ops5range5RangeyEEEEIB1q_INtNtNtB1J_7sources7from_fn6FromFnNCINvB7_16ranges_from_bitsINtNtB1H_6copied6CopiedINtNtNtNtCseushfdLQbjT_5alloc11collections5btree3set4IteryEEE0EENtB5_5UnionEE3newB9_:
+  468|  2.29k|    fn new(mut iter: I) -> Self {
+  469|  2.29k|        let next = iter.next();
+  470|  2.29k|        Self { iter, next }
+  471|  2.29k|    }
+_RNvXse_NtNtCsiXw2KPZVxgk_17fvm_ipld_bitfield4iter7combineINtB5_9LookaheadINtB5_8__CombineINtB5_7CombineINtB7_6RangesINtNtNtNtCsgY1nmJpWYPT_4core4iter8adapters6cloned6ClonedINtNtNtB1Z_5slice4iter4IterINtNtNtB1Z_3ops5range5RangeyEEEEIB1E_INtNtNtB1X_7sources7from_fn6FromFnNCINvB7_16ranges_from_bitsINtNtB1V_6copied6CopiedINtNtNtNtCseushfdLQbjT_5alloc11collections5btree3set4IteryEEE0EENtB5_5UnionEB3H_NtB5_10DifferenceEENtNtNtB1X_6traits8iterator8Iterator4nextB9_:
+  481|  71.5k|    fn next(&mut self) -> Option<Self::Item> {
+  482|       |        // `self.next` always stores the next element, so if it is `None`, the iterator is empty
+  483|  71.5k|        let next = self.next.take()?;
+  484|  69.3k|        self.next = self.iter.next();
+  485|  69.3k|        Some(next)
+  486|  71.5k|    }
+_RNvXsb_NtNtCsiXw2KPZVxgk_17fvm_ipld_bitfield4iter7combineINtB5_5MergeINtB5_8__CombineINtB5_7CombineINtB7_6RangesINtNtNtNtCsgY1nmJpWYPT_4core4iter8adapters6cloned6ClonedINtNtNtB1V_5slice4iter4IterINtNtNtB1V_3ops5range5RangeyEEEEIB1A_INtNtNtB1T_7sources7from_fn6FromFnNCINvB7_16ranges_from_bitsINtNtB1R_6copied6CopiedINtNtNtNtCseushfdLQbjT_5alloc11collections5btree3set4IteryEEE0EENtB5_5UnionEB3D_NtB5_10DifferenceEENtNtNtB1T_6traits8iterator8Iterator4nextB9_:
+  438|  71.5k|    fn next(&mut self) -> Option<Self::Item> {
+  439|  71.5k|        let mut range = self.iter.next()?;
+  440|       |
+  441|       |        // as long as the next range overlaps with (or touches) current range,
+  442|       |        // we merge it into the current range
+  443|  69.3k|        while let Some(next) = self.iter.peek() {
+  444|  67.1k|            if next.start > range.end {
+  445|  67.1k|                break;
   446|      0|            }
   447|      0|
   448|      0|            range.end = cmp::max(range.end, next.end);
   449|      0|            self.iter.next();
   450|       |        }
   451|       |
-  452|  73.1k|        Some(range)
-  453|  75.5k|    }
-_RNCNvXs9_NtNtCsh8aFm9YGVF5_17fvm_ipld_bitfield4iter7combineINtB7_8__CombineINtB9_6RangesINtNtNtNtCsaSlaN8YLTo0_4core4iter8adapters6cloned6ClonedINtNtNtB1x_5slice4iter4IterINtNtNtB1x_3ops5range5RangeyEEEEIB1c_INtNtNtB1v_7sources7from_fn6FromFnNCINvB9_16ranges_from_bitsINtNtB1t_6copied6CopiedINtNtNtNtCsbEQaeqvpCHy_5alloc11collections5btree3set4IteryEEE0EENtB7_5UnionENtNtNtB1v_6traits8iterator8Iterator4nexts_0Bb_:
-  390|  78.4k|        iter::from_fn(|| self.next_range()).find(|range| !range.is_empty())
-_RNvMsd_NtNtCsh8aFm9YGVF5_17fvm_ipld_bitfield4iter7combineINtB5_9LookaheadINtB7_6RangesINtNtNtNtCsaSlaN8YLTo0_4core4iter7sources7from_fn6FromFnNCINvB7_16ranges_from_bitsINtNtNtB1t_8adapters6copied6CopiedINtNtNtNtCsbEQaeqvpCHy_5alloc11collections5btree3set4IteryEEE0EEE3newB9_:
-  468|  4.76k|    fn new(mut iter: I) -> Self {
-  469|  4.76k|        let next = iter.next();
-  470|  4.76k|        Self { iter, next }
-  471|  4.76k|    }
-_RNvXs6_NtNtCsh8aFm9YGVF5_17fvm_ipld_bitfield4iter7combineINtB5_7CombineINtB7_6RangesINtNtNtNtCsaSlaN8YLTo0_4core4iter8adapters6cloned6ClonedINtNtNtB1t_5slice4iter4IterINtNtNtB1t_3ops5range5RangeyEEEEIB18_INtNtNtB1r_7sources7from_fn6FromFnNCINvB7_16ranges_from_bitsINtNtB1p_6copied6CopiedINtNtNtNtCsbEQaeqvpCHy_5alloc11collections5btree3set4IteryEEE0EENtB5_5UnionENtNtNtB1r_6traits8iterator8Iterator4nextB9_:
-  311|  74.2k|    fn next(&mut self) -> Option<Self::Item> {
-  312|  74.2k|        self.0.next()
-  313|  74.2k|    }
-_RNvXNtNtCsh8aFm9YGVF5_17fvm_ipld_bitfield4iter7combineNtB2_5UnionNtB2_10Combinator16advance_lhs_tail:
-  110|  23.7k|    fn advance_lhs_tail(&mut self, lhs: Range<u64>) -> Option<Range<u64>> {
-  111|  23.7k|        // the union of a range and an empty range is just that range
-  112|  23.7k|        Some(lhs)
-  113|  23.7k|    }
-_RNvXsb_NtNtCsh8aFm9YGVF5_17fvm_ipld_bitfield4iter7combineINtB5_5MergeINtB5_8__CombineINtB7_6RangesINtNtNtNtCsaSlaN8YLTo0_4core4iter8adapters6cloned6ClonedINtNtNtB1H_5slice4iter4IterINtNtNtB1H_3ops5range5RangeyEEEEIB1m_INtNtNtB1F_7sources7from_fn6FromFnNCINvB7_16ranges_from_bitsINtNtB1D_6copied6CopiedINtNtNtNtCsbEQaeqvpCHy_5alloc11collections5btree3set4IteryEEE0EENtB5_5UnionEENtNtNtB1F_6traits8iterator8Iterator4nextB9_:
-  438|  74.2k|    fn next(&mut self) -> Option<Self::Item> {
-  439|  74.2k|        let mut range = self.iter.next()?;
-  440|       |
-  441|       |        // as long as the next range overlaps with (or touches) current range,
-  442|       |        // we merge it into the current range
-  443|  78.4k|        while let Some(next) = self.iter.peek() {
-  444|  76.2k|            if next.start > range.end {
-  445|  69.6k|                break;
-  446|  6.58k|            }
-  447|  6.58k|
-  448|  6.58k|            range.end = cmp::max(range.end, next.end);
-  449|  6.58k|            self.iter.next();
-  450|       |        }
-  451|       |
-  452|  71.8k|        Some(range)
-  453|  74.2k|    }
-_RNvMsd_NtNtCsh8aFm9YGVF5_17fvm_ipld_bitfield4iter7combineINtB5_9LookaheadINtB7_6RangesINtNtNtNtCsaSlaN8YLTo0_4core4iter7sources7from_fn6FromFnNCINvB7_16ranges_from_bitsINtNtNtB1t_8adapters6copied6CopiedINtNtNtNtCsbEQaeqvpCHy_5alloc11collections5btree3set4IteryEEE0EEE4peekB9_:
-  473|   175k|    fn peek(&mut self) -> Option<&mut I::Item> {
-  474|   175k|        self.next.as_mut()
-  475|   175k|    }
-_RNCNvXs9_NtNtCsh8aFm9YGVF5_17fvm_ipld_bitfield4iter7combineINtB7_8__CombineINtB9_6RangesINtNtNtNtCsaSlaN8YLTo0_4core4iter8adapters6cloned6ClonedINtNtNtB1x_5slice4iter4IterINtNtNtB1x_3ops5range5RangeyEEEEIB1c_INtNtNtB1v_7sources7from_fn6FromFnNCINvB9_16ranges_from_bitsINtNtB1t_6copied6CopiedINtNtNtNtCsbEQaeqvpCHy_5alloc11collections5btree3set4IteryEEE0EENtB7_5UnionENtNtNtB1v_6traits8iterator8Iterator4next0Bb_:
-  390|  80.8k|        iter::from_fn(|| self.next_range()).find(|range| !range.is_empty())
-_RNvXs6_NtNtCsh8aFm9YGVF5_17fvm_ipld_bitfield4iter7combineINtB5_7CombineIBU_INtB7_6RangesINtNtNtNtCsaSlaN8YLTo0_4core4iter8adapters6cloned6ClonedINtNtNtB1x_5slice4iter4IterINtNtNtB1x_3ops5range5RangeyEEEEIB1c_INtNtNtB1v_7sources7from_fn6FromFnNCINvB7_16ranges_from_bitsINtNtB1t_6copied6CopiedINtNtNtNtCsbEQaeqvpCHy_5alloc11collections5btree3set4IteryEEE0EENtB5_5UnionEB3f_NtB5_10DifferenceENtNtNtB1v_6traits8iterator8Iterator4nextB9_:
-  311|  75.5k|    fn next(&mut self) -> Option<Self::Item> {
-  312|  75.5k|        self.0.next()
-  313|  75.5k|    }
-_RNvXs0_NtNtCsh8aFm9YGVF5_17fvm_ipld_bitfield4iter7combineNtB5_10DifferenceNtB5_10Combinator16advance_lhs_tail:
-  182|  31.8k|    fn advance_lhs_tail(&mut self, lhs: Range<u64>) -> Option<Range<u64>> {
-  183|  31.8k|        // the difference between a range and an empty range is just that range
-  184|  31.8k|        Some(lhs)
-  185|  31.8k|    }
-_RNvXsh_NtNtCsh8aFm9YGVF5_17fvm_ipld_bitfield4iter7combineNtB5_10DifferenceNtNtCsaSlaN8YLTo0_4core7default7Default7defaultB9_:
-  152|  2.38k|#[derive(Default)]
-_RNvMsa_NtNtCsh8aFm9YGVF5_17fvm_ipld_bitfield4iter7combineINtB5_5MergeINtB5_8__CombineINtB5_7CombineINtB7_6RangesINtNtNtNtCsaSlaN8YLTo0_4core4iter8adapters6cloned6ClonedINtNtNtB1V_5slice4iter4IterINtNtNtB1V_3ops5range5RangeyEEEEIB1A_INtNtNtB1T_7sources7from_fn6FromFnNCINvB7_16ranges_from_bitsINtNtB1R_6copied6CopiedINtNtNtNtCsbEQaeqvpCHy_5alloc11collections5btree3set4IteryEEE0EENtB5_5UnionEB3D_NtB5_10DifferenceEE3newB9_:
-  425|  2.38k|    pub fn new(iter: I) -> Self {
-  426|  2.38k|        Self {
-  427|  2.38k|            iter: Lookahead::new(iter),
-  428|  2.38k|        }
-  429|  2.38k|    }
-_RNvMsd_NtNtCsh8aFm9YGVF5_17fvm_ipld_bitfield4iter7combineINtB5_9LookaheadINtB5_7CombineINtB7_6RangesINtNtNtNtCsaSlaN8YLTo0_4core4iter8adapters6cloned6ClonedINtNtNtB1J_5slice4iter4IterINtNtNtB1J_3ops5range5RangeyEEEEIB1o_INtNtNtB1H_7sources7from_fn6FromFnNCINvB7_16ranges_from_bitsINtNtB1F_6copied6CopiedINtNtNtNtCsbEQaeqvpCHy_5alloc11collections5btree3set4IteryEEE0EENtB5_5UnionEE3newB9_:
-  468|  2.38k|    fn new(mut iter: I) -> Self {
-  469|  2.38k|        let next = iter.next();
-  470|  2.38k|        Self { iter, next }
-  471|  2.38k|    }
-_RNvMsd_NtNtCsh8aFm9YGVF5_17fvm_ipld_bitfield4iter7combineINtB5_9LookaheadINtB7_6RangesINtNtNtNtCsaSlaN8YLTo0_4core4iter8adapters6cloned6ClonedINtNtNtB1v_5slice4iter4IterINtNtNtB1v_3ops5range5RangeyEEEEE3newB9_:
-  468|  2.38k|    fn new(mut iter: I) -> Self {
-  469|  2.38k|        let next = iter.next();
-  470|  2.38k|        Self { iter, next }
-  471|  2.38k|    }
-_RNvXse_NtNtCsh8aFm9YGVF5_17fvm_ipld_bitfield4iter7combineINtB5_9LookaheadINtB5_8__CombineINtB7_6RangesINtNtNtNtCsaSlaN8YLTo0_4core4iter8adapters6cloned6ClonedINtNtNtB1L_5slice4iter4IterINtNtNtB1L_3ops5range5RangeyEEEEIB1q_INtNtNtB1J_7sources7from_fn6FromFnNCINvB7_16ranges_from_bitsINtNtB1H_6copied6CopiedINtNtNtNtCsbEQaeqvpCHy_5alloc11collections5btree3set4IteryEEE0EENtB5_5UnionEENtNtNtB1J_6traits8iterator8Iterator4nextB9_:
-  481|  80.8k|    fn next(&mut self) -> Option<Self::Item> {
+  452|  69.3k|        Some(range)
+  453|  71.5k|    }
+_RNvXse_NtNtCsiXw2KPZVxgk_17fvm_ipld_bitfield4iter7combineINtB5_9LookaheadINtB5_7CombineINtB7_6RangesINtNtNtNtCsgY1nmJpWYPT_4core4iter8adapters6cloned6ClonedINtNtNtB1J_5slice4iter4IterINtNtNtB1J_3ops5range5RangeyEEEEIB1o_INtNtNtB1H_7sources7from_fn6FromFnNCINvB7_16ranges_from_bitsINtNtB1F_6copied6CopiedINtNtNtNtCseushfdLQbjT_5alloc11collections5btree3set4IteryEEE0EENtB5_5UnionEENtNtNtB1H_6traits8iterator8Iterator4nextB9_:
+  481|  68.1k|    fn next(&mut self) -> Option<Self::Item> {
   482|       |        // `self.next` always stores the next element, so if it is `None`, the iterator is empty
-  483|  80.8k|        let next = self.next.take()?;
-  484|  78.4k|        self.next = self.iter.next();
-  485|  78.4k|        Some(next)
-  486|  80.8k|    }
-_RNvMs5_NtNtCsh8aFm9YGVF5_17fvm_ipld_bitfield4iter7combineINtB5_7CombineIBU_INtB7_6RangesINtNtNtNtCsaSlaN8YLTo0_4core4iter8adapters6cloned6ClonedINtNtNtB1x_5slice4iter4IterINtNtNtB1x_3ops5range5RangeyEEEEIB1c_INtNtNtB1v_7sources7from_fn6FromFnNCINvB7_16ranges_from_bitsINtNtB1t_6copied6CopiedINtNtNtNtCsbEQaeqvpCHy_5alloc11collections5btree3set4IteryEEE0EENtB5_5UnionEB3f_NtB5_10DifferenceE3newB9_:
-  298|  2.38k|    pub fn new(a: A, b: B) -> Self {
-  299|  2.38k|        Self(Merge::new(_Combine::new(a, b)))
-  300|  2.38k|    }
-_RNvXse_NtNtCsh8aFm9YGVF5_17fvm_ipld_bitfield4iter7combineINtB5_9LookaheadINtB7_6RangesINtNtNtNtCsaSlaN8YLTo0_4core4iter8adapters6cloned6ClonedINtNtNtB1v_5slice4iter4IterINtNtNtB1v_3ops5range5RangeyEEEEENtNtNtB1t_6traits8iterator8Iterator4nextB9_:
-  481|  27.0k|    fn next(&mut self) -> Option<Self::Item> {
-  482|       |        // `self.next` always stores the next element, so if it is `None`, the iterator is empty
-  483|  27.0k|        let next = self.next.take()?;
-  484|  27.0k|        self.next = self.iter.next();
-  485|  27.0k|        Some(next)
-  486|  27.0k|    }
-_RNvMsd_NtNtCsh8aFm9YGVF5_17fvm_ipld_bitfield4iter7combineINtB5_9LookaheadINtB5_8__CombineINtB5_7CombineINtB7_6RangesINtNtNtNtCsaSlaN8YLTo0_4core4iter8adapters6cloned6ClonedINtNtNtB1Z_5slice4iter4IterINtNtNtB1Z_3ops5range5RangeyEEEEIB1E_INtNtNtB1X_7sources7from_fn6FromFnNCINvB7_16ranges_from_bitsINtNtB1V_6copied6CopiedINtNtNtNtCsbEQaeqvpCHy_5alloc11collections5btree3set4IteryEEE0EENtB5_5UnionEB3H_NtB5_10DifferenceEE4peekB9_:
-  473|  73.1k|    fn peek(&mut self) -> Option<&mut I::Item> {
-  474|  73.1k|        self.next.as_mut()
-  475|  73.1k|    }
-_RNvMs8_NtNtCsh8aFm9YGVF5_17fvm_ipld_bitfield4iter7combineINtB5_8__CombineINtB7_6RangesINtNtNtNtCsaSlaN8YLTo0_4core4iter8adapters6cloned6ClonedINtNtNtB1v_5slice4iter4IterINtNtNtB1v_3ops5range5RangeyEEEEIB1a_INtNtNtB1t_7sources7from_fn6FromFnNCINvB7_16ranges_from_bitsINtNtB1r_6copied6CopiedINtNtNtNtCsbEQaeqvpCHy_5alloc11collections5btree3set4IteryEEE0EENtB5_5UnionE10next_rangeB9_:
-  354|  80.8k|    fn next_range(&mut self) -> Option<Range<u64>> {
-  355|  80.8k|        let (range, advance_lhs) = match (self.lhs.peek(), self.rhs.peek()) {
-  356|  13.4k|            (Some(lhs), Some(rhs)) => {
-  357|  13.4k|                // if both iterators are non-empty, we advance the one whichever's
-  358|  13.4k|                // corresponding range has a smaller upper bound
-  359|  13.4k|                if lhs.end <= rhs.end {
-  360|  3.30k|                    (Some(self.combinator.advance_lhs(lhs.clone(), rhs)), true)
-  361|       |                } else {
-  362|  10.1k|                    (Some(self.combinator.advance_rhs(lhs, rhs.clone())), false)
-  363|       |                }
-  364|       |            }
-  365|  23.7k|            (Some(lhs), None) => (self.combinator.advance_lhs_tail(lhs.clone()), true),
-  366|  41.1k|            (None, Some(rhs)) => (self.combinator.advance_rhs_tail(rhs.clone()), false),
-  367|  2.38k|            (None, None) => return None,
-  368|       |        };
-  369|       |
-  370|  78.4k|        if advance_lhs {
-  371|  27.0k|            self.lhs.next();
-  372|  51.3k|        } else {
-  373|  51.3k|            self.rhs.next();
-  374|  51.3k|        }
-  375|       |
-  376|  78.4k|        range
-  377|  80.8k|    }
-_RNvXNtNtCsh8aFm9YGVF5_17fvm_ipld_bitfield4iter7combineNtB2_5UnionNtB2_10Combinator11advance_rhs:
-  106|  10.1k|    fn advance_rhs(&mut self, lhs: &mut Range<u64>, rhs: Range<u64>) -> Range<u64> {
-  107|  10.1k|        cmp::min(lhs.start, rhs.start)..rhs.end
-  108|  10.1k|    }
-_RNvXse_NtNtCsh8aFm9YGVF5_17fvm_ipld_bitfield4iter7combineINtB5_9LookaheadINtB5_8__CombineINtB5_7CombineINtB7_6RangesINtNtNtNtCsaSlaN8YLTo0_4core4iter8adapters6cloned6ClonedINtNtNtB1Z_5slice4iter4IterINtNtNtB1Z_3ops5range5RangeyEEEEIB1E_INtNtNtB1X_7sources7from_fn6FromFnNCINvB7_16ranges_from_bitsINtNtB1V_6copied6CopiedINtNtNtNtCsbEQaeqvpCHy_5alloc11collections5btree3set4IteryEEE0EENtB5_5UnionEB3H_NtB5_10DifferenceEENtNtNtB1X_6traits8iterator8Iterator4nextB9_:
-  481|  75.5k|    fn next(&mut self) -> Option<Self::Item> {
-  482|       |        // `self.next` always stores the next element, so if it is `None`, the iterator is empty
-  483|  75.5k|        let next = self.next.take()?;
-  484|  73.1k|        self.next = self.iter.next();
-  485|  73.1k|        Some(next)
-  486|  75.5k|    }
-_RNvMsd_NtNtCsh8aFm9YGVF5_17fvm_ipld_bitfield4iter7combineINtB5_9LookaheadINtB5_8__CombineINtB7_6RangesINtNtNtNtCsaSlaN8YLTo0_4core4iter8adapters6cloned6ClonedINtNtNtB1L_5slice4iter4IterINtNtNtB1L_3ops5range5RangeyEEEEIB1q_INtNtNtB1J_7sources7from_fn6FromFnNCINvB7_16ranges_from_bitsINtNtB1H_6copied6CopiedINtNtNtNtCsbEQaeqvpCHy_5alloc11collections5btree3set4IteryEEE0EENtB5_5UnionEE4peekB9_:
-  473|  78.4k|    fn peek(&mut self) -> Option<&mut I::Item> {
-  474|  78.4k|        self.next.as_mut()
-  475|  78.4k|    }
+  483|  68.1k|        let next = self.next.take()?;
+  484|  68.1k|        self.next = self.iter.next();
+  485|  68.1k|        Some(next)
+  486|  68.1k|    }
+_RNvXs0_NtNtCsiXw2KPZVxgk_17fvm_ipld_bitfield4iter7combineNtB5_10DifferenceNtB5_10Combinator16advance_rhs_tail:
+  187|    363|    fn advance_rhs_tail(&mut self, _rhs: Range<u64>) -> Option<Range<u64>> {
+  188|    363|        // the difference between an empty range and a range is an empty range
+  189|    363|        None
+  190|    363|    }
+_RNvXs0_NtNtCsiXw2KPZVxgk_17fvm_ipld_bitfield4iter7combineNtB5_10DifferenceNtB5_10Combinator16advance_lhs_tail:
+  182|  30.8k|    fn advance_lhs_tail(&mut self, lhs: Range<u64>) -> Option<Range<u64>> {
+  183|  30.8k|        // the difference between a range and an empty range is just that range
+  184|  30.8k|        Some(lhs)
+  185|  30.8k|    }
+_RNvMsd_NtNtCsiXw2KPZVxgk_17fvm_ipld_bitfield4iter7combineINtB5_9LookaheadINtB5_8__CombineINtB7_6RangesINtNtNtNtCsgY1nmJpWYPT_4core4iter8adapters6cloned6ClonedINtNtNtB1L_5slice4iter4IterINtNtNtB1L_3ops5range5RangeyEEEEIB1q_INtNtNtB1J_7sources7from_fn6FromFnNCINvB7_16ranges_from_bitsINtNtB1H_6copied6CopiedINtNtNtNtCseushfdLQbjT_5alloc11collections5btree3set4IteryEEE0EENtB5_5UnionEE4peekB9_:
+  473|  74.1k|    fn peek(&mut self) -> Option<&mut I::Item> {
+  474|  74.1k|        self.next.as_mut()
+  475|  74.1k|    }
+_RNvMsa_NtNtCsiXw2KPZVxgk_17fvm_ipld_bitfield4iter7combineINtB5_5MergeINtB5_8__CombineINtB5_7CombineINtB7_6RangesINtNtNtNtCsgY1nmJpWYPT_4core4iter8adapters6cloned6ClonedINtNtNtB1V_5slice4iter4IterINtNtNtB1V_3ops5range5RangeyEEEEIB1A_INtNtNtB1T_7sources7from_fn6FromFnNCINvB7_16ranges_from_bitsINtNtB1R_6copied6CopiedINtNtNtNtCseushfdLQbjT_5alloc11collections5btree3set4IteryEEE0EENtB5_5UnionEB3D_NtB5_10DifferenceEE3newB9_:
+  425|  2.29k|    pub fn new(iter: I) -> Self {
+  426|  2.29k|        Self {
+  427|  2.29k|            iter: Lookahead::new(iter),
+  428|  2.29k|        }
+  429|  2.29k|    }
+_RNCNvXs9_NtNtCsiXw2KPZVxgk_17fvm_ipld_bitfield4iter7combineINtB7_8__CombineINtB7_7CombineINtB9_6RangesINtNtNtNtCsgY1nmJpWYPT_4core4iter8adapters6cloned6ClonedINtNtNtB1L_5slice4iter4IterINtNtNtB1L_3ops5range5RangeyEEEEIB1q_INtNtNtB1J_7sources7from_fn6FromFnNCINvB9_16ranges_from_bitsINtNtB1H_6copied6CopiedINtNtNtNtCseushfdLQbjT_5alloc11collections5btree3set4IteryEEE0EENtB7_5UnionEB3t_NtB7_10DifferenceENtNtNtB1J_6traits8iterator8Iterator4nexts_0Bb_:
+  390|  86.1k|        iter::from_fn(|| self.next_range()).find(|range| !range.is_empty())
+_RNvMsd_NtNtCsiXw2KPZVxgk_17fvm_ipld_bitfield4iter7combineINtB5_9LookaheadINtB7_6RangesINtNtNtNtCsgY1nmJpWYPT_4core4iter7sources7from_fn6FromFnNCINvB7_16ranges_from_bitsINtNtNtB1t_8adapters6copied6CopiedINtNtNtNtCseushfdLQbjT_5alloc11collections5btree3set4IteryEEE0EEE4peekB9_:
+  473|   164k|    fn peek(&mut self) -> Option<&mut I::Item> {
+  474|   164k|        self.next.as_mut()
+  475|   164k|    }
+_RNvXs6_NtNtCsiXw2KPZVxgk_17fvm_ipld_bitfield4iter7combineINtB5_7CombineIBU_INtB7_6RangesINtNtNtNtCsgY1nmJpWYPT_4core4iter8adapters6cloned6ClonedINtNtNtB1x_5slice4iter4IterINtNtNtB1x_3ops5range5RangeyEEEEIB1c_INtNtNtB1v_7sources7from_fn6FromFnNCINvB7_16ranges_from_bitsINtNtB1t_6copied6CopiedINtNtNtNtCseushfdLQbjT_5alloc11collections5btree3set4IteryEEE0EENtB5_5UnionEB3f_NtB5_10DifferenceENtNtNtB1v_6traits8iterator8Iterator4nextB9_:
+  311|  71.5k|    fn next(&mut self) -> Option<Self::Item> {
+  312|  71.5k|        self.0.next()
+  313|  71.5k|    }
+_RNvMsd_NtNtCsiXw2KPZVxgk_17fvm_ipld_bitfield4iter7combineINtB5_9LookaheadINtB5_8__CombineINtB5_7CombineINtB7_6RangesINtNtNtNtCsgY1nmJpWYPT_4core4iter8adapters6cloned6ClonedINtNtNtB1Z_5slice4iter4IterINtNtNtB1Z_3ops5range5RangeyEEEEIB1E_INtNtNtB1X_7sources7from_fn6FromFnNCINvB7_16ranges_from_bitsINtNtB1V_6copied6CopiedINtNtNtNtCseushfdLQbjT_5alloc11collections5btree3set4IteryEEE0EENtB5_5UnionEB3H_NtB5_10DifferenceEE4peekB9_:
+  473|  69.3k|    fn peek(&mut self) -> Option<&mut I::Item> {
+  474|  69.3k|        self.next.as_mut()
+  475|  69.3k|    }
+_RNvMsa_NtNtCsiXw2KPZVxgk_17fvm_ipld_bitfield4iter7combineINtB5_5MergeINtB5_8__CombineINtB7_6RangesINtNtNtNtCsgY1nmJpWYPT_4core4iter8adapters6cloned6ClonedINtNtNtB1H_5slice4iter4IterINtNtNtB1H_3ops5range5RangeyEEEEIB1m_INtNtNtB1F_7sources7from_fn6FromFnNCINvB7_16ranges_from_bitsINtNtB1D_6copied6CopiedINtNtNtNtCseushfdLQbjT_5alloc11collections5btree3set4IteryEEE0EENtB5_5UnionEE3newB9_:
+  425|  2.29k|    pub fn new(iter: I) -> Self {
+  426|  2.29k|        Self {
+  427|  2.29k|            iter: Lookahead::new(iter),
+  428|  2.29k|        }
+  429|  2.29k|    }
+_RNvXNtNtCsiXw2KPZVxgk_17fvm_ipld_bitfield4iter7combineNtB2_5UnionNtB2_10Combinator16advance_lhs_tail:
+  110|  22.6k|    fn advance_lhs_tail(&mut self, lhs: Range<u64>) -> Option<Range<u64>> {
+  111|  22.6k|        // the union of a range and an empty range is just that range
+  112|  22.6k|        Some(lhs)
+  113|  22.6k|    }
+_RNvMsd_NtNtCsiXw2KPZVxgk_17fvm_ipld_bitfield4iter7combineINtB5_9LookaheadINtB7_6RangesINtNtNtNtCsgY1nmJpWYPT_4core4iter8adapters6cloned6ClonedINtNtNtB1v_5slice4iter4IterINtNtNtB1v_3ops5range5RangeyEEEEE3newB9_:
+  468|  2.29k|    fn new(mut iter: I) -> Self {
+  469|  2.29k|        let next = iter.next();
+  470|  2.29k|        Self { iter, next }
+  471|  2.29k|    }
+_RNCNvXs9_NtNtCsiXw2KPZVxgk_17fvm_ipld_bitfield4iter7combineINtB7_8__CombineINtB7_7CombineINtB9_6RangesINtNtNtNtCsgY1nmJpWYPT_4core4iter8adapters6cloned6ClonedINtNtNtB1L_5slice4iter4IterINtNtNtB1L_3ops5range5RangeyEEEEIB1q_INtNtNtB1J_7sources7from_fn6FromFnNCINvB9_16ranges_from_bitsINtNtB1H_6copied6CopiedINtNtNtNtCseushfdLQbjT_5alloc11collections5btree3set4IteryEEE0EENtB7_5UnionEB3t_NtB7_10DifferenceENtNtNtB1J_6traits8iterator8Iterator4next0Bb_:
+  390|  88.4k|        iter::from_fn(|| self.next_range()).find(|range| !range.is_empty())
+_RNvMs8_NtNtCsiXw2KPZVxgk_17fvm_ipld_bitfield4iter7combineINtB5_8__CombineINtB7_6RangesINtNtNtNtCsgY1nmJpWYPT_4core4iter8adapters6cloned6ClonedINtNtNtB1v_5slice4iter4IterINtNtNtB1v_3ops5range5RangeyEEEEIB1a_INtNtNtB1t_7sources7from_fn6FromFnNCINvB7_16ranges_from_bitsINtNtB1r_6copied6CopiedINtNtNtNtCseushfdLQbjT_5alloc11collections5btree3set4IteryEEE0EENtB5_5UnionE3newB9_:
+  343|  2.29k|    fn new(lhs: A, rhs: B) -> Self {
+  344|  2.29k|        Self {
+  345|  2.29k|            lhs: Lookahead::new(lhs),
+  346|  2.29k|            rhs: Lookahead::new(rhs),
+  347|  2.29k|            combinator: Default::default(),
+  348|  2.29k|        }
+  349|  2.29k|    }
+_RNvXsh_NtNtCsiXw2KPZVxgk_17fvm_ipld_bitfield4iter7combineNtB5_10DifferenceNtNtCsgY1nmJpWYPT_4core7default7Default7defaultB9_:
+  152|  2.29k|#[derive(Default)]
+_RNvMs8_NtNtCsiXw2KPZVxgk_17fvm_ipld_bitfield4iter7combineINtB5_8__CombineINtB5_7CombineINtB7_6RangesINtNtNtNtCsgY1nmJpWYPT_4core4iter8adapters6cloned6ClonedINtNtNtB1J_5slice4iter4IterINtNtNtB1J_3ops5range5RangeyEEEEIB1o_INtNtNtB1H_7sources7from_fn6FromFnNCINvB7_16ranges_from_bitsINtNtB1F_6copied6CopiedINtNtNtNtCseushfdLQbjT_5alloc11collections5btree3set4IteryEEE0EENtB5_5UnionEB3r_NtB5_10DifferenceE3newB9_:
+  343|  2.29k|    fn new(lhs: A, rhs: B) -> Self {
+  344|  2.29k|        Self {
+  345|  2.29k|            lhs: Lookahead::new(lhs),
+  346|  2.29k|            rhs: Lookahead::new(rhs),
+  347|  2.29k|            combinator: Default::default(),
+  348|  2.29k|        }
+  349|  2.29k|    }
+_RNvXs0_NtNtCsiXw2KPZVxgk_17fvm_ipld_bitfield4iter7combineNtB5_10DifferenceNtB5_10Combinator11advance_rhs:
+  164|  18.0k|    fn advance_rhs(&mut self, lhs: &mut Range<u64>, rhs: Range<u64>) -> Range<u64> {
+  165|  18.0k|        // since we're advancing the rhs, we need to potentially shorten the lhs
+  166|  18.0k|        // to avoid it from returning invalid bits in the next iteration
+  167|  18.0k|        //
+  168|  18.0k|        // e.g. `--xxxx`, `xxxx--` should first produce
+  169|  18.0k|        // `------` and then `----xx`, not
+  170|  18.0k|        // `------` and then `--xxxx`
+  171|  18.0k|        //
+  172|  18.0k|        // lhs:      ----xx      --xxxx      xxxxxx
+  173|  18.0k|        // rhs:      xx----  or  xxxx--  or  --xx--
+  174|  18.0k|        // output:   ------      ------      xx----
+  175|  18.0k|        // new lhs:  ----xx      ----xx      ----xx
+  176|  18.0k|
+  177|  18.0k|        let difference = lhs.start..cmp::min(lhs.end, rhs.start);
+  178|  18.0k|        lhs.start = cmp::max(lhs.start, rhs.end);
+  179|  18.0k|        difference
+  180|  18.0k|    }
+_RNvXs9_NtNtCsiXw2KPZVxgk_17fvm_ipld_bitfield4iter7combineINtB5_8__CombineINtB7_6RangesINtNtNtNtCsgY1nmJpWYPT_4core4iter8adapters6cloned6ClonedINtNtNtB1v_5slice4iter4IterINtNtNtB1v_3ops5range5RangeyEEEEIB1a_INtNtNtB1t_7sources7from_fn6FromFnNCINvB7_16ranges_from_bitsINtNtB1r_6copied6CopiedINtNtNtNtCseushfdLQbjT_5alloc11collections5btree3set4IteryEEE0EENtB5_5UnionENtNtNtB1t_6traits8iterator8Iterator4nextB9_:
+  388|  76.4k|    fn next(&mut self) -> Option<Self::Item> {
+  389|  76.4k|        // we repeatedly compute the next range until we find one that is non-empty
+  390|  76.4k|        iter::from_fn(|| self.next_range()).find(|range| !range.is_empty())
+  391|  76.4k|    }
 
-_RINvNtCsh8aFm9YGVF5_17fvm_ipld_bitfield4iter16ranges_from_bitsINtNtNtNtCsaSlaN8YLTo0_4core4iter8adapters6copied6CopiedINtNtNtNtCsbEQaeqvpCHy_5alloc11collections5btree3set4IteryEEEB4_:
-  164|  4.76k|pub(crate) fn ranges_from_bits(bits: impl IntoIterator<Item = u64>) -> impl RangeIterator {
-  165|  4.76k|    let mut iter = bits.into_iter().peekable();
-  166|  4.76k|
-  167|  4.76k|    Ranges::new(iter::from_fn(move || {
+_RNCINvNtCsiXw2KPZVxgk_17fvm_ipld_bitfield4iter16ranges_from_bitsINtNtNtNtCsgY1nmJpWYPT_4core4iter8adapters6copied6CopiedINtNtNtNtCseushfdLQbjT_5alloc11collections5btree3set4IteryEEE0B6_:
+  167|  71.2k|    Ranges::new(iter::from_fn(move || {
+  168|  71.2k|        let start = iter.next()?;
+  169|  66.8k|        let mut end = start.checked_add(1).expect("bitfield overflow");
+  170|  67.2k|        while let Some(&next) = iter.peek() {
+  171|  65.0k|            if next < end {
+  172|      0|                panic!("out of order bitfield")
+  173|  65.0k|            } else if next > end {
+  174|  64.6k|                break;
+  175|    402|            }
+  176|    402|            end = end.checked_add(1).expect("bitfield overflow");
+  177|    402|            iter.next();
+  178|       |        }
+  179|  66.8k|        Some(start..end)
+  180|  71.2k|    }))
+_RINvMs2_NtCsiXw2KPZVxgk_17fvm_ipld_bitfield4iterINtB6_6RangesINtNtNtNtCsgY1nmJpWYPT_4core4iter8adapters6cloned6ClonedINtNtNtB16_5slice4iter4IterINtNtNtB16_3ops5range5RangeyEEEE3newBX_EB8_:
+  140|  2.29k|    pub fn new<II>(iter: II) -> Self
+  141|  2.29k|    where
+  142|  2.29k|        II: IntoIterator<IntoIter = I, Item = Range<u64>>,
+  143|  2.29k|    {
+  144|  2.29k|        Self(iter.into_iter())
+  145|  2.29k|    }
+_RINvNtCsiXw2KPZVxgk_17fvm_ipld_bitfield4iter16ranges_from_bitsINtNtNtNtCsgY1nmJpWYPT_4core4iter8adapters6copied6CopiedINtNtNtNtCseushfdLQbjT_5alloc11collections5btree3set4IteryEEEB4_:
+  164|  4.58k|pub(crate) fn ranges_from_bits(bits: impl IntoIterator<Item = u64>) -> impl RangeIterator {
+  165|  4.58k|    let mut iter = bits.into_iter().peekable();
+  166|  4.58k|
+  167|  4.58k|    Ranges::new(iter::from_fn(move || {
   168|       |        let start = iter.next()?;
   169|       |        let mut end = start.checked_add(1).expect("bitfield overflow");
   170|       |        while let Some(&next) = iter.peek() {
@@ -1013,399 +1035,377 @@ _RINvNtCsh8aFm9YGVF5_17fvm_ipld_bitfield4iter16ranges_from_bitsINtNtNtNtCsaSlaN8
   177|       |            iter.next();
   178|       |        }
   179|       |        Some(start..end)
-  180|  4.76k|    }))
-  181|  4.76k|}
-_RINvYINtNtCsh8aFm9YGVF5_17fvm_ipld_bitfield4iter6RangesINtNtNtNtCsaSlaN8YLTo0_4core4iter8adapters6cloned6ClonedINtNtNtB10_5slice4iter4IterINtNtNtB10_3ops5range5RangeyEEEENtB6_13RangeIterator5unionIB4_INtNtNtBY_7sources7from_fn6FromFnNCINvB6_16ranges_from_bitsINtNtBW_6copied6CopiedINtNtNtNtCsbEQaeqvpCHy_5alloc11collections5btree3set4IteryEEE0EEEB8_:
-   22|  2.38k|    fn union<R: RangeIterator>(self, other: R) -> Combine<Self, R, Union> {
-   23|  2.38k|        Combine::new(self, other)
-   24|  2.38k|    }
-_RNvXs3_NtCsh8aFm9YGVF5_17fvm_ipld_bitfield4iterINtB5_6RangesINtNtNtNtCsaSlaN8YLTo0_4core4iter7sources7from_fn6FromFnNCINvB5_16ranges_from_bitsINtNtNtB13_8adapters6copied6CopiedINtNtNtNtCsbEQaeqvpCHy_5alloc11collections5btree3set4IteryEEE0EENtNtNtB13_6traits8iterator8Iterator4nextB7_:
-  154|  77.0k|    fn next(&mut self) -> Option<Self::Item> {
-  155|  77.0k|        self.0.next()
-  156|  77.0k|    }
-_RINvYINtNtNtCsh8aFm9YGVF5_17fvm_ipld_bitfield4iter7combine7CombineINtB8_6RangesINtNtNtNtCsaSlaN8YLTo0_4core4iter8adapters6cloned6ClonedINtNtNtB1o_5slice4iter4IterINtNtNtB1o_3ops5range5RangeyEEEEIB13_INtNtNtB1m_7sources7from_fn6FromFnNCINvB8_16ranges_from_bitsINtNtB1k_6copied6CopiedINtNtNtNtCsbEQaeqvpCHy_5alloc11collections5btree3set4IteryEEE0EENtB6_5UnionENtB8_13RangeIterator10differenceB36_EBa_:
-   32|  2.38k|    fn difference<R: RangeIterator>(self, other: R) -> Combine<Self, R, Difference> {
-   33|  2.38k|        Combine::new(self, other)
-   34|  2.38k|    }
-_RNvXs3_NtCsh8aFm9YGVF5_17fvm_ipld_bitfield4iterINtB5_6RangesINtNtNtNtCsaSlaN8YLTo0_4core4iter8adapters6cloned6ClonedINtNtNtB15_5slice4iter4IterINtNtNtB15_3ops5range5RangeyEEEENtNtNtB13_6traits8iterator8Iterator4nextB7_:
-  154|  29.4k|    fn next(&mut self) -> Option<Self::Item> {
-  155|  29.4k|        self.0.next()
-  156|  29.4k|    }
-_RNCINvNtCsh8aFm9YGVF5_17fvm_ipld_bitfield4iter16ranges_from_bitsINtNtNtNtCsaSlaN8YLTo0_4core4iter8adapters6copied6CopiedINtNtNtNtCsbEQaeqvpCHy_5alloc11collections5btree3set4IteryEEE0B6_:
-  167|  77.0k|    Ranges::new(iter::from_fn(move || {
-  168|  77.0k|        let start = iter.next()?;
-  169|  72.4k|        let mut end = start.checked_add(1).expect("bitfield overflow");
-  170|  72.9k|        while let Some(&next) = iter.peek() {
-  171|  70.6k|            if next < end {
-  172|      0|                panic!("out of order bitfield")
-  173|  70.6k|            } else if next > end {
-  174|  70.1k|                break;
-  175|    513|            }
-  176|    513|            end = end.checked_add(1).expect("bitfield overflow");
-  177|    513|            iter.next();
-  178|       |        }
-  179|  72.4k|        Some(start..end)
-  180|  77.0k|    }))
-_RINvMs2_NtCsh8aFm9YGVF5_17fvm_ipld_bitfield4iterINtB6_6RangesINtNtNtNtCsaSlaN8YLTo0_4core4iter7sources7from_fn6FromFnNCINvB6_16ranges_from_bitsINtNtNtB14_8adapters6copied6CopiedINtNtNtNtCsbEQaeqvpCHy_5alloc11collections5btree3set4IteryEEE0EE3newBX_EB8_:
-  140|  4.76k|    pub fn new<II>(iter: II) -> Self
-  141|  4.76k|    where
-  142|  4.76k|        II: IntoIterator<IntoIter = I, Item = Range<u64>>,
-  143|  4.76k|    {
-  144|  4.76k|        Self(iter.into_iter())
-  145|  4.76k|    }
-_RINvMs2_NtCsh8aFm9YGVF5_17fvm_ipld_bitfield4iterINtB6_6RangesINtNtNtNtCsaSlaN8YLTo0_4core4iter8adapters6cloned6ClonedINtNtNtB16_5slice4iter4IterINtNtNtB16_3ops5range5RangeyEEEE3newBX_EB8_:
-  140|  2.38k|    pub fn new<II>(iter: II) -> Self
-  141|  2.38k|    where
-  142|  2.38k|        II: IntoIterator<IntoIter = I, Item = Range<u64>>,
-  143|  2.38k|    {
-  144|  2.38k|        Self(iter.into_iter())
-  145|  2.38k|    }
+  180|  4.58k|    }))
+  181|  4.58k|}
+_RNvXs3_NtCsiXw2KPZVxgk_17fvm_ipld_bitfield4iterINtB5_6RangesINtNtNtNtCsgY1nmJpWYPT_4core4iter8adapters6cloned6ClonedINtNtNtB15_5slice4iter4IterINtNtNtB15_3ops5range5RangeyEEEENtNtNtB13_6traits8iterator8Iterator4nextB7_:
+  154|  28.1k|    fn next(&mut self) -> Option<Self::Item> {
+  155|  28.1k|        self.0.next()
+  156|  28.1k|    }
+_RINvYINtNtNtCsiXw2KPZVxgk_17fvm_ipld_bitfield4iter7combine7CombineINtB8_6RangesINtNtNtNtCsgY1nmJpWYPT_4core4iter8adapters6cloned6ClonedINtNtNtB1o_5slice4iter4IterINtNtNtB1o_3ops5range5RangeyEEEEIB13_INtNtNtB1m_7sources7from_fn6FromFnNCINvB8_16ranges_from_bitsINtNtB1k_6copied6CopiedINtNtNtNtCseushfdLQbjT_5alloc11collections5btree3set4IteryEEE0EENtB6_5UnionENtB8_13RangeIterator10differenceB36_EBa_:
+   32|  2.29k|    fn difference<R: RangeIterator>(self, other: R) -> Combine<Self, R, Difference> {
+   33|  2.29k|        Combine::new(self, other)
+   34|  2.29k|    }
+_RINvYINtNtCsiXw2KPZVxgk_17fvm_ipld_bitfield4iter6RangesINtNtNtNtCsgY1nmJpWYPT_4core4iter8adapters6cloned6ClonedINtNtNtB10_5slice4iter4IterINtNtNtB10_3ops5range5RangeyEEEENtB6_13RangeIterator5unionIB4_INtNtNtBY_7sources7from_fn6FromFnNCINvB6_16ranges_from_bitsINtNtBW_6copied6CopiedINtNtNtNtCseushfdLQbjT_5alloc11collections5btree3set4IteryEEE0EEEB8_:
+   22|  2.29k|    fn union<R: RangeIterator>(self, other: R) -> Combine<Self, R, Union> {
+   23|  2.29k|        Combine::new(self, other)
+   24|  2.29k|    }
+_RINvMs2_NtCsiXw2KPZVxgk_17fvm_ipld_bitfield4iterINtB6_6RangesINtNtNtNtCsgY1nmJpWYPT_4core4iter7sources7from_fn6FromFnNCINvB6_16ranges_from_bitsINtNtNtB14_8adapters6copied6CopiedINtNtNtNtCseushfdLQbjT_5alloc11collections5btree3set4IteryEEE0EE3newBX_EB8_:
+  140|  4.58k|    pub fn new<II>(iter: II) -> Self
+  141|  4.58k|    where
+  142|  4.58k|        II: IntoIterator<IntoIter = I, Item = Range<u64>>,
+  143|  4.58k|    {
+  144|  4.58k|        Self(iter.into_iter())
+  145|  4.58k|    }
+_RNvXs3_NtCsiXw2KPZVxgk_17fvm_ipld_bitfield4iterINtB5_6RangesINtNtNtNtCsgY1nmJpWYPT_4core4iter7sources7from_fn6FromFnNCINvB5_16ranges_from_bitsINtNtNtB13_8adapters6copied6CopiedINtNtNtNtCseushfdLQbjT_5alloc11collections5btree3set4IteryEEE0EENtNtNtB13_6traits8iterator8Iterator4nextB7_:
+  154|  71.2k|    fn next(&mut self) -> Option<Self::Item> {
+  155|  71.2k|        self.0.next()
+  156|  71.2k|    }
 
-_RNvXs_Csh8aFm9YGVF5_17fvm_ipld_bitfieldNtB4_8BitFieldNtNtCsaSlaN8YLTo0_4core3cmp9PartialEq2eq:
-   53|    596|    fn eq(&self, other: &Self) -> bool {
-   54|    596|        Iterator::eq(self.ranges(), other.ranges())
-   55|    596|    }
-_RNvMs4_Csh8aFm9YGVF5_17fvm_ipld_bitfieldNtB5_8BitField5unset:
-  178|  11.5k|    pub fn unset(&mut self, bit: u64) {
-  179|  11.5k|        if bit == u64::MAX {
-  180|    638|            return;
-  181|  10.8k|        }
-  182|  10.8k|        self.set.remove(&bit);
-  183|  10.8k|        self.unset.insert(bit);
-  184|  11.5k|    }
-_RNvMs4_Csh8aFm9YGVF5_17fvm_ipld_bitfieldNtB5_8BitField6ranges:
-  285|  2.38k|    pub fn ranges(&self) -> impl RangeIterator + '_ {
-  286|  2.38k|        self.inner_ranges()
-  287|  2.38k|            .union(ranges_from_bits(self.set.iter().copied()))
-  288|  2.38k|            .difference(ranges_from_bits(self.unset.iter().copied()))
-  289|  2.38k|    }
-_RNvMs4_Csh8aFm9YGVF5_17fvm_ipld_bitfieldNtB5_8BitField7try_set:
-  168|  20.9k|    pub fn try_set(&mut self, bit: u64) -> Result<(), OutOfRangeError> {
-  169|  20.9k|        if bit == u64::MAX {
+_RNvMs4_CsiXw2KPZVxgk_17fvm_ipld_bitfieldNtB5_8BitField5unset:
+  178|  10.1k|    pub fn unset(&mut self, bit: u64) {
+  179|  10.1k|        if bit == u64::MAX {
+  180|    508|            return;
+  181|  9.64k|        }
+  182|  9.64k|        self.set.remove(&bit);
+  183|  9.64k|        self.unset.insert(bit);
+  184|  10.1k|    }
+_RNvXs_CsiXw2KPZVxgk_17fvm_ipld_bitfieldNtB4_8BitFieldNtNtCsgY1nmJpWYPT_4core3cmp9PartialEq2eq:
+   53|    573|    fn eq(&self, other: &Self) -> bool {
+   54|    573|        Iterator::eq(self.ranges(), other.ranges())
+   55|    573|    }
+_RNvMs4_CsiXw2KPZVxgk_17fvm_ipld_bitfieldNtB5_8BitField6ranges:
+  285|  2.29k|    pub fn ranges(&self) -> impl RangeIterator + '_ {
+  286|  2.29k|        self.inner_ranges()
+  287|  2.29k|            .union(ranges_from_bits(self.set.iter().copied()))
+  288|  2.29k|            .difference(ranges_from_bits(self.unset.iter().copied()))
+  289|  2.29k|    }
+_RNvMs4_CsiXw2KPZVxgk_17fvm_ipld_bitfieldNtB5_8BitField12inner_ranges:
+  279|  2.29k|    fn inner_ranges(&self) -> impl RangeIterator + '_ {
+  280|  2.29k|        iter::Ranges::new(self.ranges.iter().cloned())
+  281|  2.29k|    }
+_RNvMs4_CsiXw2KPZVxgk_17fvm_ipld_bitfieldNtB5_8BitField7try_set:
+  168|  19.5k|    pub fn try_set(&mut self, bit: u64) -> Result<(), OutOfRangeError> {
+  169|  19.5k|        if bit == u64::MAX {
   170|     68|            return Err(OutOfRangeError);
-  171|  20.8k|        }
-  172|  20.8k|        self.unset.remove(&bit);
-  173|  20.8k|        self.set.insert(bit);
-  174|  20.8k|        Ok(())
-  175|  20.9k|    }
-_RNvMs4_Csh8aFm9YGVF5_17fvm_ipld_bitfieldNtB5_8BitField12inner_ranges:
-  279|  2.38k|    fn inner_ranges(&self) -> impl RangeIterator + '_ {
-  280|  2.38k|        iter::Ranges::new(self.ranges.iter().cloned())
-  281|  2.38k|    }
-_RNvXsa_Csh8aFm9YGVF5_17fvm_ipld_bitfieldNtB5_8BitFieldNtNtCsaSlaN8YLTo0_4core7default7Default7defaultB5_:
-   42|  1.19k|#[derive(Debug, Default, Clone)]
+  171|  19.5k|        }
+  172|  19.5k|        self.unset.remove(&bit);
+  173|  19.5k|        self.set.insert(bit);
+  174|  19.5k|        Ok(())
+  175|  19.5k|    }
+_RNvXsa_CsiXw2KPZVxgk_17fvm_ipld_bitfieldNtB5_8BitFieldNtNtCsgY1nmJpWYPT_4core7default7Default7defaultB5_:
+   42|  1.14k|#[derive(Debug, Default, Clone)]
 
-_RNvXNtCsh8aFm9YGVF5_17fvm_ipld_bitfield5rangeINtNtNtCsaSlaN8YLTo0_4core3ops5range5RangeyENtB2_9RangeSize4size:
-   16|  36.5k|    fn size(&self) -> Self::Idx {
-   17|  36.5k|        if self.end <= self.start {
+_RNvXNtCsiXw2KPZVxgk_17fvm_ipld_bitfield5rangeINtNtNtCsgY1nmJpWYPT_4core3ops5range5RangeyENtB2_9RangeSize4size:
+   16|  34.6k|    fn size(&self) -> Self::Idx {
+   17|  34.6k|        if self.end <= self.start {
    18|      0|            0
    19|       |        } else {
-   20|  36.5k|            self.end - self.start
+   20|  34.6k|            self.end - self.start
    21|       |        }
-   22|  36.5k|    }
+   22|  34.6k|    }
 
-_RNvMs1_NtCsh8aFm9YGVF5_17fvm_ipld_bitfield7rleplusNtB7_8BitField8to_bytes:
-  201|  1.19k|    pub fn to_bytes(&self) -> Vec<u8> {
-  202|  1.19k|        let mut iter = self.ranges();
+_RNvXs0_NtCsiXw2KPZVxgk_17fvm_ipld_bitfield7rleplusNtB7_8BitFieldNtCs4pEnrXScJOo_9arbitrary9Arbitrary9size_hint:
+  151|    574|    fn size_hint(depth: usize) -> (usize, Option<usize>) {
+  152|    574|        size_hint::and(<usize as Arbitrary>::size_hint(depth), (0, None))
+  153|    574|    }
+_RNvMs1_NtCsiXw2KPZVxgk_17fvm_ipld_bitfield7rleplusNtB7_8BitField8to_bytes:
+  201|  1.14k|    pub fn to_bytes(&self) -> Vec<u8> {
+  202|  1.14k|        let mut iter = self.ranges();
   203|       |
-  204|  1.19k|        let first_range = match iter.next() {
-  205|  1.11k|            Some(range) => range,
-  206|     82|            None => return Default::default(),
+  204|  1.14k|        let first_range = match iter.next() {
+  205|  1.06k|            Some(range) => range,
+  206|     80|            None => return Default::default(),
   207|       |        };
   208|       |
-  209|  1.11k|        let mut writer = BitWriter::new();
-  210|  1.11k|        writer.write(0, 2); // version 00
-  211|  1.11k|
-  212|  1.11k|        if first_range.start == 0 {
-  213|    688|            writer.write(1, 1); // the first bit is a 1
-  214|    688|        } else {
-  215|    422|            writer.write(0, 1); // the first bit is a 0
-  216|    422|            writer.write_len(first_range.start); // the number of leading 0s
-  217|    422|        }
+  209|  1.06k|        let mut writer = BitWriter::new();
+  210|  1.06k|        writer.write(0, 2); // version 00
+  211|  1.06k|
+  212|  1.06k|        if first_range.start == 0 {
+  213|    658|            writer.write(1, 1); // the first bit is a 1
+  214|    658|        } else {
+  215|    408|            writer.write(0, 1); // the first bit is a 0
+  216|    408|            writer.write_len(first_range.start); // the number of leading 0s
+  217|    408|        }
   218|       |
-  219|  1.11k|        writer.write_len(first_range.size());
-  220|  1.11k|        let mut index = first_range.end;
+  219|  1.06k|        writer.write_len(first_range.size());
+  220|  1.06k|        let mut index = first_range.end;
   221|       |
   222|       |        // for each range of 1s we first encode the number of 0s that came prior
   223|       |        // before encoding the number of 1s
-  224|  36.5k|        for range in iter {
-  225|  35.4k|            writer.write_len(range.start - index); // zeros
-  226|  35.4k|            writer.write_len(range.size()); // ones
-  227|  35.4k|            index = range.end;
-  228|  35.4k|        }
+  224|  34.6k|        for range in iter {
+  225|  33.5k|            writer.write_len(range.start - index); // zeros
+  226|  33.5k|            writer.write_len(range.size()); // ones
+  227|  33.5k|            index = range.end;
+  228|  33.5k|        }
   229|       |
-  230|  1.11k|        writer.finish()
-  231|  1.19k|    }
-_RNvXs0_NtCsh8aFm9YGVF5_17fvm_ipld_bitfield7rleplusNtB7_8BitFieldNtCs3icS8w06onj_9arbitrary9Arbitrary9size_hint:
-  151|    597|    fn size_hint(depth: usize) -> (usize, Option<usize>) {
-  152|    597|        size_hint::and(<usize as Arbitrary>::size_hint(depth), (0, None))
-  153|    597|    }
-_RNvMs1_NtCsh8aFm9YGVF5_17fvm_ipld_bitfield7rleplusNtB7_8BitField10from_bytes:
-  158|    596|    pub fn from_bytes(bytes: &[u8]) -> Result<Self, Error> {
-  159|    596|        let mut reader = BitReader::new(bytes)?;
+  230|  1.06k|        writer.finish()
+  231|  1.14k|    }
+_RNvXs0_NtCsiXw2KPZVxgk_17fvm_ipld_bitfield7rleplusNtB7_8BitFieldNtCs4pEnrXScJOo_9arbitrary9Arbitrary9arbitrary:
+  115|    573|    fn arbitrary(u: &mut Unstructured<'a>) -> arbitrary::Result<Self> {
+  116|    573|        let mut next_value: bool = bool::arbitrary(u)?;
+  117|    573|        let mut ranges = Vec::new();
+  118|    573|        let mut index = 0u64;
+  119|    573|        let mut total_len: u64 = 0;
+  120|       |
+  121|    573|        let size = u.arbitrary_len::<(u64, u8)>()?;
+  122|       |
+  123|    573|        for _ in 0..size {
+  124|       |            // 3 line crappy "power-law" distribution
+  125|  5.62k|            let len = u64::arbitrary(u)?;
+  126|  5.62k|            let shift = u.int_in_range(0..=63)?;
+  127|  5.62k|            let len = (len & (u64::MAX >> shift)).saturating_add(1);
+  128|  5.62k|
+  129|  5.62k|            let (new_total_len, ovf) = total_len.overflowing_add(len);
+  130|  5.62k|            if ovf {
+  131|     55|                break;
+  132|  5.57k|            }
+  133|  5.57k|            total_len = new_total_len;
+  134|  5.57k|            let start = index;
+  135|  5.57k|            index += len;
+  136|  5.57k|            let end = index;
+  137|  5.57k|
+  138|  5.57k|            if next_value {
+  139|  2.85k|                ranges.push(start..end);
+  140|  2.85k|            }
+  141|       |
+  142|  5.57k|            next_value = !next_value;
+  143|       |        }
+  144|       |
+  145|    573|        Ok(Self {
+  146|    573|            ranges,
+  147|    573|            ..Default::default()
+  148|    573|        })
+  149|    573|    }
+_RNvMs1_NtCsiXw2KPZVxgk_17fvm_ipld_bitfield7rleplusNtB7_8BitField10from_bytes:
+  158|    573|    pub fn from_bytes(bytes: &[u8]) -> Result<Self, Error> {
+  159|    573|        let mut reader = BitReader::new(bytes)?;
   160|       |
-  161|    596|        let version = reader.read(2);
-  162|    596|        if version != 0 {
+  161|    573|        let version = reader.read(2);
+  162|    573|        if version != 0 {
   163|      0|            return Err(Error::UnsupportedVersion);
-  164|    596|        }
-  165|    596|
-  166|    596|        let mut next_value = reader.read(1) == 1;
-  167|    596|        let mut ranges = Vec::new();
-  168|    596|        let mut index = 0u64;
-  169|    596|        let mut total_len: u64 = 0;
+  164|    573|        }
+  165|    573|
+  166|    573|        let mut next_value = reader.read(1) == 1;
+  167|    573|        let mut ranges = Vec::new();
+  168|    573|        let mut index = 0u64;
+  169|    573|        let mut total_len: u64 = 0;
   170|       |
-  171|  36.8k|        while let Some(len) = reader.read_len()? {
-  172|  36.2k|            let (new_total_len, ovf) = total_len.overflowing_add(len);
-  173|  36.2k|            if ovf {
+  171|  34.8k|        while let Some(len) = reader.read_len()? {
+  172|  34.3k|            let (new_total_len, ovf) = total_len.overflowing_add(len);
+  173|  34.3k|            if ovf {
   174|      0|                return Err(Error::RLEOverflow);
-  175|  36.2k|            }
-  176|  36.2k|            total_len = new_total_len;
-  177|  36.2k|            let start = index;
-  178|  36.2k|            index += len;
-  179|  36.2k|            let end = index;
-  180|  36.2k|
-  181|  36.2k|            if next_value {
-  182|  18.2k|                ranges.push(start..end);
-  183|  18.2k|            }
+  175|  34.3k|            }
+  176|  34.3k|            total_len = new_total_len;
+  177|  34.3k|            let start = index;
+  178|  34.3k|            index += len;
+  179|  34.3k|            let end = index;
+  180|  34.3k|
+  181|  34.3k|            if next_value {
+  182|  17.3k|                ranges.push(start..end);
+  183|  17.3k|            }
   184|       |
-  185|  36.2k|            next_value = !next_value;
+  185|  34.3k|            next_value = !next_value;
   186|       |        }
   187|       |
   188|       |        // next_value equal true means we just read a run of zeros
   189|       |        // which means that there is a trailing run of zeros
-  190|    596|        if next_value {
+  190|    573|        if next_value {
   191|      0|            return Err(Error::NotMinimal);
-  192|    596|        }
-  193|    596|
-  194|    596|        Ok(Self {
-  195|    596|            ranges,
-  196|    596|            ..Default::default()
-  197|    596|        })
-  198|    596|    }
-_RNvXs0_NtCsh8aFm9YGVF5_17fvm_ipld_bitfield7rleplusNtB7_8BitFieldNtCs3icS8w06onj_9arbitrary9Arbitrary9arbitrary:
-  115|    596|    fn arbitrary(u: &mut Unstructured<'a>) -> arbitrary::Result<Self> {
-  116|    596|        let mut next_value: bool = bool::arbitrary(u)?;
-  117|    596|        let mut ranges = Vec::new();
-  118|    596|        let mut index = 0u64;
-  119|    596|        let mut total_len: u64 = 0;
-  120|       |
-  121|    596|        let size = u.arbitrary_len::<(u64, u8)>()?;
-  122|       |
-  123|    596|        for _ in 0..size {
-  124|       |            // 3 line crappy "power-law" distribution
-  125|  5.77k|            let len = u64::arbitrary(u)?;
-  126|  5.77k|            let shift = u.int_in_range(0..=63)?;
-  127|  5.77k|            let len = (len & (u64::MAX >> shift)).saturating_add(1);
-  128|  5.77k|
-  129|  5.77k|            let (new_total_len, ovf) = total_len.overflowing_add(len);
-  130|  5.77k|            if ovf {
-  131|     62|                break;
-  132|  5.71k|            }
-  133|  5.71k|            total_len = new_total_len;
-  134|  5.71k|            let start = index;
-  135|  5.71k|            index += len;
-  136|  5.71k|            let end = index;
-  137|  5.71k|
-  138|  5.71k|            if next_value {
-  139|  2.93k|                ranges.push(start..end);
-  140|  2.93k|            }
-  141|       |
-  142|  5.71k|            next_value = !next_value;
-  143|       |        }
-  144|       |
-  145|    596|        Ok(Self {
-  146|    596|            ranges,
-  147|    596|            ..Default::default()
-  148|    596|        })
-  149|    596|    }
+  192|    573|        }
+  193|    573|
+  194|    573|        Ok(Self {
+  195|    573|            ranges,
+  196|    573|            ..Default::default()
+  197|    573|        })
+  198|    573|    }
 
-_RNvMNtNtCsh8aFm9YGVF5_17fvm_ipld_bitfield7rleplus6readerNtB2_9BitReader4read:
-   82|   121k|    pub fn read(&mut self, num_bits: u32) -> u8 {
-   83|   121k|        debug_assert!(num_bits <= 8);
-   84|       |
-   85|   121k|        let res = self.peek(num_bits);
-   86|   121k|        self.drop(num_bits);
-   87|   121k|
-   88|   121k|        res
-   89|   121k|    }
-_RNvMNtNtCsh8aFm9YGVF5_17fvm_ipld_bitfield7rleplus6readerNtB2_9BitReader8has_more:
-  153|  36.8k|    pub fn has_more(&self) -> bool {
-  154|  36.8k|        self.bits != 0 || !self.bytes.is_empty()
-  155|  36.8k|    }
-_RNvMNtNtCsh8aFm9YGVF5_17fvm_ipld_bitfield7rleplus6readerNtB2_9BitReader4drop:
-   61|   157k|    pub fn drop(&mut self, num_bits: u32) {
-   62|   157k|        debug_assert!(num_bits <= 8);
-   63|       |
-   64|       |        // removes the bits
-   65|   157k|        self.bits >>= num_bits;
-   66|   157k|        self.num_bits -= num_bits;
-   67|   157k|
-   68|   157k|        // not sure why this being outside of the if improves the performance
-   69|   157k|        // bit it does, probably related to keeping caches warm
-   70|   157k|        let byte = self.bytes.first().unwrap_or(&0);
-   71|   157k|        self.bits |= (*byte as u64) << self.num_bits;
-   72|   157k|
-   73|   157k|        // if fewer than 8 bits remain, we skip to loading the next byte
-   74|   157k|        if self.num_bits < 8 {
-   75|   128k|            self.num_bits += 8;
-   76|   128k|            self.bytes = self.bytes.get(1..).unwrap_or(&[]);
-   77|   128k|        }
-   78|   157k|    }
-_RNvMNtNtCsh8aFm9YGVF5_17fvm_ipld_bitfield7rleplus6readerNtB2_9BitReader8read_len:
-  119|  36.8k|    pub fn read_len(&mut self) -> Result<Option<u64>, Error> {
-  120|  36.8k|        // We're done.
-  121|  36.8k|        if !self.has_more() {
-  122|    596|            return Ok(None);
-  123|  36.2k|        }
-  124|  36.2k|
-  125|  36.2k|        let peek6 = self.peek(6);
-  126|       |
-  127|  36.2k|        let len = if peek6 & 0b01 != 0 {
-  128|       |            // Block Single (prefix 1)
-  129|  15.6k|            self.drop(1);
-  130|  15.6k|            1
-  131|  20.5k|        } else if peek6 & 0b10 != 0 {
-  132|       |            // Block Short (prefix 01)
-  133|  1.86k|            let val = ((peek6 >> 2) & 0x0f) as u64;
-  134|  1.86k|            self.drop(6);
-  135|  1.86k|            if val < 2 {
-  136|      0|                return Err(Error::NotMinimal);
-  137|  1.86k|            }
-  138|  1.86k|            val
-  139|       |        } else {
-  140|       |            // Block Long (prefix 00)
-  141|  18.7k|            self.drop(2);
-  142|  18.7k|            let val = self.read_varint()?;
-  143|  18.7k|            if val < 16 {
-  144|      0|                return Err(Error::NotMinimal);
-  145|  18.7k|            }
-  146|  18.7k|            val
-  147|       |        };
-  148|       |
-  149|  36.2k|        Ok(Some(len))
-  150|  36.8k|    }
-_RNvMNtNtCsh8aFm9YGVF5_17fvm_ipld_bitfield7rleplus6readerNtB2_9BitReader3new:
-   26|    596|    pub fn new(bytes: &'a [u8]) -> Result<Self, Error> {
-   27|    596|        // There are infinite implicit "0"s, so we don't expect any trailing zeros in the actual
-   28|    596|        // data.
-   29|    596|        if bytes.last() == Some(&0) {
-   30|      0|            return Err(Error::NotMinimal);
-   31|    596|        }
-   32|    596|        let mut bits = 0u64;
-   33|  1.78k|        for i in 0..2 {
-   34|  1.19k|            let byte = bytes.get(i).unwrap_or(&0);
-   35|  1.19k|            bits |= (*byte as u64) << (8 * i);
-   36|  1.19k|        }
-   37|       |
-   38|    596|        let bytes = bytes.get(2..).unwrap_or(&[]);
-   39|    596|
-   40|    596|        Ok(Self {
-   41|    596|            bytes,
-   42|    596|            bits,
-   43|    596|            num_bits: 16,
-   44|    596|        })
-   45|    596|    }
-_RNvMNtNtCsh8aFm9YGVF5_17fvm_ipld_bitfield7rleplus6readerNtB2_9BitReader4peek:
-   50|   157k|    pub fn peek(&self, num_bits: u32) -> u8 {
-   51|   157k|        debug_assert!(num_bits <= 8);
-   52|       |
-   53|       |        // creates a mask with a `num_bits` number of 1s in order
-   54|       |        // to get only the bits we need from `self.bits`
-   55|   157k|        let mask = (1 << num_bits) - 1;
-   56|   157k|        (self.bits & mask) as u8
-   57|   157k|    }
-_RNvMNtNtCsh8aFm9YGVF5_17fvm_ipld_bitfield7rleplus6readerNtB2_9BitReader11read_varint:
-   93|  18.7k|    fn read_varint(&mut self) -> Result<u64, Error> {
-   94|  18.7k|        let mut len = 0u64;
+_RNvMNtNtCsiXw2KPZVxgk_17fvm_ipld_bitfield7rleplus6readerNtB2_9BitReader11read_varint:
+   93|  17.8k|    fn read_varint(&mut self) -> Result<u64, Error> {
+   94|  17.8k|        let mut len = 0u64;
    95|       |
-   96|   120k|        for i in 0..VARINT_MAX_BYTES {
-   97|   120k|            let byte = self.read(8);
-   98|   120k|
-   99|   120k|            // strip off the most significant bit and add
-  100|   120k|            // it to the output
-  101|   120k|            len |= (byte as u64 & 0x7f) << (i * 7);
-  102|   120k|
-  103|   120k|            // if the most significant bit is a 0, we've
-  104|   120k|            // reached the end of the varint
-  105|   120k|            if byte & 0x80 == 0 {
+   96|   114k|        for i in 0..VARINT_MAX_BYTES {
+   97|   114k|            let byte = self.read(8);
+   98|   114k|
+   99|   114k|            // strip off the most significant bit and add
+  100|   114k|            // it to the output
+  101|   114k|            len |= (byte as u64 & 0x7f) << (i * 7);
+  102|   114k|
+  103|   114k|            // if the most significant bit is a 0, we've
+  104|   114k|            // reached the end of the varint
+  105|   114k|            if byte & 0x80 == 0 {
   106|       |                // 1. We only allow the 9th byte to be 1 (overflows u64).
   107|       |                // 2. The last byte cannot be 0 (not minimally encoded).
-  108|  18.7k|                if (i == 9 && byte > 1) || (byte == 0 && i != 0) {
+  108|  17.8k|                if (i == 9 && byte > 1) || (byte == 0 && i != 0) {
   109|      0|                    break;
-  110|  18.7k|                }
-  111|  18.7k|                return Ok(len);
-  112|   101k|            }
+  110|  17.8k|                }
+  111|  17.8k|                return Ok(len);
+  112|  96.5k|            }
   113|       |        }
   114|       |
   115|      0|        Err(Error::InvalidVarint)
-  116|  18.7k|    }
+  116|  17.8k|    }
+_RNvMNtNtCsiXw2KPZVxgk_17fvm_ipld_bitfield7rleplus6readerNtB2_9BitReader3new:
+   26|    573|    pub fn new(bytes: &'a [u8]) -> Result<Self, Error> {
+   27|    573|        // There are infinite implicit "0"s, so we don't expect any trailing zeros in the actual
+   28|    573|        // data.
+   29|    573|        if bytes.last() == Some(&0) {
+   30|      0|            return Err(Error::NotMinimal);
+   31|    573|        }
+   32|    573|        let mut bits = 0u64;
+   33|  1.71k|        for i in 0..2 {
+   34|  1.14k|            let byte = bytes.get(i).unwrap_or(&0);
+   35|  1.14k|            bits |= (*byte as u64) << (8 * i);
+   36|  1.14k|        }
+   37|       |
+   38|    573|        let bytes = bytes.get(2..).unwrap_or(&[]);
+   39|    573|
+   40|    573|        Ok(Self {
+   41|    573|            bytes,
+   42|    573|            bits,
+   43|    573|            num_bits: 16,
+   44|    573|        })
+   45|    573|    }
+_RNvMNtNtCsiXw2KPZVxgk_17fvm_ipld_bitfield7rleplus6readerNtB2_9BitReader4read:
+   82|   115k|    pub fn read(&mut self, num_bits: u32) -> u8 {
+   83|   115k|        debug_assert!(num_bits <= 8);
+   84|       |
+   85|   115k|        let res = self.peek(num_bits);
+   86|   115k|        self.drop(num_bits);
+   87|   115k|
+   88|   115k|        res
+   89|   115k|    }
+_RNvMNtNtCsiXw2KPZVxgk_17fvm_ipld_bitfield7rleplus6readerNtB2_9BitReader4drop:
+   61|   149k|    pub fn drop(&mut self, num_bits: u32) {
+   62|   149k|        debug_assert!(num_bits <= 8);
+   63|       |
+   64|       |        // removes the bits
+   65|   149k|        self.bits >>= num_bits;
+   66|   149k|        self.num_bits -= num_bits;
+   67|   149k|
+   68|   149k|        // not sure why this being outside of the if improves the performance
+   69|   149k|        // bit it does, probably related to keeping caches warm
+   70|   149k|        let byte = self.bytes.first().unwrap_or(&0);
+   71|   149k|        self.bits |= (*byte as u64) << self.num_bits;
+   72|   149k|
+   73|   149k|        // if fewer than 8 bits remain, we skip to loading the next byte
+   74|   149k|        if self.num_bits < 8 {
+   75|   121k|            self.num_bits += 8;
+   76|   121k|            self.bytes = self.bytes.get(1..).unwrap_or(&[]);
+   77|   121k|        }
+   78|   149k|    }
+_RNvMNtNtCsiXw2KPZVxgk_17fvm_ipld_bitfield7rleplus6readerNtB2_9BitReader8read_len:
+  119|  34.8k|    pub fn read_len(&mut self) -> Result<Option<u64>, Error> {
+  120|  34.8k|        // We're done.
+  121|  34.8k|        if !self.has_more() {
+  122|    573|            return Ok(None);
+  123|  34.3k|        }
+  124|  34.3k|
+  125|  34.3k|        let peek6 = self.peek(6);
+  126|       |
+  127|  34.3k|        let len = if peek6 & 0b01 != 0 {
+  128|       |            // Block Single (prefix 1)
+  129|  14.7k|            self.drop(1);
+  130|  14.7k|            1
+  131|  19.5k|        } else if peek6 & 0b10 != 0 {
+  132|       |            // Block Short (prefix 01)
+  133|  1.76k|            let val = ((peek6 >> 2) & 0x0f) as u64;
+  134|  1.76k|            self.drop(6);
+  135|  1.76k|            if val < 2 {
+  136|      0|                return Err(Error::NotMinimal);
+  137|  1.76k|            }
+  138|  1.76k|            val
+  139|       |        } else {
+  140|       |            // Block Long (prefix 00)
+  141|  17.8k|            self.drop(2);
+  142|  17.8k|            let val = self.read_varint()?;
+  143|  17.8k|            if val < 16 {
+  144|      0|                return Err(Error::NotMinimal);
+  145|  17.8k|            }
+  146|  17.8k|            val
+  147|       |        };
+  148|       |
+  149|  34.3k|        Ok(Some(len))
+  150|  34.8k|    }
+_RNvMNtNtCsiXw2KPZVxgk_17fvm_ipld_bitfield7rleplus6readerNtB2_9BitReader4peek:
+   50|   149k|    pub fn peek(&self, num_bits: u32) -> u8 {
+   51|   149k|        debug_assert!(num_bits <= 8);
+   52|       |
+   53|       |        // creates a mask with a `num_bits` number of 1s in order
+   54|       |        // to get only the bits we need from `self.bits`
+   55|   149k|        let mask = (1 << num_bits) - 1;
+   56|   149k|        (self.bits & mask) as u8
+   57|   149k|    }
+_RNvMNtNtCsiXw2KPZVxgk_17fvm_ipld_bitfield7rleplus6readerNtB2_9BitReader8has_more:
+  153|  34.8k|    pub fn has_more(&self) -> bool {
+  154|  34.8k|        self.bits != 0 || !self.bytes.is_empty()
+  155|  34.8k|    }
 
-_RNvMNtNtCsh8aFm9YGVF5_17fvm_ipld_bitfield7rleplus6writerNtB2_9BitWriter5write:
-   23|   319k|    pub fn write(&mut self, byte: u8, num_bits: u32) {
-   24|   319k|        debug_assert!(num_bits <= 8);
-   25|   319k|        debug_assert!(8 - byte.leading_zeros() <= num_bits);
-   26|       |
-   27|   319k|        self.bits |= (byte as u16) << self.num_bits;
-   28|   319k|        self.num_bits += num_bits;
-   29|   319k|
-   30|   319k|        // when we have a full byte in `self.bits`, we write it to `self.bytes`
-   31|   319k|        if self.num_bits >= 8 {
-   32|   256k|            self.bytes.push(self.bits as u8);
-   33|   256k|            self.bits >>= 8;
-   34|   256k|            self.num_bits -= 8;
-   35|   256k|        }
-   36|   319k|    }
-_RNvMNtNtCsh8aFm9YGVF5_17fvm_ipld_bitfield7rleplus6writerNtB2_9BitWriter3new:
-   18|  1.11k|    pub fn new() -> Self {
-   19|  1.11k|        Default::default()
-   20|  1.11k|    }
-_RNvMNtNtCsh8aFm9YGVF5_17fvm_ipld_bitfield7rleplus6writerNtB2_9BitWriter6finish:
-   61|  1.11k|    pub fn finish(mut self) -> Vec<u8> {
-   62|  1.11k|        if self.bits > 0 {
-   63|    834|            self.bytes.push(self.bits as u8);
-   64|    834|        }
+_RNvMNtNtCsiXw2KPZVxgk_17fvm_ipld_bitfield7rleplus6writerNtB2_9BitWriter6finish:
+   61|  1.06k|    pub fn finish(mut self) -> Vec<u8> {
+   62|  1.06k|        if self.bits > 0 {
+   63|    808|            self.bytes.push(self.bits as u8);
+   64|    808|        }
    65|       |
    66|       |        // This check should not be necessary, but as a sanity check to make sure 0 bytes
    67|       |        // aren't added at the end of the bytes
-   68|  1.11k|        while let Some(0) = self.bytes.last() {
+   68|  1.06k|        while let Some(0) = self.bytes.last() {
    69|      0|            self.bytes.pop();
    70|      0|        }
-   71|  1.11k|        self.bytes
-   72|  1.11k|    }
-_RNvXs_NtNtCsh8aFm9YGVF5_17fvm_ipld_bitfield7rleplus6writerNtB4_9BitWriterNtNtCsaSlaN8YLTo0_4core7default7Default7defaultB8_:
-    5|  1.11k|#[derive(Default, Clone, Debug)]
-_RNvMNtNtCsh8aFm9YGVF5_17fvm_ipld_bitfield7rleplus6writerNtB2_9BitWriter9write_len:
-   39|  72.4k|    pub fn write_len(&mut self, len: u64) {
-   40|  72.4k|        debug_assert!(len > 0);
+   71|  1.06k|        self.bytes
+   72|  1.06k|    }
+_RNvXs_NtNtCsiXw2KPZVxgk_17fvm_ipld_bitfield7rleplus6writerNtB4_9BitWriterNtNtCsgY1nmJpWYPT_4core7default7Default7defaultB8_:
+    5|  1.06k|#[derive(Default, Clone, Debug)]
+_RNvMNtNtCsiXw2KPZVxgk_17fvm_ipld_bitfield7rleplus6writerNtB2_9BitWriter9write_len:
+   39|  68.6k|    pub fn write_len(&mut self, len: u64) {
+   40|  68.6k|        debug_assert!(len > 0);
    41|       |
-   42|  72.4k|        if len == 1 {
-   43|  31.2k|            // Block Single (prefix 1)
-   44|  31.2k|            self.write(1, 1);
-   45|  41.1k|        } else if len < 16 {
-   46|  3.72k|            // Block Short (prefix 01)
-   47|  3.72k|            self.write(2, 2); // 2 == 01 with the least significant bit first
-   48|  3.72k|            self.write(len as u8, 4);
-   49|  3.72k|        } else {
+   42|  68.6k|        if len == 1 {
+   43|  29.5k|            // Block Single (prefix 1)
+   44|  29.5k|            self.write(1, 1);
+   45|  39.1k|        } else if len < 16 {
+   46|  3.52k|            // Block Short (prefix 01)
+   47|  3.52k|            self.write(2, 2); // 2 == 01 with the least significant bit first
+   48|  3.52k|            self.write(len as u8, 4);
+   49|  3.52k|        } else {
    50|       |            // Block Long (prefix 00)
-   51|  37.4k|            self.write(0, 2);
-   52|  37.4k|
-   53|  37.4k|            let mut buffer = unsigned_varint::encode::u64_buffer();
-   54|   240k|            for &byte in unsigned_varint::encode::u64(len, &mut buffer) {
-   55|   240k|                self.write(byte, 8);
-   56|   240k|            }
+   51|  35.6k|            self.write(0, 2);
+   52|  35.6k|
+   53|  35.6k|            let mut buffer = unsigned_varint::encode::u64_buffer();
+   54|   228k|            for &byte in unsigned_varint::encode::u64(len, &mut buffer) {
+   55|   228k|                self.write(byte, 8);
+   56|   228k|            }
    57|       |        }
-   58|  72.4k|    }
+   58|  68.6k|    }
+_RNvMNtNtCsiXw2KPZVxgk_17fvm_ipld_bitfield7rleplus6writerNtB2_9BitWriter5write:
+   23|   302k|    pub fn write(&mut self, byte: u8, num_bits: u32) {
+   24|   302k|        debug_assert!(num_bits <= 8);
+   25|   302k|        debug_assert!(8 - byte.leading_zeros() <= num_bits);
+   26|       |
+   27|   302k|        self.bits |= (byte as u16) << self.num_bits;
+   28|   302k|        self.num_bits += num_bits;
+   29|   302k|
+   30|   302k|        // when we have a full byte in `self.bits`, we write it to `self.bytes`
+   31|   302k|        if self.num_bits >= 8 {
+   32|   243k|            self.bytes.push(self.bits as u8);
+   33|   243k|            self.bits >>= 8;
+   34|   243k|            self.num_bits -= 8;
+   35|   243k|        }
+   36|   302k|    }
+_RNvMNtNtCsiXw2KPZVxgk_17fvm_ipld_bitfield7rleplus6writerNtB2_9BitWriter3new:
+   18|  1.06k|    pub fn new() -> Self {
+   19|  1.06k|        Default::default()
+   20|  1.06k|    }
 
-_RNCNvXNvCsjWEWO8Era7H_10rle_encode1__NtB6_9OperationNtCs3icS8w06onj_9arbitrary9Arbitrary9arbitrarys_0B6_:
-    8|  31.9k|#[derive(Debug, Arbitrary)]
-_RNCNvXNvCsjWEWO8Era7H_10rle_encode1__NtB6_9OperationNtCs3icS8w06onj_9arbitrary9Arbitrary9size_hint0B6_:
-    8|    596|#[derive(Debug, Arbitrary)]
-_RNCNvXNvCsjWEWO8Era7H_10rle_encode1__NtB6_9OperationNtCs3icS8w06onj_9arbitrary9Arbitrary19arbitrary_take_rests_0B6_:
-    8|    493|#[derive(Debug, Arbitrary)]
-_RNvXNvCsjWEWO8Era7H_10rle_encode1__NtB4_9OperationNtCs3icS8w06onj_9arbitrary9Arbitrary9size_hintB4_:
-    8|    596|#[derive(Debug, Arbitrary)]
-_RNvXNvCsjWEWO8Era7H_10rle_encode1__NtB4_9OperationNtCs3icS8w06onj_9arbitrary9Arbitrary19arbitrary_take_rest:
-    8|  1.47k|#[derive(Debug, Arbitrary)]
-_RNvXNvCsjWEWO8Era7H_10rle_encode1__NtB4_9OperationNtCs3icS8w06onj_9arbitrary9Arbitrary9arbitrary:
-    8|  95.7k|#[derive(Debug, Arbitrary)]
+_RNCNvXNvCsgPXPhOXZSKT_10rle_encode1__NtB6_9OperationNtCs4pEnrXScJOo_9arbitrary9Arbitrary9arbitrarys_0B6_:
+    8|  29.2k|#[derive(Debug, Arbitrary)]
+_RNvXNvCsgPXPhOXZSKT_10rle_encode1__NtB4_9OperationNtCs4pEnrXScJOo_9arbitrary9Arbitrary9size_hintB4_:
+    8|    573|#[derive(Debug, Arbitrary)]
+_RNCNvXNvCsgPXPhOXZSKT_10rle_encode1__NtB6_9OperationNtCs4pEnrXScJOo_9arbitrary9Arbitrary9size_hint0B6_:
+    8|    573|#[derive(Debug, Arbitrary)]
+_RNCNvXNvCsgPXPhOXZSKT_10rle_encode1__NtB6_9OperationNtCs4pEnrXScJOo_9arbitrary9Arbitrary19arbitrary_take_rests_0B6_:
+    8|    470|#[derive(Debug, Arbitrary)]
+_RNvXNvCsgPXPhOXZSKT_10rle_encode1__NtB4_9OperationNtCs4pEnrXScJOo_9arbitrary9Arbitrary19arbitrary_take_rest:
+    8|  1.41k|#[derive(Debug, Arbitrary)]
+_RNvXNvCsgPXPhOXZSKT_10rle_encode1__NtB4_9OperationNtCs4pEnrXScJOo_9arbitrary9Arbitrary9arbitrary:
+    8|  87.8k|#[derive(Debug, Arbitrary)]
 
