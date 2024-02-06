@@ -1,17 +1,17 @@
 _RINvMs0_NtNtCscPSwwIASMRU_7cbor4ii4core3decNtB6_7TypeNum10decode_u64NtNtB8_5utils11SliceReaderECsjy9uLqplD7t_11cbor_decode:
-  227|  6.89k|    pub(crate) fn decode_u64<'a, R: Read<'a>>(self, reader: &mut R) -> Result<u64, Error<R::Error>> {
-  228|  6.89k|        match self.byte & self.major_limit {
-  229|  6.89k|            x @ 0 ..= 0x17 => Ok(x.into()),
-  230|    980|            0x18 => pull_one(reader).map(Into::into),
+  227|  6.99k|    pub(crate) fn decode_u64<'a, R: Read<'a>>(self, reader: &mut R) -> Result<u64, Error<R::Error>> {
+  228|  6.99k|        match self.byte & self.major_limit {
+  229|  6.99k|            x @ 0 ..= 0x17 => Ok(x.into()),
+  230|    978|            0x18 => pull_one(reader).map(Into::into),
   231|       |            0x19 => {
   232|    320|                let mut buf = [0; 2];
   233|    320|                pull_exact(reader, &mut buf)?;
   234|    312|                Ok(u16::from_be_bytes(buf).into())
   235|       |            },
   236|       |            0x1a => {
-  237|    232|                let mut buf = [0; 4];
-  238|    232|                pull_exact(reader, &mut buf)?;
-  239|    220|                Ok(u32::from_be_bytes(buf).into())
+  237|    360|                let mut buf = [0; 4];
+  238|    360|                pull_exact(reader, &mut buf)?;
+  239|    348|                Ok(u32::from_be_bytes(buf).into())
   240|       |            },
   241|       |            0x1b => {
   242|    341|                let mut buf = [0; 8];
@@ -20,30 +20,30 @@ _RINvMs0_NtNtCscPSwwIASMRU_7cbor4ii4core3decNtB6_7TypeNum10decode_u64NtNtB8_5uti
   245|       |            },
   246|     40|            _ => Err(Error::mismatch(self.major_limit, self.byte))
   247|       |        }
-  248|  6.89k|    }
+  248|  6.99k|    }
 _RINvNtNtCscPSwwIASMRU_7cbor4ii4core3dec10decode_bufNtNtB4_5utils11SliceReaderECsjy9uLqplD7t_11cbor_decode:
-  431|  9.48k|fn decode_buf<'a, R: Read<'a>>(major: u8, byte: u8, reader: &mut R, buf: &mut Vec<u8>)
-  432|  9.48k|    -> Result<Option<&'a [u8]>, Error<R::Error>>
-  433|  9.48k|{
+  431|  9.58k|fn decode_buf<'a, R: Read<'a>>(major: u8, byte: u8, reader: &mut R, buf: &mut Vec<u8>)
+  432|  9.58k|    -> Result<Option<&'a [u8]>, Error<R::Error>>
+  433|  9.58k|{
   434|       |    const CAP_LIMIT: usize = 16 * 1024;
   435|       |
-  436|  9.48k|    if let Some(mut len) = decode_len(major, byte, reader)? {
+  436|  9.58k|    if let Some(mut len) = decode_len(major, byte, reader)? {
   437|       |        // try long lifetime buffer
-  438|  4.83k|        if let Reference::Long(buf) = reader.fill(len)? {
-  439|  4.83k|            if buf.len() >= len {
-  440|  4.76k|                reader.advance(len);
-  441|  4.76k|                return Ok(Some(&buf[..len]));
-  442|     65|            }
+  438|  4.92k|        if let Reference::Long(buf) = reader.fill(len)? {
+  439|  4.92k|            if buf.len() >= len {
+  440|  4.86k|                reader.advance(len);
+  441|  4.86k|                return Ok(Some(&buf[..len]));
+  442|     66|            }
   443|      0|        }
   444|       |
-  445|     65|        buf.reserve(core::cmp::min(len, CAP_LIMIT)); // TODO try_reserve ?
+  445|     66|        buf.reserve(core::cmp::min(len, CAP_LIMIT)); // TODO try_reserve ?
   446|       |
-  447|     68|        while len != 0 {
-  448|     68|            let readbuf = reader.fill(len)?;
-  449|     68|            let readbuf = readbuf.as_ref();
-  450|     68|
-  451|     68|            if readbuf.is_empty() {
-  452|     65|                return Err(Error::Eof);
+  447|     69|        while len != 0 {
+  448|     69|            let readbuf = reader.fill(len)?;
+  449|     69|            let readbuf = readbuf.as_ref();
+  450|     69|
+  451|     69|            if readbuf.is_empty() {
+  452|     66|                return Err(Error::Eof);
   453|      3|            }
   454|      3|
   455|      3|            let readlen = core::cmp::min(readbuf.len(), len);
@@ -57,88 +57,88 @@ _RINvNtNtCscPSwwIASMRU_7cbor4ii4core3dec10decode_bufNtNtB4_5utils11SliceReaderEC
   463|       |    } else {
   464|       |        // bytes sequence
   465|       |        loop {
-  466|  6.03k|            let byte = pull_one(reader)?;
+  466|  6.17k|            let byte = pull_one(reader)?;
   467|       |
-  468|  6.01k|            if byte == marker::BREAK {
+  468|  6.14k|            if byte == marker::BREAK {
   469|    451|                break
-  470|  5.55k|            }
-  471|  5.55k|
-  472|  5.55k|            if !reader.step_in() {
+  470|  5.69k|            }
+  471|  5.69k|
+  472|  5.69k|            if !reader.step_in() {
   473|      1|                return Err(Error::DepthLimit);
-  474|  5.55k|            }
-  475|  5.55k|            let mut reader = ScopeGuard(reader, |reader| reader.step_out());
-  476|  5.55k|            let reader = &mut *reader;
+  474|  5.69k|            }
+  475|  5.69k|            let mut reader = ScopeGuard(reader, |reader| reader.step_out());
+  476|  5.69k|            let reader = &mut *reader;
   477|       |
-  478|  5.55k|            if let Some(longbuf) = decode_buf(major, byte, reader, buf)? {
-  479|  1.18k|                buf.extend_from_slice(longbuf);
-  480|  1.18k|            }
+  478|  5.69k|            if let Some(longbuf) = decode_buf(major, byte, reader, buf)? {
+  479|  1.31k|                buf.extend_from_slice(longbuf);
+  480|  1.31k|            }
   481|       |        }
   482|       |
   483|    451|        Ok(None)
   484|       |    }
-  485|  9.48k|}
+  485|  9.58k|}
 _RNvMNtNtCscPSwwIASMRU_7cbor4ii4core3decNtB2_9Reference6as_refCsjy9uLqplD7t_11cbor_decode:
-   81|  14.0k|    pub(crate) const fn as_ref(&self) -> &[u8] {
-   82|  14.0k|        match self {
-   83|  14.0k|            Reference::Long(buf) => buf,
+   81|  14.2k|    pub(crate) const fn as_ref(&self) -> &[u8] {
+   82|  14.2k|        match self {
+   83|  14.2k|            Reference::Long(buf) => buf,
    84|      0|            Reference::Short(buf) => buf
    85|       |        }
-   86|  14.0k|    }
+   86|  14.2k|    }
 _RINvNtNtCscPSwwIASMRU_7cbor4ii4core3dec10decode_lenNtNtB4_5utils11SliceReaderECsjy9uLqplD7t_11cbor_decode:
-  599|  10.6k|fn decode_len<'a, R: Read<'a>>(major: u8, byte: u8, reader: &mut R)
-  600|  10.6k|    -> Result<Option<usize>, Error<R::Error>>
-  601|  10.6k|{
-  602|  10.6k|    if byte != (marker::START | (major << 5)) {
-  603|  6.04k|        let len = TypeNum::new(!(major << 5), byte).decode_u64(reader)?;
-  604|  5.98k|        let len = usize::try_from(len).map_err(Error::CastOverflow)?;
-  605|  5.98k|        Ok(Some(len))
+  599|  10.7k|fn decode_len<'a, R: Read<'a>>(major: u8, byte: u8, reader: &mut R)
+  600|  10.7k|    -> Result<Option<usize>, Error<R::Error>>
+  601|  10.7k|{
+  602|  10.7k|    if byte != (marker::START | (major << 5)) {
+  603|  6.13k|        let len = TypeNum::new(!(major << 5), byte).decode_u64(reader)?;
+  604|  6.07k|        let len = usize::try_from(len).map_err(Error::CastOverflow)?;
+  605|  6.07k|        Ok(Some(len))
   606|       |    } else {
   607|  4.61k|        Ok(None)
   608|       |    }
-  609|  10.6k|}
+  609|  10.7k|}
 _RNvMs0_NtNtCscPSwwIASMRU_7cbor4ii4core3decNtB5_7TypeNum3newCsjy9uLqplD7t_11cbor_decode:
-  179|  6.89k|    pub(crate) const fn new(major_limit: u8, byte: u8) -> TypeNum {
-  180|  6.89k|        TypeNum { major_limit, byte }
-  181|  6.89k|    }
+  179|  6.99k|    pub(crate) const fn new(major_limit: u8, byte: u8) -> TypeNum {
+  180|  6.99k|        TypeNum { major_limit, byte }
+  181|  6.99k|    }
 _RINvNtNtCscPSwwIASMRU_7cbor4ii4core3dec10pull_exactNtNtB4_5utils11SliceReaderECsjy9uLqplD7t_11cbor_decode:
-  136|    893|fn pull_exact<'a, R: Read<'a>>(reader: &mut R, mut buf: &mut [u8]) -> Result<(), Error<R::Error>> {
-  137|  1.77k|    while !buf.is_empty() {
-  138|    908|        let readbuf = reader.fill(buf.len())?;
-  139|    908|        let readbuf = readbuf.as_ref();
-  140|    908|
-  141|    908|        if readbuf.is_empty() {
+  136|  1.02k|fn pull_exact<'a, R: Read<'a>>(reader: &mut R, mut buf: &mut [u8]) -> Result<(), Error<R::Error>> {
+  137|  2.02k|    while !buf.is_empty() {
+  138|  1.03k|        let readbuf = reader.fill(buf.len())?;
+  139|  1.03k|        let readbuf = readbuf.as_ref();
+  140|  1.03k|
+  141|  1.03k|        if readbuf.is_empty() {
   142|     31|            return Err(Error::Eof);
-  143|    877|        }
-  144|    877|
-  145|    877|        let len = core::cmp::min(buf.len(), readbuf.len());
-  146|    877|        buf[..len].copy_from_slice(&readbuf[..len]);
-  147|    877|        reader.advance(len);
-  148|    877|        buf = &mut buf[len..];
+  143|  1.00k|        }
+  144|  1.00k|
+  145|  1.00k|        let len = core::cmp::min(buf.len(), readbuf.len());
+  146|  1.00k|        buf[..len].copy_from_slice(&readbuf[..len]);
+  147|  1.00k|        reader.advance(len);
+  148|  1.00k|        buf = &mut buf[len..];
   149|       |    }
   150|       |
-  151|    862|    Ok(())
-  152|    893|}
+  151|    990|    Ok(())
+  152|  1.02k|}
 _RINvNtNtCscPSwwIASMRU_7cbor4ii4core3dec8pull_oneNtNtB4_5utils11SliceReaderECsjy9uLqplD7t_11cbor_decode:
-  125|  13.0k|pub(crate) fn pull_one<'a, R: Read<'a>>(reader: &mut R) -> Result<u8, Error<R::Error>> {
-  126|  13.0k|    let b = reader.fill(1)?
-  127|  13.0k|        .as_ref()
-  128|  13.0k|        .get(0)
-  129|  13.0k|        .copied()
-  130|  13.0k|        .ok_or(Error::Eof)?;
-  131|  12.9k|    reader.advance(1);
-  132|  12.9k|    Ok(b)
-  133|  13.0k|}
+  125|  13.1k|pub(crate) fn pull_one<'a, R: Read<'a>>(reader: &mut R) -> Result<u8, Error<R::Error>> {
+  126|  13.1k|    let b = reader.fill(1)?
+  127|  13.1k|        .as_ref()
+  128|  13.1k|        .get(0)
+  129|  13.1k|        .copied()
+  130|  13.1k|        .ok_or(Error::Eof)?;
+  131|  13.0k|    reader.advance(1);
+  132|  13.0k|    Ok(b)
+  133|  13.1k|}
 _RINvXs5_NtNtCscPSwwIASMRU_7cbor4ii4core3decINtNtB8_5types5BytesINtNtCsjlJKuNRIedO_5alloc6borrow3CowShEENtB6_6Decode11decode_withNtNtB8_5utils11SliceReaderECsjy9uLqplD7t_11cbor_decode:
-  510|  3.93k|    fn decode_with<R: Read<'a>>(byte: u8, reader: &mut R) -> Result<Self, Error<R::Error>> {
-  511|  3.93k|        use crate::alloc::borrow::Cow;
-  512|  3.93k|
-  513|  3.93k|        let mut buf = Vec::new();
-  514|  3.93k|        Ok(types::Bytes(if let Some(longbuf) = decode_buf(major::BYTES, byte, reader, &mut buf)? {
-  515|  3.58k|            Cow::Borrowed(longbuf)
+  510|  3.89k|    fn decode_with<R: Read<'a>>(byte: u8, reader: &mut R) -> Result<Self, Error<R::Error>> {
+  511|  3.89k|        use crate::alloc::borrow::Cow;
+  512|  3.89k|
+  513|  3.89k|        let mut buf = Vec::new();
+  514|  3.89k|        Ok(types::Bytes(if let Some(longbuf) = decode_buf(major::BYTES, byte, reader, &mut buf)? {
+  515|  3.54k|            Cow::Borrowed(longbuf)
   516|       |        } else {
   517|    204|            Cow::Owned(buf)
   518|       |        }))
-  519|  3.93k|    }
+  519|  3.89k|    }
 _RNvNtNtCscPSwwIASMRU_7cbor4ii4core3dec8if_majorCsjy9uLqplD7t_11cbor_decode:
   894|    297|pub fn if_major(byte: u8) -> u8 {
   895|    297|    byte >> 5
@@ -156,10 +156,10 @@ _RINvXss_NtNtCscPSwwIASMRU_7cbor4ii4core3decyNtB6_6Decode11decode_withNtNtB8_5ut
   257|    542|                    TypeNum::new(!(major::UNSIGNED << 5), byte).$decode_fn(reader)
   258|    542|                }
 _RINvYINtNtNtCscPSwwIASMRU_7cbor4ii4core5types5BytesINtNtCsjlJKuNRIedO_5alloc6borrow3CowShEENtNtB8_3dec6Decode6decodeNtNtB8_5utils11SliceReaderECsjy9uLqplD7t_11cbor_decode:
-   73|  4.02k|    fn decode<R: Read<'a>>(reader: &mut R) -> Result<Self, Error<R::Error>> {
-   74|  4.02k|        let byte = pull_one(reader)?;
-   75|  3.93k|        Self::decode_with(byte, reader)
-   76|  4.02k|    }
+   73|  3.98k|    fn decode<R: Read<'a>>(reader: &mut R) -> Result<Self, Error<R::Error>> {
+   74|  3.98k|        let byte = pull_one(reader)?;
+   75|  3.89k|        Self::decode_with(byte, reader)
+   76|  3.98k|    }
 _RINvYNtNtNtCscPSwwIASMRU_7cbor4ii4core3dec10ArrayStartNtB5_6Decode6decodeNtNtB7_5utils11SliceReaderECsjy9uLqplD7t_11cbor_decode:
    73|  1.18k|    fn decode<R: Read<'a>>(reader: &mut R) -> Result<Self, Error<R::Error>> {
    74|  1.18k|        let byte = pull_one(reader)?;
@@ -176,71 +176,71 @@ _RINvYyNtNtNtCscPSwwIASMRU_7cbor4ii4core3dec6Decode6decodeNtNtB8_5utils11SliceRe
    75|    542|        Self::decode_with(byte, reader)
    76|    551|    }
 _RNCINvNtNtCscPSwwIASMRU_7cbor4ii4core3dec10decode_bufNtNtB6_5utils11SliceReaderE0Csjy9uLqplD7t_11cbor_decode:
-  475|  5.55k|            let mut reader = ScopeGuard(reader, |reader| reader.step_out());
+  475|  5.69k|            let mut reader = ScopeGuard(reader, |reader| reader.step_out());
 
 _RINvXs1_NtNtCscPSwwIASMRU_7cbor4ii4core3encINtB6_7TypeNumhENtB6_6Encode6encodeNtNtB8_5utils9BufWriterECsjy9uLqplD7t_11cbor_decode:
-   59|  2.76k|    fn encode<W: Write>(&self, writer: &mut W) -> Result<(), Error<W::Error>> {
-   60|  2.76k|        match self.value {
-   61|  2.76k|            x @ 0x00 ..= 0x17 => writer.push(&[self.type_ | x])?,
-   62|    568|            x => writer.push(&[self.type_ | 0x18, x])?
+   59|  2.71k|    fn encode<W: Write>(&self, writer: &mut W) -> Result<(), Error<W::Error>> {
+   60|  2.71k|        match self.value {
+   61|  2.71k|            x @ 0x00 ..= 0x17 => writer.push(&[self.type_ | x])?,
+   62|    566|            x => writer.push(&[self.type_ | 0x18, x])?
    63|       |        }
-   64|  2.76k|        Ok(())
-   65|  2.76k|    }
+   64|  2.71k|        Ok(())
+   65|  2.71k|    }
 _RINvXs2_NtNtCscPSwwIASMRU_7cbor4ii4core3encINtB6_7TypeNumtENtB6_6Encode6encodeNtNtB8_5utils9BufWriterECsjy9uLqplD7t_11cbor_decode:
-   70|  2.84k|    fn encode<W: Write>(&self, writer: &mut W) -> Result<(), Error<W::Error>> {
-   71|  2.84k|        match u8::try_from(self.value) {
-   72|  2.76k|            Ok(x) => TypeNum::new(self.type_, x).encode(writer)?,
+   70|  2.80k|    fn encode<W: Write>(&self, writer: &mut W) -> Result<(), Error<W::Error>> {
+   71|  2.80k|        match u8::try_from(self.value) {
+   72|  2.71k|            Ok(x) => TypeNum::new(self.type_, x).encode(writer)?,
    73|       |            Err(_) => {
    74|     86|                let [x0, x1] = self.value.to_be_bytes();
    75|     86|                writer.push(&[self.type_ | 0x19, x0, x1])?
    76|       |            }
    77|       |        }
-   78|  2.84k|        Ok(())
-   79|  2.84k|    }
+   78|  2.80k|        Ok(())
+   79|  2.80k|    }
 _RNvMs0_NtNtCscPSwwIASMRU_7cbor4ii4core3encINtB5_7TypeNumhE3newCsjy9uLqplD7t_11cbor_decode:
-   52|  2.76k|    const fn new(type_: u8, value: V) -> TypeNum<V> {
-   53|  2.76k|        TypeNum { type_, value }
-   54|  2.76k|    }
+   52|  2.71k|    const fn new(type_: u8, value: V) -> TypeNum<V> {
+   53|  2.71k|        TypeNum { type_, value }
+   54|  2.71k|    }
 _RINvXs3_NtNtCscPSwwIASMRU_7cbor4ii4core3encINtB6_7TypeNummENtB6_6Encode6encodeNtNtB8_5utils9BufWriterECsjy9uLqplD7t_11cbor_decode:
-   84|  2.85k|    fn encode<W: Write>(&self, writer: &mut W) -> Result<(), Error<W::Error>> {
-   85|  2.85k|        match u16::try_from(self.value) {
-   86|  2.84k|            Ok(x) => TypeNum::new(self.type_, x).encode(writer)?,
+   84|  2.81k|    fn encode<W: Write>(&self, writer: &mut W) -> Result<(), Error<W::Error>> {
+   85|  2.81k|        match u16::try_from(self.value) {
+   86|  2.80k|            Ok(x) => TypeNum::new(self.type_, x).encode(writer)?,
    87|       |            Err(_) =>{
    88|     10|                let [x0, x1, x2, x3] = self.value.to_be_bytes();
    89|     10|                writer.push(&[self.type_ | 0x1a, x0, x1, x2, x3])?;
    90|       |            }
    91|       |        }
-   92|  2.85k|        Ok(())
-   93|  2.85k|    }
+   92|  2.81k|        Ok(())
+   93|  2.81k|    }
 _RNvMs0_NtNtCscPSwwIASMRU_7cbor4ii4core3encINtB5_7TypeNumtE3newCsjy9uLqplD7t_11cbor_decode:
-   52|  2.84k|    const fn new(type_: u8, value: V) -> TypeNum<V> {
-   53|  2.84k|        TypeNum { type_, value }
-   54|  2.84k|    }
+   52|  2.80k|    const fn new(type_: u8, value: V) -> TypeNum<V> {
+   53|  2.80k|        TypeNum { type_, value }
+   54|  2.80k|    }
 _RINvXs4_NtNtCscPSwwIASMRU_7cbor4ii4core3encINtB6_7TypeNumyENtB6_6Encode6encodeNtNtB8_5utils9BufWriterECsjy9uLqplD7t_11cbor_decode:
-   98|  2.96k|    fn encode<W: Write>(&self, writer: &mut W) -> Result<(), Error<W::Error>> {
-   99|  2.96k|        match u32::try_from(self.value) {
-  100|  2.85k|            Ok(x) => TypeNum::new(self.type_, x).encode(writer)?,
+   98|  2.92k|    fn encode<W: Write>(&self, writer: &mut W) -> Result<(), Error<W::Error>> {
+   99|  2.92k|        match u32::try_from(self.value) {
+  100|  2.81k|            Ok(x) => TypeNum::new(self.type_, x).encode(writer)?,
   101|       |            Err(_) => {
   102|    108|                let [x0, x1, x2, x3, x4, x5, x6, x7] = self.value.to_be_bytes();
   103|    108|                writer.push(&[self.type_ | 0x1b, x0, x1, x2, x3, x4, x5, x6, x7])?;
   104|       |            }
   105|       |        }
-  106|  2.96k|        Ok(())
-  107|  2.96k|    }
+  106|  2.92k|        Ok(())
+  107|  2.92k|    }
 _RNvMs0_NtNtCscPSwwIASMRU_7cbor4ii4core3encINtB5_7TypeNummE3newCsjy9uLqplD7t_11cbor_decode:
-   52|  2.85k|    const fn new(type_: u8, value: V) -> TypeNum<V> {
-   53|  2.85k|        TypeNum { type_, value }
-   54|  2.85k|    }
+   52|  2.81k|    const fn new(type_: u8, value: V) -> TypeNum<V> {
+   53|  2.81k|        TypeNum { type_, value }
+   54|  2.81k|    }
 _RINvXs7_NtNtCscPSwwIASMRU_7cbor4ii4core3encINtNtB8_5types5BytesRShENtB6_6Encode6encodeNtNtB8_5utils9BufWriterECsjy9uLqplD7t_11cbor_decode:
-  208|  1.96k|    fn encode<W: Write>(&self, writer: &mut W) -> Result<(), Error<W::Error>> {
-  209|  1.96k|        TypeNum::new(major::BYTES << 5, self.0.len() as u64).encode(writer)?;
-  210|  1.96k|        writer.push(self.0)?;
-  211|  1.96k|        Ok(())
-  212|  1.96k|    }
+  208|  1.92k|    fn encode<W: Write>(&self, writer: &mut W) -> Result<(), Error<W::Error>> {
+  209|  1.92k|        TypeNum::new(major::BYTES << 5, self.0.len() as u64).encode(writer)?;
+  210|  1.92k|        writer.push(self.0)?;
+  211|  1.92k|        Ok(())
+  212|  1.92k|    }
 _RNvMs0_NtNtCscPSwwIASMRU_7cbor4ii4core3encINtB5_7TypeNumyE3newCsjy9uLqplD7t_11cbor_decode:
-   52|  2.96k|    const fn new(type_: u8, value: V) -> TypeNum<V> {
-   53|  2.96k|        TypeNum { type_, value }
-   54|  2.96k|    }
+   52|  2.92k|    const fn new(type_: u8, value: V) -> TypeNum<V> {
+   53|  2.92k|        TypeNum { type_, value }
+   54|  2.92k|    }
 _RINvXsd_NtNtCscPSwwIASMRU_7cbor4ii4core3encNtB6_17ArrayStartBoundedNtB6_6Encode6encodeNtNtB8_5utils9BufWriterECsjy9uLqplD7t_11cbor_decode:
   269|    500|    fn encode<W: Write>(&self, writer: &mut W) -> Result<(), Error<W::Error>> {
   270|    500|        TypeNum::new(major::ARRAY << 5, self.0 as u64).encode(writer)?;
@@ -257,9 +257,9 @@ _RINvXsu_NtNtCscPSwwIASMRU_7cbor4ii4core3encyNtB6_6Encode6encodeNtNtB8_5utils9Bu
   161|    250|                }
 
 _RNvMs0_NtNtCscPSwwIASMRU_7cbor4ii4core5utilsNtB5_11SliceReader3newCsjy9uLqplD7t_11cbor_decode:
-   53|    679|    pub fn new(buf: &[u8]) -> SliceReader<'_> {
-   54|    679|        SliceReader { buf, limit: 256 }
-   55|    679|    }
+   53|    680|    pub fn new(buf: &[u8]) -> SliceReader<'_> {
+   54|    680|        SliceReader { buf, limit: 256 }
+   55|    680|    }
 _RNvMNtNtCscPSwwIASMRU_7cbor4ii4core5utilsNtB2_9BufWriter3newCsjy9uLqplD7t_11cbor_decode:
    14|    250|    pub fn new(buf: Vec<u8>) -> Self {
    15|    250|       BufWriter(buf)
@@ -269,34 +269,34 @@ _RNvMNtNtCscPSwwIASMRU_7cbor4ii4core5utilsNtB2_9BufWriter10into_innerCsjy9uLqplD
    25|    250|        self.0
    26|    250|    }
 _RNvXs1_NtNtCscPSwwIASMRU_7cbor4ii4core5utilsNtB5_11SliceReaderNtNtB7_3dec4Read4fillCsjy9uLqplD7t_11cbor_decode:
-   62|  19.4k|    fn fill<'b>(&'b mut self, want: usize) -> Result<dec::Reference<'de, 'b>, Self::Error> {
-   63|  19.4k|        let len = core::cmp::min(self.buf.len(), want);
-   64|  19.4k|        Ok(dec::Reference::Long(&self.buf[..len]))
-   65|  19.4k|    }
+   62|  19.7k|    fn fill<'b>(&'b mut self, want: usize) -> Result<dec::Reference<'de, 'b>, Self::Error> {
+   63|  19.7k|        let len = core::cmp::min(self.buf.len(), want);
+   64|  19.7k|        Ok(dec::Reference::Long(&self.buf[..len]))
+   65|  19.7k|    }
 _RNvXs1_NtNtCscPSwwIASMRU_7cbor4ii4core5utilsNtB5_11SliceReaderNtNtB7_3dec4Read7advanceCsjy9uLqplD7t_11cbor_decode:
-   68|  18.5k|    fn advance(&mut self, n: usize) {
-   69|  18.5k|        let len = core::cmp::min(self.buf.len(), n);
-   70|  18.5k|        self.buf = &self.buf[len..];
-   71|  18.5k|    }
+   68|  18.8k|    fn advance(&mut self, n: usize) {
+   69|  18.8k|        let len = core::cmp::min(self.buf.len(), n);
+   70|  18.8k|        self.buf = &self.buf[len..];
+   71|  18.8k|    }
 _RNvXs1_NtNtCscPSwwIASMRU_7cbor4ii4core5utilsNtB5_11SliceReaderNtNtB7_3dec4Read7step_inCsjy9uLqplD7t_11cbor_decode:
-   74|  6.74k|    fn step_in(&mut self) -> bool {
-   75|  6.74k|        if let Some(limit) = self.limit.checked_sub(1) {
-   76|  6.73k|            self.limit = limit;
-   77|  6.73k|            true
+   74|  6.87k|    fn step_in(&mut self) -> bool {
+   75|  6.87k|        if let Some(limit) = self.limit.checked_sub(1) {
+   76|  6.87k|            self.limit = limit;
+   77|  6.87k|            true
    78|       |        } else {
    79|      1|            false
    80|       |        }
-   81|  6.74k|    }
+   81|  6.87k|    }
 _RNvXs1_NtNtCscPSwwIASMRU_7cbor4ii4core5utilsNtB5_11SliceReaderNtNtB7_3dec4Read8step_outCsjy9uLqplD7t_11cbor_decode:
-   84|  6.73k|    fn step_out(&mut self) {
-   85|  6.73k|        self.limit += 1;
-   86|  6.73k|    }
+   84|  6.87k|    fn step_out(&mut self) {
+   85|  6.87k|        self.limit += 1;
+   86|  6.87k|    }
 _RNvXs_NtNtCscPSwwIASMRU_7cbor4ii4core5utilsNtB4_9BufWriterNtNtB6_3enc5Write4pushCsjy9uLqplD7t_11cbor_decode:
-   39|  4.92k|    fn push(&mut self, input: &[u8]) -> Result<(), Self::Error> {
-   40|  4.92k|        self.0.try_reserve(input.len())?;
-   41|  4.92k|        self.0.extend_from_slice(input);
-   42|  4.92k|        Ok(())
-   43|  4.92k|    }
+   39|  4.84k|    fn push(&mut self, input: &[u8]) -> Result<(), Self::Error> {
+   40|  4.84k|        self.0.try_reserve(input.len())?;
+   41|  4.84k|        self.0.extend_from_slice(input);
+   42|  4.84k|        Ok(())
+   43|  4.84k|    }
 
 _RNvMs1_NtCscPSwwIASMRU_7cbor4ii5errorINtB5_11DecodeErrorNtNtCs9dCPwL0B372_4core7convert10InfallibleE8mismatchCsjy9uLqplD7t_11cbor_decode:
    93|     40|    pub(crate) const fn mismatch(major_limit: u8, byte: u8) -> Self {
@@ -307,13 +307,13 @@ _RNvMs1_NtCscPSwwIASMRU_7cbor4ii5errorINtB5_11DecodeErrorNtNtCs9dCPwL0B372_4core
    98|     40|    }
 
 _RNvXs_NtCscPSwwIASMRU_7cbor4ii4utilINtB4_10ScopeGuardNtNtNtB6_4core5utils11SliceReaderENtNtNtCs9dCPwL0B372_4core3ops5deref8DerefMut9deref_mutCsjy9uLqplD7t_11cbor_decode:
-   17|  5.55k|    fn deref_mut(&mut self) -> &mut Self::Target {
-   18|  5.55k|        self.0
-   19|  5.55k|    }
+   17|  5.69k|    fn deref_mut(&mut self) -> &mut Self::Target {
+   18|  5.69k|        self.0
+   19|  5.69k|    }
 _RNvXs0_NtCscPSwwIASMRU_7cbor4ii4utilINtB5_10ScopeGuardNtNtNtB7_4core5utils11SliceReaderENtNtNtCs9dCPwL0B372_4core3ops4drop4Drop4dropCsjy9uLqplD7t_11cbor_decode:
-   24|  5.55k|    fn drop(&mut self) {
-   25|  5.55k|        (self.1)(self.0);
-   26|  5.55k|    }
+   24|  5.69k|    fn drop(&mut self) {
+   25|  5.69k|        (self.1)(self.0);
+   26|  5.69k|    }
 
 _RINvMNtCs4H3WPwuEFsj_3cid3cidINtB3_3CidKj40_E10read_bytesQRShECsjy9uLqplD7t_11cbor_decode:
   140|    290|    pub fn read_bytes<R: io::Read>(mut r: R) -> Result<Self> {
@@ -511,49 +511,49 @@ _RNvXs0_NtCs4H3WPwuEFsj_3cid7versionyINtNtCs9dCPwL0B372_4core7convert4FromNtB5_7
    49|    234|    }
 
 rust_fuzzer_test_input:
-  209|    554|            pub extern "C" fn rust_fuzzer_test_input(bytes: &[u8]) -> i32 {
+  209|    555|            pub extern "C" fn rust_fuzzer_test_input(bytes: &[u8]) -> i32 {
   210|       |                // When `RUST_LIBFUZZER_DEBUG_PATH` is set, write the debug
   211|       |                // formatting of the input to that file. This is only intended for
   212|       |                // `cargo fuzz`'s use!
   213|       |
   214|       |                // `RUST_LIBFUZZER_DEBUG_PATH` is set in initialization.
-  215|    554|                if let Some(path) = $crate::RUST_LIBFUZZER_DEBUG_PATH.get() {
+  215|    555|                if let Some(path) = $crate::RUST_LIBFUZZER_DEBUG_PATH.get() {
   216|       |                    use std::io::Write;
   217|      0|                    let mut file = std::fs::File::create(path)
   218|      0|                        .expect("failed to create `RUST_LIBFUZZER_DEBUG_PATH` file");
   219|      0|                    writeln!(&mut file, "{:?}", bytes)
   220|      0|                        .expect("failed to write to `RUST_LIBFUZZER_DEBUG_PATH` file");
   221|      0|                    return 0;
-  222|    554|                }
-  223|    554|
-  224|    554|                __libfuzzer_sys_run(bytes);
-  225|    554|                0
+  222|    555|                }
+  223|    555|
+  224|    555|                __libfuzzer_sys_run(bytes);
+  225|    555|                0
   226|       |            }
 _RNvNvCsjy9uLqplD7t_11cbor_decode1__19___libfuzzer_sys_run:
-  241|    554|            fn __libfuzzer_sys_run($bytes: &[u8]) {
+  241|    555|            fn __libfuzzer_sys_run($bytes: &[u8]) {
   242|       |                $body
   243|       |            }
 LLVMFuzzerTestOneInput:
-   58|    554|pub fn test_input_wrap(data: *const u8, size: usize) -> i32 {
-   59|    554|    let test_input = ::std::panic::catch_unwind(|| unsafe {
+   58|    555|pub fn test_input_wrap(data: *const u8, size: usize) -> i32 {
+   59|    555|    let test_input = ::std::panic::catch_unwind(|| unsafe {
    60|       |        let data_slice = ::std::slice::from_raw_parts(data, size);
    61|       |        rust_fuzzer_test_input(data_slice)
-   62|    554|    });
-   63|    554|
-   64|    554|    match test_input {
-   65|    554|        Ok(i) => i,
+   62|    555|    });
+   63|    555|
+   64|    555|    match test_input {
+   65|    555|        Ok(i) => i,
    66|       |        Err(_) => {
    67|       |            // hopefully the custom panic hook will be called before and abort the
    68|       |            // process before the stack frames are unwinded.
    69|      0|            ::std::process::abort();
    70|       |        }
    71|       |    }
-   72|    554|}
+   72|    555|}
 _RNCNvCsi3dcEyRAfkl_13libfuzzer_sys15test_input_wrap0B3_:
-   59|    554|    let test_input = ::std::panic::catch_unwind(|| unsafe {
-   60|    554|        let data_slice = ::std::slice::from_raw_parts(data, size);
-   61|    554|        rust_fuzzer_test_input(data_slice)
-   62|    554|    });
+   59|    555|    let test_input = ::std::panic::catch_unwind(|| unsafe {
+   60|    555|        let data_slice = ::std::slice::from_raw_parts(data, size);
+   61|    555|        rust_fuzzer_test_input(data_slice)
+   62|    555|    });
 LLVMFuzzerInitialize:
    79|      2|pub fn initialize(_argc: *const isize, _argv: *const *const *const u8) -> isize {
    80|      2|    // Registers a panic hook that aborts the process before unwinding.
@@ -695,28 +695,28 @@ _RNvMs_NtCsgRZrALhziyc_9multihash9multihashINtB4_9MultihashKj40_E4wrapCsjy9uLqpl
   117|     17|    }
 
 _RNvYNtNtNtCs9cGagMfeDDj_10fvm_shared7address8protocol8ProtocolNtNtCsed1yqFqBZmX_10num_traits4cast13FromPrimitive7from_u8B8_:
-  448|  2.24k|    fn from_u8(n: u8) -> Option<Self> {
-  449|  2.24k|        FromPrimitive::from_u64(From::from(n))
-  450|  2.24k|    }
+  448|  2.20k|    fn from_u8(n: u8) -> Option<Self> {
+  449|  2.20k|        FromPrimitive::from_u64(From::from(n))
+  450|  2.20k|    }
 
 _RNvMs2_NtCsl1c8dvh1tGF_9once_cell3impINtB5_8OnceCellNtNtCsjlJKuNRIedO_5alloc6string6StringE14is_initializedCsjy9uLqplD7t_11cbor_decode:
-   49|    554|    pub(crate) fn is_initialized(&self) -> bool {
-   50|    554|        // An `Acquire` load is enough because that makes all the initialization
-   51|    554|        // operations visible to us, and, this being a fast path, weaker
-   52|    554|        // ordering helps with performance. This `Acquire` synchronizes with
-   53|    554|        // `SeqCst` operations on the slow path.
-   54|    554|        self.queue.load(Ordering::Acquire) == COMPLETE_PTR
-   55|    554|    }
+   49|    555|    pub(crate) fn is_initialized(&self) -> bool {
+   50|    555|        // An `Acquire` load is enough because that makes all the initialization
+   51|    555|        // operations visible to us, and, this being a fast path, weaker
+   52|    555|        // ordering helps with performance. This `Acquire` synchronizes with
+   53|    555|        // `SeqCst` operations on the slow path.
+   54|    555|        self.queue.load(Ordering::Acquire) == COMPLETE_PTR
+   55|    555|    }
 
 _RNvMs4_NtCsl1c8dvh1tGF_9once_cell4syncINtB5_8OnceCellNtNtCsjlJKuNRIedO_5alloc6string6StringE3getCsjy9uLqplD7t_11cbor_decode:
-  965|    554|        pub fn get(&self) -> Option<&T> {
-  966|    554|            if self.0.is_initialized() {
+  965|    555|        pub fn get(&self) -> Option<&T> {
+  966|    555|            if self.0.is_initialized() {
   967|       |                // Safe b/c value is initialized.
   968|      0|                Some(unsafe { self.get_unchecked() })
   969|       |            } else {
-  970|    554|                None
+  970|    555|                None
   971|       |            }
-  972|    554|        }
+  972|    555|        }
 
 _RNvXs4_CsdVj11FBJb1d_10scopeguardINtB5_10ScopeGuardQINtNtCs1E5Hi2kLQXm_18serde_ipld_dagcbor2de12DeserializerNtNtNtCscPSwwIASMRU_7cbor4ii4core5utils11SliceReaderEFBN_EuENtNtNtCs9dCPwL0B372_4core3ops5deref8DerefMut9deref_mutCsjy9uLqplD7t_11cbor_decode:
   460|  1.18k|    fn deref_mut(&mut self) -> &mut T {
@@ -766,9 +766,9 @@ _RINvXNvXsh_NtNtCsjJjkTSz0cq2_5serde2de5implsINtNtCsjlJKuNRIedO_5alloc3vec3VecpE
  1031|    478|                let capacity = size_hint::cautious::<T>(seq.size_hint());
  1032|    478|                let mut values = Vec::<T>::with_capacity(capacity);
  1033|       |
- 1034|  2.19k|                while let Some(value) = tri!(seq.next_element()) {
- 1035|  1.71k|                    values.push(value);
- 1036|  1.71k|                }
+ 1034|  2.15k|                while let Some(value) = tri!(seq.next_element()) {
+ 1035|  1.67k|                    values.push(value);
+ 1036|  1.67k|                }
  1037|       |
  1038|    385|                Ok(values)
  1039|    478|            }
@@ -853,12 +853,12 @@ _RINvXs3_NtCsjJjkTSz0cq2_5serde2deINtNtCs9dCPwL0B372_4core6marker11PhantomDataNt
   794|    385|        T::deserialize(deserializer)
   795|    385|    }
 _RINvXs3_NtCsjJjkTSz0cq2_5serde2deINtNtCs9dCPwL0B372_4core6marker11PhantomDataNtNtCs9cGagMfeDDj_10fvm_shared7address7AddressENtB6_15DeserializeSeed11deserializeQINtNtCs1E5Hi2kLQXm_18serde_ipld_dagcbor2de12DeserializerNtNtNtCscPSwwIASMRU_7cbor4ii4core5utils11SliceReaderEECsjy9uLqplD7t_11cbor_decode:
-  790|  2.34k|    fn deserialize<D>(self, deserializer: D) -> Result<T, D::Error>
-  791|  2.34k|    where
-  792|  2.34k|        D: Deserializer<'de>,
-  793|  2.34k|    {
-  794|  2.34k|        T::deserialize(deserializer)
-  795|  2.34k|    }
+  790|  2.30k|    fn deserialize<D>(self, deserializer: D) -> Result<T, D::Error>
+  791|  2.30k|    where
+  792|  2.30k|        D: Deserializer<'de>,
+  793|  2.30k|    {
+  794|  2.30k|        T::deserialize(deserializer)
+  795|  2.30k|    }
 _RINvXs3_NtCsjJjkTSz0cq2_5serde2deINtNtCs9dCPwL0B372_4core6marker11PhantomDataNtNtCsdA2aeLE5hGd_17fvm_ipld_bitfield11unvalidated19UnvalidatedBitFieldENtB6_15DeserializeSeed11deserializeQINtNtCs1E5Hi2kLQXm_18serde_ipld_dagcbor2de12DeserializerNtNtNtCscPSwwIASMRU_7cbor4ii4core5utils11SliceReaderEECsjy9uLqplD7t_11cbor_decode:
   790|    334|    fn deserialize<D>(self, deserializer: D) -> Result<T, D::Error>
   791|    334|    where
@@ -867,12 +867,12 @@ _RINvXs3_NtCsjJjkTSz0cq2_5serde2deINtNtCs9dCPwL0B372_4core6marker11PhantomDataNt
   794|    334|        T::deserialize(deserializer)
   795|    334|    }
 _RINvXs3_NtCsjJjkTSz0cq2_5serde2deINtNtCs9dCPwL0B372_4core6marker11PhantomDataNtNvXNvXNvNvXNtCskQK7vsxa1Sn_11common_fuzz4cborNtB1q_7PayloadNtB6_11Deserialize11deserialize1__NtB1n_5InnerB2c_11deserializeNtB1i_9___VisitorNtB6_7Visitor9visit_seq17___DeserializeWithENtB6_15DeserializeSeed11deserializeQINtNtCs1E5Hi2kLQXm_18serde_ipld_dagcbor2de12DeserializerNtNtNtCscPSwwIASMRU_7cbor4ii4core5utils11SliceReaderEECsjy9uLqplD7t_11cbor_decode:
-  790|    665|    fn deserialize<D>(self, deserializer: D) -> Result<T, D::Error>
-  791|    665|    where
-  792|    665|        D: Deserializer<'de>,
-  793|    665|    {
-  794|    665|        T::deserialize(deserializer)
-  795|    665|    }
+  790|    666|    fn deserialize<D>(self, deserializer: D) -> Result<T, D::Error>
+  791|    666|    where
+  792|    666|        D: Deserializer<'de>,
+  793|    666|    {
+  794|    666|        T::deserialize(deserializer)
+  795|    666|    }
 _RINvXs3_NtCsjJjkTSz0cq2_5serde2deINtNtCs9dCPwL0B372_4core6marker11PhantomDatayENtB6_15DeserializeSeed11deserializeQINtNtCs1E5Hi2kLQXm_18serde_ipld_dagcbor2de12DeserializerNtNtNtCscPSwwIASMRU_7cbor4ii4core5utils11SliceReaderEECsjy9uLqplD7t_11cbor_decode:
   790|    551|    fn deserialize<D>(self, deserializer: D) -> Result<T, D::Error>
   791|    551|    where
@@ -902,12 +902,12 @@ _RINvYINtNtCs1E5Hi2kLQXm_18serde_ipld_dagcbor2de8AccessorNtNtNtCscPSwwIASMRU_7cb
  1726|    385|        self.next_element_seed(PhantomData)
  1727|    385|    }
 _RINvYINtNtCs1E5Hi2kLQXm_18serde_ipld_dagcbor2de8AccessorNtNtNtCscPSwwIASMRU_7cbor4ii4core5utils11SliceReaderENtNtCsjJjkTSz0cq2_5serde2de9SeqAccess12next_elementNtNtCs9cGagMfeDDj_10fvm_shared7address7AddressECsjy9uLqplD7t_11cbor_decode:
- 1722|  2.72k|    fn next_element<T>(&mut self) -> Result<Option<T>, Self::Error>
- 1723|  2.72k|    where
- 1724|  2.72k|        T: Deserialize<'de>,
- 1725|  2.72k|    {
- 1726|  2.72k|        self.next_element_seed(PhantomData)
- 1727|  2.72k|    }
+ 1722|  2.68k|    fn next_element<T>(&mut self) -> Result<Option<T>, Self::Error>
+ 1723|  2.68k|    where
+ 1724|  2.68k|        T: Deserialize<'de>,
+ 1725|  2.68k|    {
+ 1726|  2.68k|        self.next_element_seed(PhantomData)
+ 1727|  2.68k|    }
 _RINvYINtNtCs1E5Hi2kLQXm_18serde_ipld_dagcbor2de8AccessorNtNtNtCscPSwwIASMRU_7cbor4ii4core5utils11SliceReaderENtNtCsjJjkTSz0cq2_5serde2de9SeqAccess12next_elementNtNtCsdA2aeLE5hGd_17fvm_ipld_bitfield11unvalidated19UnvalidatedBitFieldECsjy9uLqplD7t_11cbor_decode:
  1722|    334|    fn next_element<T>(&mut self) -> Result<Option<T>, Self::Error>
  1723|    334|    where
@@ -916,12 +916,12 @@ _RINvYINtNtCs1E5Hi2kLQXm_18serde_ipld_dagcbor2de8AccessorNtNtNtCscPSwwIASMRU_7cb
  1726|    334|        self.next_element_seed(PhantomData)
  1727|    334|    }
 _RINvYINtNtCs1E5Hi2kLQXm_18serde_ipld_dagcbor2de8AccessorNtNtNtCscPSwwIASMRU_7cbor4ii4core5utils11SliceReaderENtNtCsjJjkTSz0cq2_5serde2de9SeqAccess12next_elementNtNvXNvXNvNvXNtCskQK7vsxa1Sn_11common_fuzz4cborNtB2L_7PayloadNtB1L_11Deserialize11deserialize1__NtB2I_5InnerB3x_11deserializeNtB2D_9___VisitorNtB1L_7Visitor9visit_seq17___DeserializeWithECsjy9uLqplD7t_11cbor_decode:
- 1722|    665|    fn next_element<T>(&mut self) -> Result<Option<T>, Self::Error>
- 1723|    665|    where
- 1724|    665|        T: Deserialize<'de>,
- 1725|    665|    {
- 1726|    665|        self.next_element_seed(PhantomData)
- 1727|    665|    }
+ 1722|    666|    fn next_element<T>(&mut self) -> Result<Option<T>, Self::Error>
+ 1723|    666|    where
+ 1724|    666|        T: Deserialize<'de>,
+ 1725|    666|    {
+ 1726|    666|        self.next_element_seed(PhantomData)
+ 1727|    666|    }
 _RINvYINtNtCs1E5Hi2kLQXm_18serde_ipld_dagcbor2de8AccessorNtNtNtCscPSwwIASMRU_7cbor4ii4core5utils11SliceReaderENtNtCsjJjkTSz0cq2_5serde2de9SeqAccess12next_elementyECsjy9uLqplD7t_11cbor_decode:
  1722|    551|    fn next_element<T>(&mut self) -> Result<Option<T>, Self::Error>
  1723|    551|    where
@@ -987,12 +987,12 @@ _RINvXs1G_NtNtCsjJjkTSz0cq2_5serde3ser5implsRNtCsdA2aeLE5hGd_17fvm_ipld_bitfield
   456|    250|                (**self).serialize(serializer)
   457|    250|            }
 _RINvXs1G_NtNtCsjJjkTSz0cq2_5serde3ser5implsRNtNtCs9cGagMfeDDj_10fvm_shared7address7AddressNtB9_9Serialize9serializeQINtNtCs1E5Hi2kLQXm_18serde_ipld_dagcbor3ser10SerializerNtNtNtCscPSwwIASMRU_7cbor4ii4core5utils9BufWriterEECsjy9uLqplD7t_11cbor_decode:
-  452|    964|            fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-  453|    964|            where
-  454|    964|                S: Serializer,
-  455|    964|            {
-  456|    964|                (**self).serialize(serializer)
-  457|    964|            }
+  452|    922|            fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+  453|    922|            where
+  454|    922|                S: Serializer,
+  455|    922|            {
+  456|    922|                (**self).serialize(serializer)
+  457|    922|            }
 _RINvXs1G_NtNtCsjJjkTSz0cq2_5serde3ser5implsRNtNtCsdA2aeLE5hGd_17fvm_ipld_bitfield11unvalidated19UnvalidatedBitFieldNtB9_9Serialize9serializeQINtNtCs1E5Hi2kLQXm_18serde_ipld_dagcbor3ser10SerializerNtNtNtCscPSwwIASMRU_7cbor4ii4core5utils9BufWriterEECsjy9uLqplD7t_11cbor_decode:
   452|    250|            fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
   453|    250|            where
@@ -1044,7 +1044,7 @@ _RINvYQINtNtCs1E5Hi2kLQXm_18serde_ipld_dagcbor3ser10SerializerNtNtNtCscPSwwIASMR
  1279|    250|        serializer.end()
  1280|    250|    }
 _RNCINvYQINtNtCs1E5Hi2kLQXm_18serde_ipld_dagcbor3ser10SerializerNtNtNtCscPSwwIASMRU_7cbor4ii4core5utils9BufWriterENtNtCsjJjkTSz0cq2_5serde3ser10Serializer11collect_seqRINtNtCsjlJKuNRIedO_5alloc3vec3VecNtNtCs9cGagMfeDDj_10fvm_shared7address7AddressEE0Csjy9uLqplD7t_11cbor_decode:
- 1278|    714|        tri!(iter.try_for_each(|item| serializer.serialize_element(&item)));
+ 1278|    672|        tri!(iter.try_for_each(|item| serializer.serialize_element(&item)));
 
 _RINvMNtCs3h0qSQPzQJX_11serde_bytes7bytebufNtB3_7ByteBuf4fromINtNtCsjlJKuNRIedO_5alloc3vec3VechEECsjy9uLqplD7t_11cbor_decode:
    60|    250|    pub fn from<T: Into<Vec<u8>>>(bytes: T) -> Self {
@@ -1086,20 +1086,20 @@ _RINvMs_NtCs1E5Hi2kLQXm_18serde_ipld_dagcbor2deINtB5_12DeserializerNtNtNtCscPSww
   125|       |        }
   126|    313|    }
 _RINvNtCs1E5Hi2kLQXm_18serde_ipld_dagcbor2de10from_sliceNtNtCskQK7vsxa1Sn_11common_fuzz4cbor7PayloadECsjy9uLqplD7t_11cbor_decode:
-   40|    679|pub fn from_slice<'a, T>(buf: &'a [u8]) -> Result<T, DecodeError<Infallible>>
-   41|    679|where
-   42|    679|    T: de::Deserialize<'a>,
-   43|    679|{
-   44|    679|    let reader = SliceReader::new(buf);
-   45|    679|    let mut deserializer = Deserializer::from_reader(reader);
-   46|    679|    let value = serde::Deserialize::deserialize(&mut deserializer)?;
+   40|    680|pub fn from_slice<'a, T>(buf: &'a [u8]) -> Result<T, DecodeError<Infallible>>
+   41|    680|where
+   42|    680|    T: de::Deserialize<'a>,
+   43|    680|{
+   44|    680|    let reader = SliceReader::new(buf);
+   45|    680|    let mut deserializer = Deserializer::from_reader(reader);
+   46|    680|    let value = serde::Deserialize::deserialize(&mut deserializer)?;
    47|    255|    deserializer.end()?;
    48|    250|    Ok(value)
-   49|    679|}
+   49|    680|}
 _RNvMNtCs1E5Hi2kLQXm_18serde_ipld_dagcbor2deINtB2_12DeserializerNtNtNtCscPSwwIASMRU_7cbor4ii4core5utils11SliceReaderE11from_readerCsjy9uLqplD7t_11cbor_decode:
-   93|    679|    pub fn from_reader(reader: R) -> Deserializer<R> {
-   94|    679|        Deserializer { reader }
-   95|    679|    }
+   93|    680|    pub fn from_reader(reader: R) -> Deserializer<R> {
+   94|    680|        Deserializer { reader }
+   95|    680|    }
 _RINvXs0_NtCs1E5Hi2kLQXm_18serde_ipld_dagcbor2deQINtB6_12DeserializerNtNtNtCscPSwwIASMRU_7cbor4ii4core5utils11SliceReaderENtNtCsjJjkTSz0cq2_5serde2de12Deserializer15deserialize_seqINtNvXsh_NtB1X_5implsINtNtCsjlJKuNRIedO_5alloc3vec3VecpENtB1X_11Deserialize11deserialize10VecVisitorNtNtCs9cGagMfeDDj_10fvm_shared7address7AddressEECsjy9uLqplD7t_11cbor_decode:
   333|    502|    fn deserialize_seq<V>(self, visitor: V) -> Result<V::Value, Self::Error>
   334|    502|    where
@@ -1117,53 +1117,53 @@ _RINvXs0_NtCs1E5Hi2kLQXm_18serde_ipld_dagcbor2deQINtB6_12DeserializerNtNtNtCscPS
   146|    535|            visitor.$visit(value)
   147|    551|        }
 _RINvXs0_NtCs1E5Hi2kLQXm_18serde_ipld_dagcbor2deQINtB6_12DeserializerNtNtNtCscPSwwIASMRU_7cbor4ii4core5utils11SliceReaderENtNtCsjJjkTSz0cq2_5serde2de12Deserializer17deserialize_bytesNtNvXs0_NtNtCs6sKEvD5xUCG_17fvm_ipld_encoding5bytes12strict_bytesINtNtCsjlJKuNRIedO_5alloc6borrow3CowShENtB31_11Deserialize11deserialize10CowVisitorECsjy9uLqplD7t_11cbor_decode:
-  239|  2.72k|    fn deserialize_bytes<V>(self, visitor: V) -> Result<V::Value, Self::Error>
-  240|  2.72k|    where
-  241|  2.72k|        V: Visitor<'de>,
-  242|  2.72k|    {
-  243|  2.72k|        match <types::Bytes<Cow<[u8]>>>::decode(&mut self.reader)?.0 {
-  244|  2.45k|            Cow::Borrowed(buf) => visitor.visit_borrowed_bytes(buf),
+  239|  2.68k|    fn deserialize_bytes<V>(self, visitor: V) -> Result<V::Value, Self::Error>
+  240|  2.68k|    where
+  241|  2.68k|        V: Visitor<'de>,
+  242|  2.68k|    {
+  243|  2.68k|        match <types::Bytes<Cow<[u8]>>>::decode(&mut self.reader)?.0 {
+  244|  2.40k|            Cow::Borrowed(buf) => visitor.visit_borrowed_bytes(buf),
   245|    184|            Cow::Owned(buf) => visitor.visit_byte_buf(buf),
   246|       |        }
-  247|  2.72k|    }
+  247|  2.68k|    }
 _RINvXs0_NtCs1E5Hi2kLQXm_18serde_ipld_dagcbor2deQINtB6_12DeserializerNtNtNtCscPSwwIASMRU_7cbor4ii4core5utils11SliceReaderENtNtCsjJjkTSz0cq2_5serde2de12Deserializer17deserialize_bytesNtNvXs_NtNtCs6sKEvD5xUCG_17fvm_ipld_encoding5bytes12strict_bytesINtNtCsjlJKuNRIedO_5alloc3vec3VechENtB30_11Deserialize11deserialize10VecVisitorECsjy9uLqplD7t_11cbor_decode:
-  239|    999|    fn deserialize_bytes<V>(self, visitor: V) -> Result<V::Value, Self::Error>
-  240|    999|    where
-  241|    999|        V: Visitor<'de>,
-  242|    999|    {
-  243|    999|        match <types::Bytes<Cow<[u8]>>>::decode(&mut self.reader)?.0 {
+  239|  1.00k|    fn deserialize_bytes<V>(self, visitor: V) -> Result<V::Value, Self::Error>
+  240|  1.00k|    where
+  241|  1.00k|        V: Visitor<'de>,
+  242|  1.00k|    {
+  243|  1.00k|        match <types::Bytes<Cow<[u8]>>>::decode(&mut self.reader)?.0 {
   244|    852|            Cow::Borrowed(buf) => visitor.visit_borrowed_bytes(buf),
   245|     12|            Cow::Owned(buf) => visitor.visit_byte_buf(buf),
   246|       |        }
-  247|    999|    }
+  247|  1.00k|    }
 _RINvXs0_NtCs1E5Hi2kLQXm_18serde_ipld_dagcbor2deQINtB6_12DeserializerNtNtNtCscPSwwIASMRU_7cbor4ii4core5utils11SliceReaderENtNtCsjJjkTSz0cq2_5serde2de12Deserializer17deserialize_tupleNtNvXNvNvXNtCskQK7vsxa1Sn_11common_fuzz4cborNtB33_7PayloadNtB1X_11Deserialize11deserialize1__NtB30_5InnerB3P_11deserialize9___VisitorECsjy9uLqplD7t_11cbor_decode:
-  343|    679|    fn deserialize_tuple<V>(self, len: usize, visitor: V) -> Result<V::Value, Self::Error>
-  344|    679|    where
-  345|    679|        V: Visitor<'de>,
-  346|    679|    {
-  347|    679|        let mut de = self.try_step()?;
-  348|    679|        let seq = Accessor::tuple(&mut de, len)?;
-  349|    665|        visitor.visit_seq(seq)
-  350|    679|    }
+  343|    680|    fn deserialize_tuple<V>(self, len: usize, visitor: V) -> Result<V::Value, Self::Error>
+  344|    680|    where
+  345|    680|        V: Visitor<'de>,
+  346|    680|    {
+  347|    680|        let mut de = self.try_step()?;
+  348|    680|        let seq = Accessor::tuple(&mut de, len)?;
+  349|    666|        visitor.visit_seq(seq)
+  350|    680|    }
 _RINvXs0_NtCs1E5Hi2kLQXm_18serde_ipld_dagcbor2deQINtB6_12DeserializerNtNtNtCscPSwwIASMRU_7cbor4ii4core5utils11SliceReaderENtNtCsjJjkTSz0cq2_5serde2de12Deserializer20deserialize_byte_bufNtNvXs_NtNtCs6sKEvD5xUCG_17fvm_ipld_encoding5bytes12strict_bytesINtNtCsjlJKuNRIedO_5alloc3vec3VechENtB33_11Deserialize11deserialize10VecVisitorECsjy9uLqplD7t_11cbor_decode:
-  250|    999|    fn deserialize_byte_buf<V>(self, visitor: V) -> Result<V::Value, Self::Error>
-  251|    999|    where
-  252|    999|        V: Visitor<'de>,
-  253|    999|    {
-  254|    999|        self.deserialize_bytes(visitor)
-  255|    999|    }
+  250|  1.00k|    fn deserialize_byte_buf<V>(self, visitor: V) -> Result<V::Value, Self::Error>
+  251|  1.00k|    where
+  252|  1.00k|        V: Visitor<'de>,
+  253|  1.00k|    {
+  254|  1.00k|        self.deserialize_bytes(visitor)
+  255|  1.00k|    }
 _RINvXs0_NtCs1E5Hi2kLQXm_18serde_ipld_dagcbor2deQINtB6_12DeserializerNtNtNtCscPSwwIASMRU_7cbor4ii4core5utils11SliceReaderENtNtCsjJjkTSz0cq2_5serde2de12Deserializer24deserialize_tuple_structNtNvXNvNvXNtCskQK7vsxa1Sn_11common_fuzz4cborNtB3a_7PayloadNtB1X_11Deserialize11deserialize1__NtB37_5InnerB3W_11deserialize9___VisitorECsjy9uLqplD7t_11cbor_decode:
-  353|    679|    fn deserialize_tuple_struct<V>(
-  354|    679|        self,
-  355|    679|        _name: &'static str,
-  356|    679|        len: usize,
-  357|    679|        visitor: V,
-  358|    679|    ) -> Result<V::Value, Self::Error>
-  359|    679|    where
-  360|    679|        V: Visitor<'de>,
-  361|    679|    {
-  362|    679|        self.deserialize_tuple(len, visitor)
-  363|    679|    }
+  353|    680|    fn deserialize_tuple_struct<V>(
+  354|    680|        self,
+  355|    680|        _name: &'static str,
+  356|    680|        len: usize,
+  357|    680|        visitor: V,
+  358|    680|    ) -> Result<V::Value, Self::Error>
+  359|    680|    where
+  360|    680|        V: Visitor<'de>,
+  361|    680|    {
+  362|    680|        self.deserialize_tuple(len, visitor)
+  363|    680|    }
 _RINvXs0_NtCs1E5Hi2kLQXm_18serde_ipld_dagcbor2deQINtB6_12DeserializerNtNtNtCscPSwwIASMRU_7cbor4ii4core5utils11SliceReaderENtNtCsjJjkTSz0cq2_5serde2de12Deserializer26deserialize_newtype_structINtNvXs0_NtCs4H3WPwuEFsj_3cid5serdeINtNtB3d_3cid3CidKpENtB1X_11Deserialize11deserialize16MainEntryVisitorKj40_EECsjy9uLqplD7t_11cbor_decode:
   317|    313|    fn deserialize_newtype_struct<V>(
   318|    313|        self,
@@ -1216,17 +1216,17 @@ _RINvXs2_NtCs1E5Hi2kLQXm_18serde_ipld_dagcbor2deINtB6_8AccessorNtNtNtCscPSwwIASM
   485|       |        }
   486|    385|    }
 _RINvXs2_NtCs1E5Hi2kLQXm_18serde_ipld_dagcbor2deINtB6_8AccessorNtNtNtCscPSwwIASMRU_7cbor4ii4core5utils11SliceReaderENtNtCsjJjkTSz0cq2_5serde2de9SeqAccess17next_element_seedINtNtCs9dCPwL0B372_4core6marker11PhantomDataNtNtCs9cGagMfeDDj_10fvm_shared7address7AddressEECsjy9uLqplD7t_11cbor_decode:
-  476|  2.72k|    fn next_element_seed<T>(&mut self, seed: T) -> Result<Option<T::Value>, Self::Error>
-  477|  2.72k|    where
-  478|  2.72k|        T: de::DeserializeSeed<'de>,
-  479|  2.72k|    {
-  480|  2.72k|        if self.len > 0 {
-  481|  2.34k|            self.len -= 1;
-  482|  2.34k|            Ok(Some(seed.deserialize(&mut *self.de)?))
+  476|  2.68k|    fn next_element_seed<T>(&mut self, seed: T) -> Result<Option<T::Value>, Self::Error>
+  477|  2.68k|    where
+  478|  2.68k|        T: de::DeserializeSeed<'de>,
+  479|  2.68k|    {
+  480|  2.68k|        if self.len > 0 {
+  481|  2.30k|            self.len -= 1;
+  482|  2.30k|            Ok(Some(seed.deserialize(&mut *self.de)?))
   483|       |        } else {
   484|    385|            Ok(None)
   485|       |        }
-  486|  2.72k|    }
+  486|  2.68k|    }
 _RINvXs2_NtCs1E5Hi2kLQXm_18serde_ipld_dagcbor2deINtB6_8AccessorNtNtNtCscPSwwIASMRU_7cbor4ii4core5utils11SliceReaderENtNtCsjJjkTSz0cq2_5serde2de9SeqAccess17next_element_seedINtNtCs9dCPwL0B372_4core6marker11PhantomDataNtNtCsdA2aeLE5hGd_17fvm_ipld_bitfield11unvalidated19UnvalidatedBitFieldEECsjy9uLqplD7t_11cbor_decode:
   476|    334|    fn next_element_seed<T>(&mut self, seed: T) -> Result<Option<T::Value>, Self::Error>
   477|    334|    where
@@ -1240,17 +1240,17 @@ _RINvXs2_NtCs1E5Hi2kLQXm_18serde_ipld_dagcbor2deINtB6_8AccessorNtNtNtCscPSwwIASM
   485|       |        }
   486|    334|    }
 _RINvXs2_NtCs1E5Hi2kLQXm_18serde_ipld_dagcbor2deINtB6_8AccessorNtNtNtCscPSwwIASMRU_7cbor4ii4core5utils11SliceReaderENtNtCsjJjkTSz0cq2_5serde2de9SeqAccess17next_element_seedINtNtCs9dCPwL0B372_4core6marker11PhantomDataNtNvXNvXNvNvXNtCskQK7vsxa1Sn_11common_fuzz4cborNtB3E_7PayloadNtB1R_11Deserialize11deserialize1__NtB3B_5InnerB4q_11deserializeNtB3w_9___VisitorNtB1R_7Visitor9visit_seq17___DeserializeWithEECsjy9uLqplD7t_11cbor_decode:
-  476|    665|    fn next_element_seed<T>(&mut self, seed: T) -> Result<Option<T::Value>, Self::Error>
-  477|    665|    where
-  478|    665|        T: de::DeserializeSeed<'de>,
-  479|    665|    {
-  480|    665|        if self.len > 0 {
-  481|    665|            self.len -= 1;
-  482|    665|            Ok(Some(seed.deserialize(&mut *self.de)?))
+  476|    666|    fn next_element_seed<T>(&mut self, seed: T) -> Result<Option<T::Value>, Self::Error>
+  477|    666|    where
+  478|    666|        T: de::DeserializeSeed<'de>,
+  479|    666|    {
+  480|    666|        if self.len > 0 {
+  481|    666|            self.len -= 1;
+  482|    666|            Ok(Some(seed.deserialize(&mut *self.de)?))
   483|       |        } else {
   484|      0|            Ok(None)
   485|       |        }
-  486|    665|    }
+  486|    666|    }
 _RINvXs2_NtCs1E5Hi2kLQXm_18serde_ipld_dagcbor2deINtB6_8AccessorNtNtNtCscPSwwIASMRU_7cbor4ii4core5utils11SliceReaderENtNtCsjJjkTSz0cq2_5serde2de9SeqAccess17next_element_seedINtNtCs9dCPwL0B372_4core6marker11PhantomDatayEECsjy9uLqplD7t_11cbor_decode:
   476|    551|    fn next_element_seed<T>(&mut self, seed: T) -> Result<Option<T::Value>, Self::Error>
   477|    551|    where
@@ -1305,14 +1305,14 @@ _RNvMs1_NtCs1E5Hi2kLQXm_18serde_ipld_dagcbor2deINtB5_8AccessorNtNtNtCscPSwwIASMR
   438|    479|        )
   439|    502|    }
 _RNvMs1_NtCs1E5Hi2kLQXm_18serde_ipld_dagcbor2deINtB5_8AccessorNtNtNtCscPSwwIASMRU_7cbor4ii4core5utils11SliceReaderE5tupleCsjy9uLqplD7t_11cbor_decode:
-  442|    679|    pub fn tuple(
-  443|    679|        de: &'a mut Deserializer<R>,
-  444|    679|        len: usize,
-  445|    679|    ) -> Result<Accessor<'a, R>, DecodeError<R::Error>> {
-  446|    679|        let array_start = dec::ArrayStart::decode(&mut de.reader)?;
+  442|    680|    pub fn tuple(
+  443|    680|        de: &'a mut Deserializer<R>,
+  444|    680|        len: usize,
+  445|    680|    ) -> Result<Accessor<'a, R>, DecodeError<R::Error>> {
+  446|    680|        let array_start = dec::ArrayStart::decode(&mut de.reader)?;
   447|       |
-  448|    672|        if array_start.0 == Some(len) {
-  449|    665|            Ok(Accessor { de, len })
+  448|    673|        if array_start.0 == Some(len) {
+  449|    666|            Ok(Accessor { de, len })
   450|       |        } else {
   451|      7|            Err(DecodeError::RequireLength {
   452|      7|                name: "tuple",
@@ -1320,7 +1320,7 @@ _RNvMs1_NtCs1E5Hi2kLQXm_18serde_ipld_dagcbor2deINtB5_8AccessorNtNtNtCscPSwwIASMR
   454|      7|                value: array_start.0.unwrap_or(0),
   455|      7|            })
   456|       |        }
-  457|    679|    }
+  457|    680|    }
 _RNvMs_NtCs1E5Hi2kLQXm_18serde_ipld_dagcbor2deINtB4_12DeserializerNtNtNtCscPSwwIASMRU_7cbor4ii4core5utils11SliceReaderE3endCsjy9uLqplD7t_11cbor_decode:
   130|    255|    pub fn end(&mut self) -> Result<(), DecodeError<R::Error>> {
   131|    255|        match peek_one(&mut self.reader) {
@@ -1358,14 +1358,14 @@ _RINvXs4_NtCs1E5Hi2kLQXm_18serde_ipld_dagcbor5errorINtB6_11DecodeErrorNtNtCs9dCP
   137|     45|        DecodeError::Msg(msg.to_string())
   138|     45|    }
 _RNvXs6_NtCs1E5Hi2kLQXm_18serde_ipld_dagcbor5errorINtB5_11DecodeErrorNtNtCs9dCPwL0B372_4core7convert10InfallibleENtNtB18_3fmt7Display3fmtCsjy9uLqplD7t_11cbor_decode:
-  163|    429|    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-  164|    429|        fmt::Debug::fmt(self, f)
-  165|    429|    }
+  163|    430|    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+  164|    430|        fmt::Debug::fmt(self, f)
+  165|    430|    }
 _RNvXs7_NtCs1E5Hi2kLQXm_18serde_ipld_dagcbor5errorINtB5_11DecodeErrorNtNtCs9dCPwL0B372_4core7convert10InfallibleEINtB16_4FromINtNtCscPSwwIASMRU_7cbor4ii5error11DecodeErrorB14_EE4fromCsjy9uLqplD7t_11cbor_decode:
-  169|    287|    fn from(err: cbor4ii::DecodeError<E>) -> DecodeError<E> {
-  170|    287|        match err {
+  169|    288|    fn from(err: cbor4ii::DecodeError<E>) -> DecodeError<E> {
+  170|    288|        match err {
   171|      0|            cbor4ii::DecodeError::Read(read) => DecodeError::Read(read),
-  172|    246|            cbor4ii::DecodeError::Eof => DecodeError::Eof,
+  172|    247|            cbor4ii::DecodeError::Eof => DecodeError::Eof,
   173|     40|            cbor4ii::DecodeError::Mismatch { expect_major, byte } => {
   174|     40|                DecodeError::Mismatch { expect_major, byte }
   175|       |            }
@@ -1390,7 +1390,7 @@ _RNvXs7_NtCs1E5Hi2kLQXm_18serde_ipld_dagcbor5errorINtB5_11DecodeErrorNtNtCs9dCPw
   194|       |            // Needed as `cbor4ii::EncodeError` is markes as non_exhaustive
   195|      0|            _ => DecodeError::Msg(err.to_string()),
   196|       |        }
-  197|    287|    }
+  197|    288|    }
 
 _RINvNtCs1E5Hi2kLQXm_18serde_ipld_dagcbor3ser6to_vecNtNtCskQK7vsxa1Sn_11common_fuzz4cbor7PayloadECsjy9uLqplD7t_11cbor_decode:
    23|    250|pub fn to_vec<T>(value: &T) -> Result<Vec<u8>, EncodeError<TryReserveError>>
@@ -1411,9 +1411,9 @@ _RNvMNtCs1E5Hi2kLQXm_18serde_ipld_dagcbor3serINtB2_10SerializerNtNtNtCscPSwwIASM
    57|    250|        self.writer
    58|    250|    }
 _RINvXs0_NtCs1E5Hi2kLQXm_18serde_ipld_dagcbor3serINtB6_7CollectNtNtNtCscPSwwIASMRU_7cbor4ii4core5utils9BufWriterENtNtCsjJjkTSz0cq2_5serde3ser12SerializeSeq17serialize_elementRNtNtCs9cGagMfeDDj_10fvm_shared7address7AddressECsjy9uLqplD7t_11cbor_decode:
-  380|    714|    fn serialize_element<T: Serialize + ?Sized>(&mut self, value: &T) -> Result<(), Self::Error> {
-  381|    714|        value.serialize(&mut *self.ser)
-  382|    714|    }
+  380|    672|    fn serialize_element<T: Serialize + ?Sized>(&mut self, value: &T) -> Result<(), Self::Error> {
+  381|    672|        value.serialize(&mut *self.ser)
+  382|    672|    }
 _RINvXs2_NtCs1E5Hi2kLQXm_18serde_ipld_dagcbor3serINtB6_14BoundedCollectNtNtNtCscPSwwIASMRU_7cbor4ii4core5utils9BufWriterENtNtCsjJjkTSz0cq2_5serde3ser20SerializeTupleStruct15serialize_fieldNtNvXNvNvXs_NtCskQK7vsxa1Sn_11common_fuzz4cborNtB3b_7PayloadNtB1W_9Serialize9serialize1__NtB36_5InnerB3X_9serialize15___SerializeWithECsjy9uLqplD7t_11cbor_decode:
   414|    250|    fn serialize_field<T: Serialize + ?Sized>(&mut self, value: &T) -> Result<(), Self::Error> {
   415|    250|        value.serialize(&mut *self.ser)
@@ -1492,10 +1492,10 @@ _RNvXs_NtCs1E5Hi2kLQXm_18serde_ipld_dagcbor3serQINtB4_10SerializerNtNtNtCscPSwwI
   124|    250|        Ok(())
   125|    250|    }
 _RNvXs_NtCs1E5Hi2kLQXm_18serde_ipld_dagcbor3serQINtB4_10SerializerNtNtNtCscPSwwIASMRU_7cbor4ii4core5utils9BufWriterENtNtCsjJjkTSz0cq2_5serde3ser10Serializer15serialize_bytesCsjy9uLqplD7t_11cbor_decode:
-  159|  1.71k|    fn serialize_bytes(self, v: &[u8]) -> Result<Self::Ok, Self::Error> {
-  160|  1.71k|        types::Bytes(v).encode(&mut self.writer)?;
-  161|  1.71k|        Ok(())
-  162|  1.71k|    }
+  159|  1.67k|    fn serialize_bytes(self, v: &[u8]) -> Result<Self::Ok, Self::Error> {
+  160|  1.67k|        types::Bytes(v).encode(&mut self.writer)?;
+  161|  1.67k|        Ok(())
+  162|  1.67k|    }
 _RNvXs_NtCs1E5Hi2kLQXm_18serde_ipld_dagcbor3serQINtB4_10SerializerNtNtNtCscPSwwIASMRU_7cbor4ii4core5utils9BufWriterENtNtCsjJjkTSz0cq2_5serde3ser10Serializer15serialize_tupleCsjy9uLqplD7t_11cbor_decode:
   238|    250|    fn serialize_tuple(self, len: usize) -> Result<Self::SerializeTuple, Self::Error> {
   239|    250|        enc::ArrayStartBounded(len).encode(&mut self.writer)?;
@@ -1511,17 +1511,17 @@ _RNvXs_NtCs1E5Hi2kLQXm_18serde_ipld_dagcbor3serQINtB4_10SerializerNtNtNtCscPSwwI
   250|    250|    }
 
 _RINvXs_Cs3L1u1g2m3C7_11serde_tupleINtB5_12DeserializerQINtNtCs1E5Hi2kLQXm_18serde_ipld_dagcbor2de12DeserializerNtNtNtCscPSwwIASMRU_7cbor4ii4core5utils11SliceReaderEENtNtCsjJjkTSz0cq2_5serde2de12Deserializer24deserialize_tuple_structNtNvXNvNvXNtCskQK7vsxa1Sn_11common_fuzz4cborNtB3S_7PayloadNtB2F_11Deserialize11deserialize1__NtB3P_5InnerB4E_11deserialize9___VisitorECsjy9uLqplD7t_11cbor_decode:
-  353|    679|    fn deserialize_tuple_struct<V>(
-  354|    679|        self,
-  355|    679|        name: &'static str,
-  356|    679|        len: usize,
-  357|    679|        visitor: V,
-  358|    679|    ) -> Result<V::Value, Self::Error>
-  359|    679|    where
-  360|    679|        V: serde::de::Visitor<'de>,
-  361|    679|    {
-  362|    679|        self.0.deserialize_tuple_struct(name, len, visitor)
-  363|    679|    }
+  353|    680|    fn deserialize_tuple_struct<V>(
+  354|    680|        self,
+  355|    680|        name: &'static str,
+  356|    680|        len: usize,
+  357|    680|        visitor: V,
+  358|    680|    ) -> Result<V::Value, Self::Error>
+  359|    680|    where
+  360|    680|        V: serde::de::Visitor<'de>,
+  361|    680|    {
+  362|    680|        self.0.deserialize_tuple_struct(name, len, visitor)
+  363|    680|    }
 _RNvXCs3L1u1g2m3C7_11serde_tupleINtB2_10SerializerQINtNtCs1E5Hi2kLQXm_18serde_ipld_dagcbor3ser10SerializerNtNtNtCscPSwwIASMRU_7cbor4ii4core5utils9BufWriterEENtNtCsjJjkTSz0cq2_5serde3ser10Serializer22serialize_tuple_structCsjy9uLqplD7t_11cbor_decode:
   158|    250|    fn serialize_tuple_struct(
   159|    250|        self,
@@ -1537,21 +1537,21 @@ _RNvXNtCsb1smg7ygDCx_9thiserror7displayRjNtB2_9AsDisplay10as_displayCs9cGagMfeDD
    21|      4|    }
 
 _RNvNtCshvusEHOgk12_15unsigned_varint6decode7is_lastCsjy9uLqplD7t_11cbor_decode:
-   90|  4.54k|pub fn is_last(b: u8) -> bool {
-   91|  4.54k|    b & 0x80 == 0
-   92|  4.54k|}
+   90|  4.56k|pub fn is_last(b: u8) -> bool {
+   91|  4.56k|    b & 0x80 == 0
+   92|  4.56k|}
 _RNvNtCshvusEHOgk12_15unsigned_varint6decode3u64Csjy9uLqplD7t_11cbor_decode:
   122|  1.06k|pub fn u64(buf: &[u8]) -> Result<(u64, &[u8]), Error> {
   123|  1.06k|    decode!(buf, 9, u64)
   124|  1.06k|}
 _RNvNtCshvusEHOgk12_15unsigned_varint6decode3u64Cs9cGagMfeDDj_10fvm_shared:
-  122|  1.68k|pub fn u64(buf: &[u8]) -> Result<(u64, &[u8]), Error> {
-  123|  1.68k|    decode!(buf, 9, u64)
-  124|  1.68k|}
+  122|  1.64k|pub fn u64(buf: &[u8]) -> Result<(u64, &[u8]), Error> {
+  123|  1.64k|    decode!(buf, 9, u64)
+  124|  1.64k|}
 _RNvNtCshvusEHOgk12_15unsigned_varint6decode7is_lastCs9cGagMfeDDj_10fvm_shared:
-   90|  5.84k|pub fn is_last(b: u8) -> bool {
-   91|  5.84k|    b & 0x80 == 0
-   92|  5.84k|}
+   90|  5.71k|pub fn is_last(b: u8) -> bool {
+   91|  5.71k|    b & 0x80 == 0
+   92|  5.71k|}
 
 _RNvNtCshvusEHOgk12_15unsigned_varint6encode10u64_bufferCsjy9uLqplD7t_11cbor_decode:
   119|  1.79k|pub fn u64_buffer() -> [u8; U64_LEN] {
@@ -1570,13 +1570,13 @@ _RNvNtCshvusEHOgk12_15unsigned_varint6encode3u64Csjy9uLqplD7t_11cbor_decode:
    70|    718|    encode!(number, buf)
    71|    718|}
 _RNvNtCshvusEHOgk12_15unsigned_varint6encode10u64_bufferCs9cGagMfeDDj_10fvm_shared:
-  119|    690|pub fn u64_buffer() -> [u8; U64_LEN] {
-  120|    690|    [0; U64_LEN]
-  121|    690|}
+  119|    650|pub fn u64_buffer() -> [u8; U64_LEN] {
+  120|    650|    [0; U64_LEN]
+  121|    650|}
 _RNvNtCshvusEHOgk12_15unsigned_varint6encode3u64Cs9cGagMfeDDj_10fvm_shared:
-   69|    690|pub fn u64(number: u64, buf: &mut [u8; U64_LEN]) -> &[u8] {
-   70|    690|    encode!(number, buf)
-   71|    690|}
+   69|    650|pub fn u64(number: u64, buf: &mut [u8; U64_LEN]) -> &[u8] {
+   70|    650|    encode!(number, buf)
+   71|    650|}
 _RNvNtCshvusEHOgk12_15unsigned_varint6encode3u64CsdA2aeLE5hGd_17fvm_ipld_bitfield:
    69|  7.54k|pub fn u64(number: u64, buf: &mut [u8; U64_LEN]) -> &[u8] {
    70|  7.54k|    encode!(number, buf)
@@ -1589,14 +1589,14 @@ _RNvNtCshvusEHOgk12_15unsigned_varint6encode10u64_bufferCsdA2aeLE5hGd_17fvm_ipld
 _RINvNtCshvusEHOgk12_15unsigned_varint2io8read_u64QQRShECsjy9uLqplD7t_11cbor_decode:
    31|  1.07k|            pub fn $name<R: io::Read>(mut reader: R) -> Result<$t, ReadError> {
    32|  1.07k|                let mut b = encode::$b();
-   33|  2.31k|                for i in 0 .. b.len() {
-   34|  2.31k|                    let n = reader.read(&mut b[i .. i + 1])?;
-   35|  2.31k|                    if n == 0 {
+   33|  2.32k|                for i in 0 .. b.len() {
+   34|  2.32k|                    let n = reader.read(&mut b[i .. i + 1])?;
+   35|  2.32k|                    if n == 0 {
    36|     14|                        return Err(ReadError::Io(io::ErrorKind::UnexpectedEof.into()))
-   37|  2.30k|                    }
-   38|  2.30k|                    if decode::is_last(b[i]) {
+   37|  2.31k|                    }
+   38|  2.31k|                    if decode::is_last(b[i]) {
    39|  1.06k|                        return Ok(decode::$t(&b[..= i])?.0)
-   40|  1.23k|                    }
+   40|  1.25k|                    }
    41|       |                }
    42|      1|                Err(decode::Error::Overflow.into())
    43|  1.07k|            }
@@ -2235,12 +2235,12 @@ _RINvNtNtCs6sKEvD5xUCG_17fvm_ipld_encoding5bytes12strict_bytes9serializeRINtNtCs
   159|    250|        Serialize::serialize(bytes.as_ref(), serializer)
   160|    250|    }
 _RINvXNtNtCs6sKEvD5xUCG_17fvm_ipld_encoding5bytes12strict_bytesINtNtCsjlJKuNRIedO_5alloc3vec3VechENtB3_9Serialize9serializeQINtNtCs1E5Hi2kLQXm_18serde_ipld_dagcbor3ser10SerializerNtNtNtCscPSwwIASMRU_7cbor4ii4core5utils9BufWriterEECsjy9uLqplD7t_11cbor_decode:
-   35|    964|        fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-   36|    964|        where
-   37|    964|            S: Serializer,
-   38|    964|        {
-   39|    964|            serializer.serialize_bytes(self.as_ref())
-   40|    964|        }
+   35|    922|        fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+   36|    922|        where
+   37|    922|            S: Serializer,
+   38|    922|        {
+   39|    922|            serializer.serialize_bytes(self.as_ref())
+   40|    922|        }
 _RINvXNtNtCs6sKEvD5xUCG_17fvm_ipld_encoding5bytes12strict_bytesShNtB3_9Serialize9serializeQINtNtCs1E5Hi2kLQXm_18serde_ipld_dagcbor3ser10SerializerNtNtNtCscPSwwIASMRU_7cbor4ii4core5utils9BufWriterEECsjy9uLqplD7t_11cbor_decode:
    35|    750|        fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
    36|    750|        where
@@ -2249,43 +2249,43 @@ _RINvXNtNtCs6sKEvD5xUCG_17fvm_ipld_encoding5bytes12strict_bytesShNtB3_9Serialize
    39|    750|            serializer.serialize_bytes(self.as_ref())
    40|    750|        }
 _RINvNtNtCs6sKEvD5xUCG_17fvm_ipld_encoding5bytes12strict_bytes11deserializeINtNtCsjlJKuNRIedO_5alloc3vec3VechEQINtNtCs1E5Hi2kLQXm_18serde_ipld_dagcbor2de12DeserializerNtNtNtCscPSwwIASMRU_7cbor4ii4core5utils11SliceReaderEECsjy9uLqplD7t_11cbor_decode:
-  162|    999|    pub fn deserialize<'de, T, D>(deserializer: D) -> Result<T, D::Error>
-  163|    999|    where
-  164|    999|        T: Deserialize<'de>,
-  165|    999|        D: Deserializer<'de>,
-  166|    999|    {
-  167|    999|        Deserialize::deserialize(deserializer)
-  168|    999|    }
+  162|  1.00k|    pub fn deserialize<'de, T, D>(deserializer: D) -> Result<T, D::Error>
+  163|  1.00k|    where
+  164|  1.00k|        T: Deserialize<'de>,
+  165|  1.00k|        D: Deserializer<'de>,
+  166|  1.00k|    {
+  167|  1.00k|        Deserialize::deserialize(deserializer)
+  168|  1.00k|    }
 _RINvXs_NtNtCs6sKEvD5xUCG_17fvm_ipld_encoding5bytes12strict_bytesINtNtCsjlJKuNRIedO_5alloc3vec3VechENtB5_11Deserialize11deserializeQINtNtCs1E5Hi2kLQXm_18serde_ipld_dagcbor2de12DeserializerNtNtNtCscPSwwIASMRU_7cbor4ii4core5utils11SliceReaderEECsjy9uLqplD7t_11cbor_decode:
-   44|    999|        fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-   45|    999|        where
-   46|    999|            D: Deserializer<'de>,
-   47|    999|        {
-   48|    999|            struct VecVisitor;
-   49|    999|
-   50|    999|            impl<'de> Visitor<'de> for VecVisitor {
-   51|    999|                type Value = Vec<u8>;
-   52|    999|
-   53|    999|                fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-   54|    999|                    formatter.write_str("byte array")
-   55|    999|                }
-   56|    999|
-   57|    999|                fn visit_bytes<E>(self, v: &[u8]) -> Result<Vec<u8>, E>
-   58|    999|                where
-   59|    999|                    E: Error,
-   60|    999|                {
-   61|    999|                    Ok(v.into())
-   62|    999|                }
-   63|    999|
-   64|    999|                fn visit_byte_buf<E>(self, v: Vec<u8>) -> Result<Vec<u8>, E>
-   65|    999|                where
-   66|    999|                    E: Error,
-   67|    999|                {
-   68|    999|                    Ok(v)
-   69|    999|                }
-   70|    999|            }
-   71|    999|            deserializer.deserialize_byte_buf(VecVisitor)
-   72|    999|        }
+   44|  1.00k|        fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+   45|  1.00k|        where
+   46|  1.00k|            D: Deserializer<'de>,
+   47|  1.00k|        {
+   48|  1.00k|            struct VecVisitor;
+   49|  1.00k|
+   50|  1.00k|            impl<'de> Visitor<'de> for VecVisitor {
+   51|  1.00k|                type Value = Vec<u8>;
+   52|  1.00k|
+   53|  1.00k|                fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+   54|  1.00k|                    formatter.write_str("byte array")
+   55|  1.00k|                }
+   56|  1.00k|
+   57|  1.00k|                fn visit_bytes<E>(self, v: &[u8]) -> Result<Vec<u8>, E>
+   58|  1.00k|                where
+   59|  1.00k|                    E: Error,
+   60|  1.00k|                {
+   61|  1.00k|                    Ok(v.into())
+   62|  1.00k|                }
+   63|  1.00k|
+   64|  1.00k|                fn visit_byte_buf<E>(self, v: Vec<u8>) -> Result<Vec<u8>, E>
+   65|  1.00k|                where
+   66|  1.00k|                    E: Error,
+   67|  1.00k|                {
+   68|  1.00k|                    Ok(v)
+   69|  1.00k|                }
+   70|  1.00k|            }
+   71|  1.00k|            deserializer.deserialize_byte_buf(VecVisitor)
+   72|  1.00k|        }
 _RINvXNvXs0_NtNtCs6sKEvD5xUCG_17fvm_ipld_encoding5bytes12strict_bytesINtNtCsjlJKuNRIedO_5alloc6borrow3CowShENtB9_11Deserialize11deserializeNtB3_10CowVisitorNtNtCsjJjkTSz0cq2_5serde2de7Visitor14visit_byte_bufINtNtCs1E5Hi2kLQXm_18serde_ipld_dagcbor5error11DecodeErrorNtNtCs9dCPwL0B372_4core7convert10InfallibleEECsjy9uLqplD7t_11cbor_decode:
   103|    184|                fn visit_byte_buf<E>(self, v: Vec<u8>) -> Result<Self::Value, E>
   104|    184|                where
@@ -2294,12 +2294,12 @@ _RINvXNvXs0_NtNtCs6sKEvD5xUCG_17fvm_ipld_encoding5bytes12strict_bytesINtNtCsjlJK
   107|    184|                    Ok(Cow::Owned(v))
   108|    184|                }
 _RINvXNvXs0_NtNtCs6sKEvD5xUCG_17fvm_ipld_encoding5bytes12strict_bytesINtNtCsjlJKuNRIedO_5alloc6borrow3CowShENtB9_11Deserialize11deserializeNtB3_10CowVisitorNtNtCsjJjkTSz0cq2_5serde2de7Visitor20visit_borrowed_bytesINtNtCs1E5Hi2kLQXm_18serde_ipld_dagcbor5error11DecodeErrorNtNtCs9dCPwL0B372_4core7convert10InfallibleEECsjy9uLqplD7t_11cbor_decode:
-   89|  2.45k|                fn visit_borrowed_bytes<E>(self, v: &'de [u8]) -> Result<Self::Value, E>
-   90|  2.45k|                where
-   91|  2.45k|                    E: Error,
-   92|  2.45k|                {
-   93|  2.45k|                    Ok(Cow::Borrowed(v))
-   94|  2.45k|                }
+   89|  2.40k|                fn visit_borrowed_bytes<E>(self, v: &'de [u8]) -> Result<Self::Value, E>
+   90|  2.40k|                where
+   91|  2.40k|                    E: Error,
+   92|  2.40k|                {
+   93|  2.40k|                    Ok(Cow::Borrowed(v))
+   94|  2.40k|                }
 _RINvXNvXs_NtNtCs6sKEvD5xUCG_17fvm_ipld_encoding5bytes12strict_bytesINtNtCsjlJKuNRIedO_5alloc3vec3VechENtB8_11Deserialize11deserializeNtB3_10VecVisitorNtNtCsjJjkTSz0cq2_5serde2de7Visitor11visit_bytesINtNtCs1E5Hi2kLQXm_18serde_ipld_dagcbor5error11DecodeErrorNtNtCs9dCPwL0B372_4core7convert10InfallibleEECsjy9uLqplD7t_11cbor_decode:
    57|    852|                fn visit_bytes<E>(self, v: &[u8]) -> Result<Vec<u8>, E>
    58|    852|                where
@@ -2315,42 +2315,42 @@ _RINvXNvXs_NtNtCs6sKEvD5xUCG_17fvm_ipld_encoding5bytes12strict_bytesINtNtCsjlJKu
    68|     12|                    Ok(v)
    69|     12|                }
 _RINvXs0_NtNtCs6sKEvD5xUCG_17fvm_ipld_encoding5bytes12strict_bytesINtNtCsjlJKuNRIedO_5alloc6borrow3CowShENtB6_11Deserialize11deserializeQINtNtCs1E5Hi2kLQXm_18serde_ipld_dagcbor2de12DeserializerNtNtNtCscPSwwIASMRU_7cbor4ii4core5utils11SliceReaderEECsjy9uLqplD7t_11cbor_decode:
-   76|  2.72k|        fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-   77|  2.72k|        where
-   78|  2.72k|            D: Deserializer<'de>,
-   79|  2.72k|        {
-   80|  2.72k|            struct CowVisitor;
-   81|  2.72k|
-   82|  2.72k|            impl<'de> Visitor<'de> for CowVisitor {
-   83|  2.72k|                type Value = Cow<'de, [u8]>;
-   84|  2.72k|
-   85|  2.72k|                fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-   86|  2.72k|                    formatter.write_str("a byte array")
-   87|  2.72k|                }
-   88|  2.72k|
-   89|  2.72k|                fn visit_borrowed_bytes<E>(self, v: &'de [u8]) -> Result<Self::Value, E>
-   90|  2.72k|                where
-   91|  2.72k|                    E: Error,
-   92|  2.72k|                {
-   93|  2.72k|                    Ok(Cow::Borrowed(v))
-   94|  2.72k|                }
-   95|  2.72k|
-   96|  2.72k|                fn visit_bytes<E>(self, v: &[u8]) -> Result<Self::Value, E>
-   97|  2.72k|                where
-   98|  2.72k|                    E: Error,
-   99|  2.72k|                {
-  100|  2.72k|                    Ok(Cow::Owned(v.to_vec()))
-  101|  2.72k|                }
-  102|  2.72k|
-  103|  2.72k|                fn visit_byte_buf<E>(self, v: Vec<u8>) -> Result<Self::Value, E>
-  104|  2.72k|                where
-  105|  2.72k|                    E: Error,
-  106|  2.72k|                {
-  107|  2.72k|                    Ok(Cow::Owned(v))
-  108|  2.72k|                }
-  109|  2.72k|            }
-  110|  2.72k|            deserializer.deserialize_bytes(CowVisitor)
-  111|  2.72k|        }
+   76|  2.68k|        fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+   77|  2.68k|        where
+   78|  2.68k|            D: Deserializer<'de>,
+   79|  2.68k|        {
+   80|  2.68k|            struct CowVisitor;
+   81|  2.68k|
+   82|  2.68k|            impl<'de> Visitor<'de> for CowVisitor {
+   83|  2.68k|                type Value = Cow<'de, [u8]>;
+   84|  2.68k|
+   85|  2.68k|                fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+   86|  2.68k|                    formatter.write_str("a byte array")
+   87|  2.68k|                }
+   88|  2.68k|
+   89|  2.68k|                fn visit_borrowed_bytes<E>(self, v: &'de [u8]) -> Result<Self::Value, E>
+   90|  2.68k|                where
+   91|  2.68k|                    E: Error,
+   92|  2.68k|                {
+   93|  2.68k|                    Ok(Cow::Borrowed(v))
+   94|  2.68k|                }
+   95|  2.68k|
+   96|  2.68k|                fn visit_bytes<E>(self, v: &[u8]) -> Result<Self::Value, E>
+   97|  2.68k|                where
+   98|  2.68k|                    E: Error,
+   99|  2.68k|                {
+  100|  2.68k|                    Ok(Cow::Owned(v.to_vec()))
+  101|  2.68k|                }
+  102|  2.68k|
+  103|  2.68k|                fn visit_byte_buf<E>(self, v: Vec<u8>) -> Result<Self::Value, E>
+  104|  2.68k|                where
+  105|  2.68k|                    E: Error,
+  106|  2.68k|                {
+  107|  2.68k|                    Ok(Cow::Owned(v))
+  108|  2.68k|                }
+  109|  2.68k|            }
+  110|  2.68k|            deserializer.deserialize_bytes(CowVisitor)
+  111|  2.68k|        }
 _RINvNtNtCs6sKEvD5xUCG_17fvm_ipld_encoding5bytes12strict_bytes11deserializeINtNtCsjlJKuNRIedO_5alloc6borrow3CowShEQINtNtCs1E5Hi2kLQXm_18serde_ipld_dagcbor2de12DeserializerNtNtNtCscPSwwIASMRU_7cbor4ii4core5utils11SliceReaderEECsjy9uLqplD7t_11cbor_decode:
   162|    385|    pub fn deserialize<'de, T, D>(deserializer: D) -> Result<T, D::Error>
   163|    385|    where
@@ -2361,20 +2361,20 @@ _RINvNtNtCs6sKEvD5xUCG_17fvm_ipld_encoding5bytes12strict_bytes11deserializeINtNt
   168|    385|    }
 
 _RNvXNtCs6sKEvD5xUCG_17fvm_ipld_encoding6errorsNtB2_5ErrorINtNtCs9dCPwL0B372_4core7convert4FromINtNtCs1E5Hi2kLQXm_18serde_ipld_dagcbor5error11DecodeErrorNtBW_10InfallibleEE4fromCsjy9uLqplD7t_11cbor_decode:
-   23|    429|    fn from(err: DecodeError<T>) -> Self {
-   24|    429|        Self {
-   25|    429|            description: err.to_string(),
-   26|    429|            protocol: CodecProtocol::Cbor,
-   27|    429|        }
-   28|    429|    }
+   23|    430|    fn from(err: DecodeError<T>) -> Self {
+   24|    430|        Self {
+   25|    430|            description: err.to_string(),
+   26|    430|            protocol: CodecProtocol::Cbor,
+   27|    430|        }
+   28|    430|    }
 
 _RINvCs6sKEvD5xUCG_17fvm_ipld_encoding10from_sliceNtNtCskQK7vsxa1Sn_11common_fuzz4cbor7PayloadECsjy9uLqplD7t_11cbor_decode:
-   61|    679|pub fn from_slice<'a, T>(slice: &'a [u8]) -> Result<T, Error>
-   62|    679|where
-   63|    679|    T: de::Deserialize<'a>,
-   64|    679|{
-   65|    679|    serde_ipld_dagcbor::from_slice(slice).map_err(Into::into)
-   66|    679|}
+   61|    680|pub fn from_slice<'a, T>(slice: &'a [u8]) -> Result<T, Error>
+   62|    680|where
+   63|    680|    T: de::Deserialize<'a>,
+   64|    680|{
+   65|    680|    serde_ipld_dagcbor::from_slice(slice).map_err(Into::into)
+   66|    680|}
 _RINvCs6sKEvD5xUCG_17fvm_ipld_encoding6to_vecNtNtCskQK7vsxa1Sn_11common_fuzz4cbor7PayloadECsjy9uLqplD7t_11cbor_decode:
    44|    250|pub fn to_vec<T>(value: &T) -> Result<Vec<u8>, Error>
    45|    250|where
@@ -2391,108 +2391,108 @@ _RNvXs6_NtNtCs9cGagMfeDDj_10fvm_shared7address6errorsNtB5_5ErrorNtNtCs9dCPwL0B37
    14|     38|#[derive(Debug, PartialEq, Eq, Error)]
 
 _RINvXs3_NtCs9cGagMfeDDj_10fvm_shared7addressNtB6_7AddressNtNtCsjJjkTSz0cq2_5serde3ser9Serialize9serializeQINtNtCs1E5Hi2kLQXm_18serde_ipld_dagcbor3ser10SerializerNtNtNtCscPSwwIASMRU_7cbor4ii4core5utils9BufWriterEECsjy9uLqplD7t_11cbor_decode:
-  357|    964|    fn serialize<S>(&self, s: S) -> Result<S::Ok, S::Error>
-  358|    964|    where
-  359|    964|        S: Serializer,
-  360|    964|    {
-  361|    964|        let address_bytes = self.to_bytes();
-  362|    964|        strict_bytes::Serialize::serialize(&address_bytes, s)
-  363|    964|    }
+  357|    922|    fn serialize<S>(&self, s: S) -> Result<S::Ok, S::Error>
+  358|    922|    where
+  359|    922|        S: Serializer,
+  360|    922|    {
+  361|    922|        let address_bytes = self.to_bytes();
+  362|    922|        strict_bytes::Serialize::serialize(&address_bytes, s)
+  363|    922|    }
 _RINvXs4_NtCs9cGagMfeDDj_10fvm_shared7addressNtB6_7AddressNtNtCsjJjkTSz0cq2_5serde2de11Deserialize11deserializeQINtNtCs1E5Hi2kLQXm_18serde_ipld_dagcbor2de12DeserializerNtNtNtCscPSwwIASMRU_7cbor4ii4core5utils11SliceReaderEECsjy9uLqplD7t_11cbor_decode:
-  367|  2.34k|    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-  368|  2.34k|    where
-  369|  2.34k|        D: Deserializer<'de>,
-  370|  2.34k|    {
-  371|  2.34k|        let bz: Cow<'de, [u8]> = strict_bytes::Deserialize::deserialize(deserializer)?;
+  367|  2.30k|    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+  368|  2.30k|    where
+  369|  2.30k|        D: Deserializer<'de>,
+  370|  2.30k|    {
+  371|  2.30k|        let bz: Cow<'de, [u8]> = strict_bytes::Deserialize::deserialize(deserializer)?;
   372|       |
   373|       |        // Create and return created address of unmarshalled bytes
-  374|  2.25k|        Address::from_bytes(&bz).map_err(de::Error::custom)
-  375|  2.34k|    }
+  374|  2.21k|        Address::from_bytes(&bz).map_err(de::Error::custom)
+  375|  2.30k|    }
 _RNvMNtCs9cGagMfeDDj_10fvm_shared7addressNtB2_7Address3new:
-   79|  2.24k|    fn new(protocol: Protocol, bz: &[u8]) -> Result<Self, Error> {
-   80|  2.24k|        Ok(Self {
-   81|  2.24k|            payload: Payload::new(protocol, bz)?,
+   79|  2.20k|    fn new(protocol: Protocol, bz: &[u8]) -> Result<Self, Error> {
+   80|  2.20k|        Ok(Self {
+   81|  2.20k|            payload: Payload::new(protocol, bz)?,
    82|       |        })
-   83|  2.24k|    }
+   83|  2.20k|    }
 _RNvMNtCs9cGagMfeDDj_10fvm_shared7addressNtB2_7Address10from_bytes:
-   86|  2.25k|    pub fn from_bytes(bz: &[u8]) -> Result<Self, Error> {
-   87|  2.25k|        if bz.len() < 2 {
+   86|  2.21k|    pub fn from_bytes(bz: &[u8]) -> Result<Self, Error> {
+   87|  2.21k|        if bz.len() < 2 {
    88|     10|            Err(Error::InvalidLength)
    89|       |        } else {
-   90|  2.24k|            let protocol = Protocol::from_byte(bz[0]).ok_or(Error::UnknownProtocol)?;
-   91|  2.24k|            Self::new(protocol, &bz[1..])
+   90|  2.20k|            let protocol = Protocol::from_byte(bz[0]).ok_or(Error::UnknownProtocol)?;
+   91|  2.20k|            Self::new(protocol, &bz[1..])
    92|       |        }
-   93|  2.25k|    }
+   93|  2.21k|    }
 _RNvMNtCs9cGagMfeDDj_10fvm_shared7addressNtB2_7Address8to_bytes:
-  168|    964|    pub fn to_bytes(self) -> Vec<u8> {
-  169|    964|        self.payload.to_bytes()
-  170|    964|    }
+  168|    922|    pub fn to_bytes(self) -> Vec<u8> {
+  169|    922|        self.payload.to_bytes()
+  170|    922|    }
 _RNvNtCs9cGagMfeDDj_10fvm_shared7address12to_leb_bytes:
-  378|    690|pub(crate) fn to_leb_bytes(id: u64) -> Vec<u8> {
-  379|    690|    // write id to buffer in leb128 format
-  380|    690|    unsigned_varint::encode::u64(id, &mut unsigned_varint::encode::u64_buffer()).into()
-  381|    690|}
+  378|    650|pub(crate) fn to_leb_bytes(id: u64) -> Vec<u8> {
+  379|    650|    // write id to buffer in leb128 format
+  380|    650|    unsigned_varint::encode::u64(id, &mut unsigned_varint::encode::u64_buffer()).into()
+  381|    650|}
 _RNvNtCs9cGagMfeDDj_10fvm_shared7address14from_leb_bytes:
-  383|    741|pub(crate) fn from_leb_bytes(bz: &[u8]) -> Result<u64, Error> {
+  383|    729|pub(crate) fn from_leb_bytes(bz: &[u8]) -> Result<u64, Error> {
   384|       |    // write id to buffer in leb128 format
-  385|    741|    let (id, remaining) = unsigned_varint::decode::u64(bz)?;
-  386|    724|    if !remaining.is_empty() {
+  385|    729|    let (id, remaining) = unsigned_varint::decode::u64(bz)?;
+  386|    712|    if !remaining.is_empty() {
   387|      2|        return Err(Error::InvalidPayload);
-  388|    722|    }
-  389|    722|    Ok(id)
-  390|    741|}
+  388|    710|    }
+  389|    710|    Ok(id)
+  390|    729|}
 
 _RNvMs0_NtNtCs9cGagMfeDDj_10fvm_shared7address7payloadNtB5_16DelegatedAddress3new:
-   57|    936|    pub fn new(namespace: ActorID, subaddress: &[u8]) -> Result<Self, Error> {
-   58|    936|        let length = subaddress.len();
-   59|    936|        if length > MAX_SUBADDRESS_LEN {
+   57|    908|    pub fn new(namespace: ActorID, subaddress: &[u8]) -> Result<Self, Error> {
+   58|    908|        let length = subaddress.len();
+   59|    908|        if length > MAX_SUBADDRESS_LEN {
    60|      1|            return Err(Error::InvalidPayloadLength(length));
-   61|    935|        }
-   62|    935|        let mut addr = DelegatedAddress {
-   63|    935|            namespace,
-   64|    935|            length,
-   65|    935|            buffer: [0u8; MAX_SUBADDRESS_LEN],
-   66|    935|        };
-   67|    935|        addr.buffer[..length].copy_from_slice(&subaddress[..length]);
-   68|    935|        Ok(addr)
-   69|    936|    }
+   61|    907|        }
+   62|    907|        let mut addr = DelegatedAddress {
+   63|    907|            namespace,
+   64|    907|            length,
+   65|    907|            buffer: [0u8; MAX_SUBADDRESS_LEN],
+   66|    907|        };
+   67|    907|        addr.buffer[..length].copy_from_slice(&subaddress[..length]);
+   68|    907|        Ok(addr)
+   69|    908|    }
 _RNvMs0_NtNtCs9cGagMfeDDj_10fvm_shared7address7payloadNtB5_16DelegatedAddress9namespaceB9_:
-   73|    330|    pub fn namespace(&self) -> ActorID {
-   74|    330|        self.namespace
-   75|    330|    }
+   73|    302|    pub fn namespace(&self) -> ActorID {
+   74|    302|        self.namespace
+   75|    302|    }
 _RNvMs0_NtNtCs9cGagMfeDDj_10fvm_shared7address7payloadNtB5_16DelegatedAddress10subaddressB9_:
-   79|    330|    pub fn subaddress(&self) -> &[u8] {
-   80|    330|        &self.buffer[..self.length]
-   81|    330|    }
+   79|    302|    pub fn subaddress(&self) -> &[u8] {
+   80|    302|        &self.buffer[..self.length]
+   81|    302|    }
 _RNvMs2_NtNtCs9cGagMfeDDj_10fvm_shared7address7payloadNtB5_7Payload12to_raw_bytes:
-  115|    964|    pub fn to_raw_bytes(self) -> Vec<u8> {
-  116|    964|        use Payload::*;
-  117|    964|        match self {
-  118|    360|            ID(i) => to_leb_bytes(i),
-  119|    114|            Secp256k1(arr) => arr.to_vec(),
+  115|    922|    pub fn to_raw_bytes(self) -> Vec<u8> {
+  116|    922|        use Payload::*;
+  117|    922|        match self {
+  118|    348|            ID(i) => to_leb_bytes(i),
+  119|    112|            Secp256k1(arr) => arr.to_vec(),
   120|     90|            Actor(arr) => arr.to_vec(),
   121|     70|            BLS(arr) => arr.to_vec(),
-  122|    330|            Delegated(addr) => {
-  123|    330|                let mut buf = to_leb_bytes(addr.namespace());
-  124|    330|                buf.extend(addr.subaddress());
-  125|    330|                buf
+  122|    302|            Delegated(addr) => {
+  123|    302|                let mut buf = to_leb_bytes(addr.namespace());
+  124|    302|                buf.extend(addr.subaddress());
+  125|    302|                buf
   126|       |            }
   127|       |        }
-  128|    964|    }
+  128|    922|    }
 _RNvMs2_NtNtCs9cGagMfeDDj_10fvm_shared7address7payloadNtB5_7Payload8to_bytes:
-  131|    964|    pub fn to_bytes(self) -> Vec<u8> {
-  132|    964|        let mut bz = self.to_raw_bytes();
-  133|    964|        bz.insert(0, Protocol::from(self) as u8);
-  134|    964|        bz
-  135|    964|    }
+  131|    922|    pub fn to_bytes(self) -> Vec<u8> {
+  132|    922|        let mut bz = self.to_raw_bytes();
+  133|    922|        bz.insert(0, Protocol::from(self) as u8);
+  134|    922|        bz
+  135|    922|    }
 _RNvMs2_NtNtCs9cGagMfeDDj_10fvm_shared7address7payloadNtB5_7Payload3new:
-  138|  2.24k|    pub fn new(protocol: Protocol, payload: &[u8]) -> Result<Self, Error> {
-  139|  2.24k|        let payload = match protocol {
-  140|    741|            Protocol::ID => Self::ID(from_leb_bytes(payload)?),
+  138|  2.20k|    pub fn new(protocol: Protocol, payload: &[u8]) -> Result<Self, Error> {
+  139|  2.20k|        let payload = match protocol {
+  140|    729|            Protocol::ID => Self::ID(from_leb_bytes(payload)?),
   141|       |            Protocol::Secp256k1 => Self::Secp256k1(
-  142|    224|                payload
-  143|    224|                    .try_into()
-  144|    224|                    .map_err(|_| Error::InvalidPayloadLength(payload.len()))?,
+  142|    222|                payload
+  143|    222|                    .try_into()
+  144|    222|                    .map_err(|_| Error::InvalidPayloadLength(payload.len()))?,
   145|       |            ),
   146|       |            Protocol::Actor => Self::Actor(
   147|    193|                payload
@@ -2505,12 +2505,12 @@ _RNvMs2_NtNtCs9cGagMfeDDj_10fvm_shared7address7payloadNtB5_7Payload3new:
   154|    146|                    .map_err(|_| Error::InvalidPayloadLength(payload.len()))?,
   155|       |            ),
   156|       |            Protocol::Delegated => {
-  157|    939|                let (id, remaining) = unsigned_varint::decode::u64(payload)?;
-  158|    936|                Self::Delegated(DelegatedAddress::new(id, remaining)?)
+  157|    911|                let (id, remaining) = unsigned_varint::decode::u64(payload)?;
+  158|    908|                Self::Delegated(DelegatedAddress::new(id, remaining)?)
   159|       |            }
   160|       |        };
-  161|  2.21k|        Ok(payload)
-  162|  2.24k|    }
+  161|  2.17k|        Ok(payload)
+  162|  2.20k|    }
 _RNCNvMs2_NtNtCs9cGagMfeDDj_10fvm_shared7address7payloadNtB7_7Payload3new0Bb_:
   144|      1|                    .map_err(|_| Error::InvalidPayloadLength(payload.len()))?,
 _RNCNvMs2_NtNtCs9cGagMfeDDj_10fvm_shared7address7payloadNtB7_7Payload3news_0Bb_:
@@ -2518,35 +2518,35 @@ _RNCNvMs2_NtNtCs9cGagMfeDDj_10fvm_shared7address7payloadNtB7_7Payload3news_0Bb_:
 _RNCNvMs2_NtNtCs9cGagMfeDDj_10fvm_shared7address7payloadNtB7_7Payload3news0_0Bb_:
   154|      1|                    .map_err(|_| Error::InvalidPayloadLength(payload.len()))?,
 _RNvXs3_NtNtCs9cGagMfeDDj_10fvm_shared7address7payloadNtNtB7_8protocol8ProtocolINtNtCs9dCPwL0B372_4core7convert4FromNtB5_7PayloadE4fromB9_:
-  166|    964|    fn from(pl: Payload) -> Self {
-  167|    964|        match pl {
-  168|    360|            Payload::ID(_) => Self::ID,
-  169|    114|            Payload::Secp256k1(_) => Self::Secp256k1,
+  166|    922|    fn from(pl: Payload) -> Self {
+  167|    922|        match pl {
+  168|    348|            Payload::ID(_) => Self::ID,
+  169|    112|            Payload::Secp256k1(_) => Self::Secp256k1,
   170|     90|            Payload::Actor(_) => Self::Actor,
   171|     70|            Payload::BLS(_) => Self::BLS,
-  172|    330|            Payload::Delegated { .. } => Self::Delegated,
+  172|    302|            Payload::Delegated { .. } => Self::Delegated,
   173|       |        }
-  174|    964|    }
+  174|    922|    }
 
 _RNvMNtNtCs9cGagMfeDDj_10fvm_shared7address8protocolNtB2_8Protocol9from_byte:
-   29|  2.24k|    pub(super) fn from_byte(b: u8) -> Option<Protocol> {
-   30|  2.24k|        FromPrimitive::from_u8(b)
-   31|  2.24k|    }
+   29|  2.20k|    pub(super) fn from_byte(b: u8) -> Option<Protocol> {
+   30|  2.20k|        FromPrimitive::from_u8(b)
+   31|  2.20k|    }
 _RNvXNvNtNtCs9cGagMfeDDj_10fvm_shared7address8protocol36__IMPL_NUM_FromPrimitive_FOR_ProtocolNtB4_8ProtocolNtNtCsed1yqFqBZmX_10num_traits4cast13FromPrimitive8from_u64B8_:
-   12|  2.24k|#[derive(PartialEq, Eq, Copy, Clone, FromPrimitive, Debug, Hash)]
+   12|  2.20k|#[derive(PartialEq, Eq, Copy, Clone, FromPrimitive, Debug, Hash)]
 _RNvXNvNtNtCs9cGagMfeDDj_10fvm_shared7address8protocol36__IMPL_NUM_FromPrimitive_FOR_ProtocolNtB4_8ProtocolNtNtCsed1yqFqBZmX_10num_traits4cast13FromPrimitive8from_i64B8_:
-   12|  2.24k|#[derive(PartialEq, Eq, Copy, Clone, FromPrimitive, Debug, Hash)]
+   12|  2.20k|#[derive(PartialEq, Eq, Copy, Clone, FromPrimitive, Debug, Hash)]
 
 _RINvXNtCskQK7vsxa1Sn_11common_fuzz4cborNtB3_7PayloadNtNtCsjJjkTSz0cq2_5serde2de11Deserialize11deserializeQINtNtCs1E5Hi2kLQXm_18serde_ipld_dagcbor2de12DeserializerNtNtNtCscPSwwIASMRU_7cbor4ii4core5utils11SliceReaderEECsjy9uLqplD7t_11cbor_decode:
    12|  1.10k|#[derive(Deserialize_tuple, Serialize_tuple, Arbitrary, Debug)]
 _RNCINvXNvXNvNvXNtCskQK7vsxa1Sn_11common_fuzz4cborNtBd_7PayloadNtNtCsjJjkTSz0cq2_5serde2de11Deserialize11deserialize1__NtBa_5InnerBY_11deserializeNtB5_9___VisitorNtB10_7Visitor9visit_seqINtNtCs1E5Hi2kLQXm_18serde_ipld_dagcbor2de8AccessorNtNtNtCscPSwwIASMRU_7cbor4ii4core5utils11SliceReaderEE0Csjy9uLqplD7t_11cbor_decode:
    12|    551|#[derive(Deserialize_tuple, Serialize_tuple, Arbitrary, Debug)]
 _RINvXNvXNvNvXNtCskQK7vsxa1Sn_11common_fuzz4cborNtBb_7PayloadNtNtCsjJjkTSz0cq2_5serde2de11Deserialize11deserialize1__NtB8_5InnerBW_11deserializeNtB3_9___VisitorNtBY_7Visitor9visit_seqINtNtCs1E5Hi2kLQXm_18serde_ipld_dagcbor2de8AccessorNtNtNtCscPSwwIASMRU_7cbor4ii4core5utils11SliceReaderEECsjy9uLqplD7t_11cbor_decode:
-   12|    665|#[derive(Deserialize_tuple, Serialize_tuple, Arbitrary, Debug)]
+   12|    666|#[derive(Deserialize_tuple, Serialize_tuple, Arbitrary, Debug)]
 _RINvXNvXNvNvXs_NtCskQK7vsxa1Sn_11common_fuzz4cborNtBd_7PayloadNtNtCsjJjkTSz0cq2_5serde3ser9Serialize9serialize1__NtB8_5InnerBY_9serializeNtB3_15___SerializeWithBY_9serializeQINtNtCs1E5Hi2kLQXm_18serde_ipld_dagcbor3ser10SerializerNtNtNtCscPSwwIASMRU_7cbor4ii4core5utils9BufWriterEECsjy9uLqplD7t_11cbor_decode:
    12|    250|#[derive(Deserialize_tuple, Serialize_tuple, Arbitrary, Debug)]
 _RINvXNvXNvXNvNvXNtCskQK7vsxa1Sn_11common_fuzz4cborNtBe_7PayloadNtNtCsjJjkTSz0cq2_5serde2de11Deserialize11deserialize1__NtBb_5InnerBZ_11deserializeNtB6_9___VisitorNtB11_7Visitor9visit_seqNtB3_17___DeserializeWithBZ_11deserializeQINtNtCs1E5Hi2kLQXm_18serde_ipld_dagcbor2de12DeserializerNtNtNtCscPSwwIASMRU_7cbor4ii4core5utils11SliceReaderEECsjy9uLqplD7t_11cbor_decode:
-   12|    779|#[derive(Deserialize_tuple, Serialize_tuple, Arbitrary, Debug)]
+   12|    781|#[derive(Deserialize_tuple, Serialize_tuple, Arbitrary, Debug)]
 _RINvXs_NtCskQK7vsxa1Sn_11common_fuzz4cborNtB5_7PayloadNtNtCsjJjkTSz0cq2_5serde3ser9Serialize9serializeQINtNtCs1E5Hi2kLQXm_18serde_ipld_dagcbor3ser10SerializerNtNtNtCscPSwwIASMRU_7cbor4ii4core5utils9BufWriterEECsjy9uLqplD7t_11cbor_decode:
    12|    250|#[derive(Deserialize_tuple, Serialize_tuple, Arbitrary, Debug)]
 
